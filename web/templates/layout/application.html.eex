@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" type="image/png" href="/images/favicon.png">
+  </head>
+  <body>
+    <div class="header">
+      <a href="<%= pages_path(:index) %>">Home... </a>
+    </div>
+    <div class="center">
+      <a href="https://github.com/entice"><img src="/images/entice.png" alt="entice-logo" width="400" height="400"></a>
+      <div class="titleMessage"><%= title %></div>
+
+      <%= for message <- Flash.get_all(@conn, :message) do %>
+        <div class="statusMessage">
+          <p><%= message %></p>
+        </div>
+      <% end %>
+
+      <%= @inner %>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,104 @@
+
+body {
+  background-color:#241C1C;
+
+  font-family: 'Trebuchet MS';
+  color: #9e0400;
+  text-decoration: none;
+  word-spacing: normal;
+  letter-spacing: 0;
+}
+
+a {
+  color: #CC554D;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #FF6A60;
+  text-decoration: underline;
+}
+
+
+fieldset {
+  padding: 5px 10px 5px 10px;
+  border-style: solid;
+  border-color: #9E0400;
+}
+
+.header {
+  text-align: center;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  padding: 10px 0 10px 0;
+  margin: 0 0 0 -300px;
+  z-index: 10;
+}
+
+.center {
+  text-align: center;
+  width: 400px;
+  position: absolute;
+  left: 50%;
+  padding: 60px 0 100px 0;
+  margin: 0 0 0 -200px;
+}
+
+.titleMessage {
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+}
+
+.statusMessage {
+  text-align: center;
+  width: 100%;
+}
+
+.inputLabel {
+  width: 10em;
+  display: block;
+  float: left;
+}
+
+.inputField {
+  background-color: #241C1C;
+  border-style: solid;
+  border-color: #9E0400;
+  font-family: 'Trebuchet MS';
+  color: #CC554D;
+}
+
+.inputButton {
+  background-color: #241C1C;
+  border-style: solid;
+  border-color: #9E0400;
+  font-family: 'Trebuchet MS';
+  color: #CC554D;
+  width: 100%;
+}
+
+.inputButton:hover {
+  color: #FF6A60;
+}
+
+.lobbyChars {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #9E0400;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.outputTextbox {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #9E0400;
+  width: 100%;
+  padding: 0 10px 0 10px;
+  text-align: left;
+}
+
+
+
