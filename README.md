@@ -1,8 +1,13 @@
+[![Build Status](https://travis-ci.org/entice/server-elixir.svg)](https://travis-ci.org/entice/server-elixir)
+
 # EnticeServer
 
-To start your new Phoenix application:
+Needs:
+
+- Erlang version: 17.1
+- Elixir version: 1.0.2
+
+To start:
 
 1. Install dependencies with `mix deps.get`
-2. Start Phoenix router with `mix phoenix.start`
-
-Now you can visit `localhost:4000` from your browser.
+2. Start server with `mix phoenix.start`

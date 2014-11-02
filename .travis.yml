@@ -1,12 +1,22 @@
 language: erlang
 otp_release:
-  - 17.2
+- 17.1
 before_install:
-  - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
-  - unzip -d elixir v1.0.2.zip
+- wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
+- unzip -d elixir v1.0.2.zip
 before_script:
-  - export PATH=`pwd`/elixir/bin:$PATH
-  - mix local.hex --force
-  - mix deps.get
+- export PATH=`pwd`/elixir/bin:$PATH
+- mix local.hex --force
+- mix deps.get
 script:
-  - MIX_ENV=all mix test
+- MIX_ENV=test mix test
+deploy:
+  provider: heroku
+  buildpack: https://github.com/HashNuke/heroku-buildpack-elixir.git
+  strategy: git
+  api_key:
+    secure: HSDMAqUCQDuOdY9RxFYRb0fMYiEW9RPN63/GO/TJKc9GYjOV3uOD6JRCDhIx+tFIrh+UIbjO6P1cM7sGELYcbGtMrMAIvYP5mC+782qgMK7703q6pYoDRNvDFa161heVZqUehHw2PYHwJGucJqr6O8e9aQ8zKEYfhMPt1E0tBsM=
+  app: entice-server-elixir
+  on:
+    repo: entice/server-elixir
+    branch: master
