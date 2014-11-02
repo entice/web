@@ -1,4 +1,4 @@
 defmodule EnticeServer.LayoutView do
-  use EnticeServer.Views
+  use EnticeServer.View
 
 end

@@ -9,8 +9,7 @@ use Mix.Config
 config :phoenix, EnticeServer.Router,
   url: [host: "localhost"],
   http: [port: System.get_env("PORT")],
-  https: false,
-  secret_key_base: "lqbcb7WJJ+qQa+oEVj+ZJmJuhzRdfXRwliZ1b5/F19N3hckjJU80HWohKhYGWhknayP03DQHMRRFfw+pkeh08w==",
+  secret_key_base: "IdLrhlWtCQ6xUcIr3EE3lEclhFj3TM/fylt5MU9klvZKfS9zNWqfYNBedl5AO7VLQkmugNrIb7fTrCNIEtTXsA==",
   catch_errors: true,
   debug_errors: false,
   error_controller: EnticeServer.PageController

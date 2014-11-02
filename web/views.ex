@@ -1,19 +1,20 @@
-defmodule EnticeServer.Views do
+defmodule EnticeServer.View do
+  use Phoenix.View, root: "web/templates"
 
-  defmacro __using__(_options) do
-    quote do
-      use Phoenix.View
-      import unquote(__MODULE__)
+  # Everything that is imported, aliased, or used in this block is available
+  # in the rest of this module and in any other view module that uses it.
+  using do
+    # Import common functionality
+    import EnticeServer.I18n
+    import EnticeServer.Router.Helpers
 
-      # This block is expanded within all views for aliases, imports, etc
-      import EnticeServer.I18n
-      import EnticeServer.Router.Helpers
-      alias Phoenix.Controller.Flash
-    end
+    # Use Phoenix.HTML to import all HTML functions (forms, tags, etc)
+    use Phoenix.HTML
+
+    # Common aliases
+    alias Phoenix.Controller.Flash
   end
 
   # Functions defined here are available to all other views/templates
   def title, do: "... entice server ..."
 end
-
-

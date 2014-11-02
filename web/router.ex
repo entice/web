@@ -1,15 +1,26 @@
 defmodule EnticeServer.Router do
   use Phoenix.Router
 
-  scope "/" do
-    # Use the default browser stack.
-    pipe_through :browser
-
-    get "/", EnticeServer.PageController, :index, as: :pages
+  # Simple HTML pipeline
+  pipeline :browser do
+    plug :accepts, ~w(html)
+    plug :fetch_session
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api" do
-  #   pipe_through :api
-  # end
+  # Simple JSON api pipeline
+  pipeline :api do
+    plug :accepts, ~w(json)
+  end
+
+
+  scope "/" do
+    pipe_through :browser # Use the default browser stack
+
+    get "/", EnticeServer.PageController, :index
+  end
+
+
+  scope "/api" do
+    pipe_through :api
+  end
 end
