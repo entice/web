@@ -1,0 +1,18 @@
+<script>
+  var socket = new Phoenix.Socket("/ws");
+
+  socket.join("chat", "global", {auth_token: "hello_world"}, function(channel) {
+
+    channel.on("join", function(message) {
+      console.log("Got " + message.content);
+    });
+
+    channel.on("pong", function(message) {
+      console.log("Got " + message + " while listening for event pong");
+    });
+
+    onSomeEvent(function() {
+      channel.send("ping", {data: "json stuff"});
+    });
+  });
+</script>

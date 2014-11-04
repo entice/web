@@ -10,6 +10,8 @@ before_script:
 - mix deps.get
 script:
 - MIX_ENV=test mix test
+notifications:
+  irc: irc.rizon.net#gwlpr
 deploy:
   provider: heroku
   buildpack: https://github.com/HashNuke/heroku-buildpack-elixir.git
