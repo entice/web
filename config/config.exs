@@ -5,19 +5,12 @@
 # is restricted to this project.
 use Mix.Config
 
-# Configures the router
-config :phoenix, EnticeServer.Router,
+# Configures the endpoint
+config :entice_server, EnticeServer.Endpoint,
   url: [host: "localhost"],
   http: [port: System.get_env("PORT")],
-  secret_key_base: "IdLrhlWtCQ6xUcIr3EE3lEclhFj3TM/fylt5MU9klvZKfS9zNWqfYNBedl5AO7VLQkmugNrIb7fTrCNIEtTXsA==",
-  catch_errors: true,
-  debug_errors: false,
-  error_controller: EnticeServer.PageController
-
-# Session configuration
-config :phoenix, EnticeServer.Router,
-  session: [store: :cookie,
-            key: "_entice_server_key"]
+  secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO",
+  debug_errors: false
 
 # Configures Elixir's Logger
 config :logger, :console,

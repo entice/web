@@ -11,10 +11,10 @@ use Mix.Config
 # Where those two env variables point to a file on
 # disk for the key and cert.
 
-config :phoenix, EnticeServer.Router,
+config :entice_server, EnticeServer.Endpoint,
   url: [host: "entice-server-elixir.herokuapp.com"],
   http: [port: System.get_env("PORT")],
-  secret_key_base: "IdLrhlWtCQ6xUcIr3EE3lEclhFj3TM/fylt5MU9klvZKfS9zNWqfYNBedl5AO7VLQkmugNrIb7fTrCNIEtTXsA=="
+  secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO"
 
 config :logger,
   level: :info

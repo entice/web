@@ -14,13 +14,13 @@ defmodule EnticeServer.PageController do
     conn
     |> put_session(:auth_token, id)
     |> Flash.put(:message, "... authorized #{id} ...")
-    |> redirect("/")
+    |> redirect(to: "/")
   end
 
   def test(conn, _params) do
     id = get_session(conn, :auth_token)
     conn
     |> Flash.put(:message, "... test authorized: #{id} ...")
-    |> redirect("/")
+    |> redirect(to: "/")
   end
 end

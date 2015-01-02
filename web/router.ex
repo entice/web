@@ -13,13 +13,13 @@ defmodule EnticeServer.Router do
 
 
   # Web routes
-  scope "/" do
+  scope "/", EnticeServer do
     pipe_through :browser # Use the default browser stack
 
-    get "/", EnticeServer.PageController, :index
-    get "/auth", EnticeServer.PageController, :auth
-    get "/test", EnticeServer.PageController, :test
-    get "/chat", EnticeServer.PageController, :chat
+    get "/",     PageController, :index
+    get "/auth", PageController, :auth
+    get "/test", PageController, :test
+    get "/chat", PageController, :chat
   end
 
 

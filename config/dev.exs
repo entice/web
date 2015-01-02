@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :phoenix, EnticeServer.Router,
+config :entice_server, EnticeServer.Endpoint,
   http: [port: System.get_env("PORT") || 4000],
   debug_errors: true
 

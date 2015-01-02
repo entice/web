@@ -1,7 +1,6 @@
 defmodule EnticeServer.ChatChannelTest do
   use ExUnit.Case
   alias EnticeServer.ChatChannel
-  alias UUID
   alias Phoenix.Socket
 
   test "Join with a valid auth token" do
