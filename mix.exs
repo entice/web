@@ -22,7 +22,7 @@ defmodule Entice.Web.Mixfile do
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:entice_cynosure, github: "entice/cynosure", branch: "master"},
+    [{:entice_area, github: "entice/area", branch: "master"},
      {:phoenix, github: "phoenixframework/phoenix", branch: "master"},
      {:cowboy, "~> 1.0"},
      {:uuid, "~> 0.1.5"}] # https://github.com/zyro/elixir-uuid
