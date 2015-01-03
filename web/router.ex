@@ -5,15 +5,10 @@ defmodule Entice.Web.Router do
   pipeline :browser do
     plug :accepts, ~w(html)
     plug :fetch_session
+    plug :protect_from_forgery
     plug :fetch_flash
     plug :put_layout, {Entice.Web.LayoutView, "application.html"}
   end
-
-  pipeline :api do
-    plug :accepts, ~w(json)
-    plug :fetch_session
-  end
-
 
   # Web routes
   scope "/", Entice.Web do
@@ -26,9 +21,16 @@ defmodule Entice.Web.Router do
   end
 
 
+  pipeline :api do
+    plug :accepts, ~w(json)
+    plug :fetch_session
+  end
+
   # API routes
-  scope "/api" do
+  scope "/api", Entice.Web do
     pipe_through :api
+
+    post "/auth", ApiController, :api_auth
   end
 
 

@@ -20,7 +20,7 @@ defmodule Entice.Web.Endpoint do
 
   plug Plug.Session,
     store: :cookie,
-    key: "_entice_server_key",
+    key: "_entice_key",
     signing_salt: "wZg9FGRp",
     encryption_salt: "KzX0FbQY"
 

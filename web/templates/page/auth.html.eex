@@ -1,0 +1,37 @@
+<form action="<%= api_path(@conn, :api_auth) %>" id="searchForm">
+
+  <fieldset><legend>Login</legend>
+    <p>
+      <label for="email" class="inputLabel">Email:</label>
+      <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
+    </p>
+    <p>
+      <label for="password" class="inputLabel">Password:</label>
+      <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
+    </p>
+  </fieldset>
+
+  <input type="submit" class="inputButton" name="" value="... do it ..." />
+
+  <script>
+    $("#email").focus();
+
+    $( "#searchForm" ).submit(function( event ) {
+      event.preventDefault();
+
+      var $form = $(this),
+        email = $form.find("input[name='email']").val(),
+        passw = $form.find("input[name='password']").val(),
+        url = $form.attr( "action" );
+
+      $.post("<%= api_path(@conn, :api_auth) %>", {email: email, password: passw}).then(function(data) {
+        $('.authMessage').append(JSON.stringify(data));
+      });
+    });
+
+
+  </script>
+
+</form>
+
+<div class="authMessage">
