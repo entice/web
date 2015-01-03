@@ -1,11 +1,11 @@
-defmodule EnticeServer.ChatChannelTest do
+defmodule Entice.Web.ChatChannelTest do
   use ExUnit.Case
-  alias EnticeServer.ChatChannel
+  alias Entice.Web.ChatChannel
   alias Phoenix.Socket
 
   test "Join with a valid auth token" do
     auth_token = UUID.uuid1()
-    socket = %Socket{pid: self, router: EnticeServer.Router, channel: "chan66"}
+    socket = %Socket{pid: self, router: Entice.Web.Router, channel: "chan66"}
     ChatChannel.join(socket, "global", %{auth_token: auth_token})
 
     assert_received  %Phoenix.Socket.Message{
@@ -16,7 +16,7 @@ defmodule EnticeServer.ChatChannelTest do
   end
 
   test "Get kicked with no auth token" do
-    socket = %Socket{pid: self, router: EnticeServer.Router, channel: "chan66"}
+    socket = %Socket{pid: self, router: Entice.Web.Router, channel: "chan66"}
     assert {:error, socket, :unauthorized} == ChatChannel.join(socket, "nonexisiting_topic", nil)
   end
 end

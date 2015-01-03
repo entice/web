@@ -1,8 +1,8 @@
-defmodule EnticeServer.Endpoint do
-  use Phoenix.Endpoint, otp_app: :entice_server
+defmodule Entice.Web.Endpoint do
+  use Phoenix.Endpoint, otp_app: :entice_web
 
   plug Plug.Static,
-    at: "/", from: :entice_server
+    at: "/", from: :entice_web
 
   plug Plug.Logger
 
@@ -24,5 +24,5 @@ defmodule EnticeServer.Endpoint do
     signing_salt: "wZg9FGRp",
     encryption_salt: "KzX0FbQY"
 
-  plug :router, EnticeServer.Router
+  plug :router, Entice.Web.Router
 end

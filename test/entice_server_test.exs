@@ -1,4 +1,4 @@
-defmodule EnticeServerTest do
+defmodule Entice.WebTest do
   use ExUnit.Case
 
   test "the truth" do

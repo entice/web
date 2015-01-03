@@ -1,4 +1,4 @@
-defmodule EnticeServer do
+defmodule Entice.Web do
   use Application
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
@@ -8,19 +8,20 @@ defmodule EnticeServer do
 
     children = [
       # Define workers and child supervisors to be supervised
-      # worker(EnticeServer.Worker, [arg1, arg2, arg3])
+      # worker(Entice.Web.Worker, [arg1, arg2, arg3])
+      worker(Entice.Web.Endpoint, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: EnticeServer.Supervisor]
+    opts = [strategy: :one_for_one, name: Entice.Web.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    EnticeServer.Endpoint.config_change(changed, removed)
+    Entice.Web.Endpoint.config_change(changed, removed)
     :ok
   end
 end

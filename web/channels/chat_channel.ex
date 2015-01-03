@@ -1,4 +1,4 @@
-defmodule EnticeServer.ChatChannel do
+defmodule Entice.Web.ChatChannel do
   use Phoenix.Channel
 
   def join(socket, "global", %{auth_token: token}) do

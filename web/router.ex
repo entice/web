@@ -1,19 +1,22 @@
-defmodule EnticeServer.Router do
+defmodule Entice.Web.Router do
   use Phoenix.Router
   use Phoenix.Router.Socket, mount: "/ws"
 
   pipeline :browser do
     plug :accepts, ~w(html)
     plug :fetch_session
+    plug :fetch_flash
+    plug :put_layout, {Entice.Web.LayoutView, "application.html"}
   end
 
   pipeline :api do
     plug :accepts, ~w(json)
+    plug :fetch_session
   end
 
 
   # Web routes
-  scope "/", EnticeServer do
+  scope "/", Entice.Web do
     pipe_through :browser # Use the default browser stack
 
     get "/",     PageController, :index
@@ -30,5 +33,5 @@ defmodule EnticeServer.Router do
 
 
   # Websocket channels
-  channel "chat", EnticeServer.ChatChannel
+  channel "chat", Entice.Web.ChatChannel
 end

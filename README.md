@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/entice/server-elixir.svg)](https://travis-ci.org/entice/server-elixir)
 
-# EnticeServer
+# Entice.Web
+
+Serves a web frontend for entice. Use this to access the worlds.
 
 Needs:
 

@@ -11,7 +11,7 @@ use Mix.Config
 # Where those two env variables point to a file on
 # disk for the key and cert.
 
-config :entice_server, EnticeServer.Endpoint,
+config :entice_web, Entice.Web.Endpoint,
   url: [host: "entice-server-elixir.herokuapp.com"],
   http: [port: System.get_env("PORT")],
   secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO"

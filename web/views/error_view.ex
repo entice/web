@@ -1,5 +1,5 @@
-defmodule EnticeServer.ErrorView do
-  use EnticeServer.View
+defmodule Entice.Web.ErrorView do
+  use Entice.Web.View
 
   def render("404.html", _assigns) do
     "Page not found - 404"

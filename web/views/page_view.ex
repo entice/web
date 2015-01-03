@@ -1,3 +1,3 @@
-defmodule EnticeServer.PageView do
-  use EnticeServer.View
+defmodule Entice.Web.PageView do
+  use Entice.Web.View
 end

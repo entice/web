@@ -1,18 +1,15 @@
-defmodule EnticeServer.View do
-  use Phoenix.View, root: "web/templates"
+defmodule Entice.Web.View do
+  use Phoenix.View, namespace: Entice.Web, root: "web/templates"
 
   # The quoted expression returned by this block is applied
   # to this module and all other views that use this module.
   using do
     quote do
       # Import common functionality
-      import EnticeServer.Router.Helpers
+      import Entice.Web.Router.Helpers
 
       # Use Phoenix.HTML to import all HTML functions (forms, tags, etc)
       use Phoenix.HTML
-
-      # Common aliases
-      alias Phoenix.Controller.Flash
     end
   end
 

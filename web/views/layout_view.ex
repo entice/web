@@ -1,3 +1,3 @@
-defmodule EnticeServer.LayoutView do
-  use EnticeServer.View
+defmodule Entice.Web.LayoutView do
+  use Entice.Web.View
 end

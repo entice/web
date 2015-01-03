@@ -5,10 +5,12 @@
 # is restricted to this project.
 use Mix.Config
 
+config :entice_web,
+  phoenix_namespace: Entice.Web
+
 # Configures the endpoint
-config :entice_server, EnticeServer.Endpoint,
+config :entice_web, Entice.Web.Endpoint,
   url: [host: "localhost"],
-  http: [port: System.get_env("PORT")],
   secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO",
   debug_errors: false
 

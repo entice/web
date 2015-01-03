@@ -15,16 +15,16 @@
   </head>
   <body>
     <div class="header">
-      <a href="<%= page_path(:index) %>">Home... </a>
-      | <a href="<%= page_path(:auth) %>">Auth... </a>
-      | <a href="<%= page_path(:test) %>">Test... </a>
-      | <a href="<%= page_path(:chat) %>">Chat... </a>
+      <a href="<%= page_path(@conn, :index) %>">Home... </a>
+      | <a href="<%= page_path(@conn, :auth) %>">Auth... </a>
+      | <a href="<%= page_path(@conn, :test) %>">Test... </a>
+      | <a href="<%= page_path(@conn, :chat) %>">Chat... </a>
     </div>
     <div class="center">
       <a href="https://github.com/entice"><img src="/images/entice.png" alt="entice-logo" width="400" height="400"></a>
       <div class="titleMessage"><%= title %></div>
 
-      <%= for message <- Flash.get_all(@conn, :message) do %>
+      <%= if message = get_flash(@conn, :message) do %>
         <div class="statusMessage">
           <p><%= message %></p>
         </div>
