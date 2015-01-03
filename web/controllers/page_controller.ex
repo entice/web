@@ -1,12 +1,8 @@
 defmodule Entice.Web.PageController do
-  import Plug.Conn
-  import Phoenix.Controller
+  use Phoenix.Controller
 
-  use Phoenix.Controller.Pipeline
-
-  plug Phoenix.Controller.Logger
-  plug :put_view, Entice.Web.PageView
   plug :action
+  plug :put_view, Entice.Web.PageView
 
 
   def index(conn, _),     do: conn |> render "index.html"
