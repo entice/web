@@ -4,7 +4,7 @@ defmodule Entice.Web.ChatChannelTest do
   alias Phoenix.Socket
 
   test "Join with a valid auth token" do
-    auth_token = UUID.uuid1()
+    auth_token = UUID.uuid4()
     socket = %Socket{pid: self, router: Entice.Web.Router, channel: "chan66"}
     ChatChannel.join(socket, "global", %{auth_token: auth_token})
 

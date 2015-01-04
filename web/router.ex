@@ -7,6 +7,7 @@ defmodule Entice.Web.Router do
     plug :fetch_session
     plug :protect_from_forgery
     plug :fetch_flash
+    # Manually inject the layout here due to non standard namespaces...
     plug :put_layout, {Entice.Web.LayoutView, "application.html"}
   end
 
@@ -30,7 +31,7 @@ defmodule Entice.Web.Router do
   scope "/api", Entice.Web do
     pipe_through :api
 
-    post "/auth", ApiController, :api_auth
+    post "/login", ApiController, :login
   end
 
 

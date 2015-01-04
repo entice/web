@@ -1,4 +1,5 @@
-<form action="<%= api_path(@conn, :api_auth) %>" id="searchForm">
+<br>
+<form action="<%= api_path(@conn, :login) %>" id="searchForm">
 
   <fieldset><legend>Login</legend>
     <p>
@@ -16,16 +17,23 @@
   <script>
     $("#email").focus();
 
-    $( "#searchForm" ).submit(function( event ) {
+    $("#searchForm").submit(function(event) {
       event.preventDefault();
+      $('.authMessage').empty();
 
       var $form = $(this),
         email = $form.find("input[name='email']").val(),
-        passw = $form.find("input[name='password']").val(),
-        url = $form.attr( "action" );
+        passw = $form.find("input[name='password']").val();
 
-      $.post("<%= api_path(@conn, :api_auth) %>", {email: email, password: passw}).then(function(data) {
-        $('.authMessage').append(JSON.stringify(data));
+      $.post("<%= api_path(@conn, :login) %>", {email: email, password: passw})
+       .then(function(data) {
+        if (data.status === "ok") {
+          $('.authMessage').append(data.message);
+          $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
+        } else {
+          $('.authMessage').append(data.message);
+          $('.authMessage').append("<br/>Please try again!");
+        }
       });
     });
 
@@ -33,5 +41,5 @@
   </script>
 
 </form>
-
+<br>
 <div class="authMessage">
