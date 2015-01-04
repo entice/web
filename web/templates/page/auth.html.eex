@@ -1,4 +1,3 @@
-<br>
 <form action="<%= api_path(@conn, :login) %>" id="searchForm">
 
   <fieldset><legend>Login</legend>

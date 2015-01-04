@@ -18,7 +18,7 @@ deploy:
   strategy: git
   api_key:
     secure: HSDMAqUCQDuOdY9RxFYRb0fMYiEW9RPN63/GO/TJKc9GYjOV3uOD6JRCDhIx+tFIrh+UIbjO6P1cM7sGELYcbGtMrMAIvYP5mC+782qgMK7703q6pYoDRNvDFa161heVZqUehHw2PYHwJGucJqr6O8e9aQ8zKEYfhMPt1E0tBsM=
-  app: entice-server-elixir
+  app: entice-web
   on:
-    repo: entice/server-elixir
+    repo: entice/web
     branch: master
