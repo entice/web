@@ -1,44 +1,76 @@
-<form action="<%= api_path(@conn, :login) %>" id="searchForm">
+<%= if logged_in?(@conn) do %>
+   <form action="<%= auth_path(@conn, :logout) %>" id="searchForm">
 
-  <fieldset><legend>Login</legend>
-    <p>
-      <label for="email" class="inputLabel">Email:</label>
-      <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
-    </p>
-    <p>
-      <label for="password" class="inputLabel">Password:</label>
-      <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
-    </p>
-  </fieldset>
+    <input type="submit" class="inputButton" name="" value="... log out ..." />
 
-  <input type="submit" class="inputButton" name="" value="... do it ..." />
+    <script>
+      $(".inputButton").focus();
 
-  <script>
-    $("#email").focus();
+      $("#searchForm").submit(function(event) {
+        event.preventDefault();
 
-    $("#searchForm").submit(function(event) {
-      event.preventDefault();
-      $('.authMessage').empty();
-
-      var $form = $(this),
-        email = $form.find("input[name='email']").val(),
-        passw = $form.find("input[name='password']").val();
-
-      $.post("<%= api_path(@conn, :login) %>", {email: email, password: passw})
-       .then(function(data) {
-        if (data.status === "ok") {
-          $('.authMessage').append(data.message);
-          $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
-        } else {
-          $('.authMessage').append(data.message);
-          $('.authMessage').append("<br/>Please try again!");
-        }
+        $.post("<%= auth_path(@conn, :logout) %>")
+         .then(function(data) {
+          if (data.status === "ok") {
+            $('.authMessage').append(data.message);
+            $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
+            $(location).attr('href','<%= page_path(@conn, :index) %>');
+          } else {
+            $('.authMessage').append(data.message);
+            $('.authMessage').append("<br/>Please try again!");
+          }
+        });
       });
-    });
 
 
-  </script>
+    </script>
 
-</form>
+  </form>
+<% else %>
+  <form action="<%= auth_path(@conn, :login) %>" id="searchForm">
+
+    <fieldset><legend>Login</legend>
+      <p>
+        <label for="email" class="inputLabel">Email:</label>
+        <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
+      </p>
+      <p>
+        <label for="password" class="inputLabel">Password:</label>
+        <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
+      </p>
+    </fieldset>
+
+    <input type="submit" class="inputButton" name="" value="... do it ..." />
+
+    <script>
+      $("#email").focus();
+
+      $("#searchForm").submit(function(event) {
+        event.preventDefault();
+        $('.authMessage').empty();
+
+        var $form = $(this),
+          email = $form.find("input[name='email']").val(),
+          passw = $form.find("input[name='password']").val();
+
+        $.post("<%= auth_path(@conn, :login) %>", {email: email, password: passw})
+         .then(function(data) {
+          if (data.status === "ok") {
+            $('.authMessage').append(data.message);
+            $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
+            $(location).attr('href','<%= page_path(@conn, :index) %>');
+          } else {
+            $('.authMessage').append(data.message);
+            $('.authMessage').append("<br/>Please try again!");
+          }
+        });
+      });
+
+
+    </script>
+
+  </form>
+<% end %>
+
 <br>
 <div class="authMessage">

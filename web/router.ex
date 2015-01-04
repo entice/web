@@ -15,10 +15,10 @@ defmodule Entice.Web.Router do
   scope "/", Entice.Web do
     pipe_through :browser # Use the default browser stack
 
-    get "/",     PageController, :index
-    get "/auth", PageController, :auth
-    get "/test", PageController, :test
-    get "/chat", PageController, :chat
+    get "/",             PageController, :index
+    get "/auth",         PageController, :auth
+    get "/client/:area", PageController, :client
+    get "/chat",         PageController, :chat
   end
 
 
@@ -31,10 +31,12 @@ defmodule Entice.Web.Router do
   scope "/api", Entice.Web do
     pipe_through :api
 
-    post "/login", ApiController, :login
+    post "/login",  AuthController, :login
+    post "/logout", AuthController, :logout
   end
 
 
   # Websocket channels
+  channel "area", Entice.Web.AreaChannel
   channel "chat", Entice.Web.ChatChannel
 end

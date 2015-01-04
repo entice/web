@@ -36,6 +36,18 @@ fieldset {
   z-index: 10;
 }
 
+.footer {
+  text-align: center;
+  width: 600px;
+  position:absolute;
+  bottom: 0;
+  left: 50%;
+  padding: 10px 0 10px 0;
+  margin: 0 0 0 -300px;
+  z-index: 10;
+  font-size: small;
+}
+
 .center {
   text-align: center;
   width: 400px;

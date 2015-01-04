@@ -1,0 +1,28 @@
+<div class="outputTextbox" id="output"></div>
+
+<script>
+  function puts(header, headerColor, message) {
+    var pre = document.createElement("p");
+    pre.style.wordWrap = "break-word";
+    pre.innerHTML = '<span style="color: ' + headerColor + '">' + header + ':</span> ' + message;
+    $('#output').append(pre);
+  };
+
+  function init() {
+    var socket = new Phoenix.Socket("/ws");
+
+    socket.join("area", "<%= @area %>", {}, function(channel) {
+
+      channel.on("join", function(message) {
+        puts("Got", "blue", JSON.stringify(message));
+      });
+
+      channel.on("pong", function(message) {
+        console.log("Got " + message + " while listening for event pong");
+        channel.send("ping", {data: "json stuff"});
+      });
+    });
+  };
+
+  window.addEventListener("load", init(), false);
+</script>

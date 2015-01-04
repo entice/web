@@ -1,8 +1,12 @@
-defmodule Entice.Web.ChatChannel do
+defmodule Entice.Web.AreaChannel do
   use Phoenix.Channel
+  use Entice.Area
+  alias Entice.Area.Entity
 
-  def join(socket, "global", _handshake_msg) do
-    socket |> reply("join", %{content: "joined global chat successfully"})
+  def join(socket, "heroes_ascent", _handshake_msg) do
+    {:ok, id} = Entity.start(HeroesAscent, UUID.uuid4())
+    socket |> assign(:entity_id, id)
+    socket |> reply("join", %{entity_id: id})
     {:ok, socket}
   end
 

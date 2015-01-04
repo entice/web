@@ -16,10 +16,15 @@
   </head>
   <body>
     <div class="header">
-      <a href="<%= page_path(@conn, :index) %>">Home... </a>
-      | <a href="<%= page_path(@conn, :auth) %>">Auth... </a>
-      | <a href="<%= page_path(@conn, :test) %>">Test... </a>
-      | <a href="<%= page_path(@conn, :chat) %>">Chat... </a>
+      <span><a href="<%= page_path(@conn, :index) %>">Home... </a></span>
+
+      <%= if logged_in?(@conn) do %>
+        <span>| <a href="<%= page_path(@conn, :client, "heroes_ascent") %>">Client... </a></span>
+        <span>| <a href="<%= page_path(@conn, :chat) %>">Chat... </a></span>
+        <span>| <a href="<%= page_path(@conn, :auth) %>">Logout... </a></span>
+      <% else %>
+        <span>| <a href="<%= page_path(@conn, :auth) %>">Login... </a></span>
+      <% end %>
     </div>
     <div class="center">
       <a href="https://github.com/entice"><img src="/images/entice.png" alt="entice-logo" width="400" height="400"></a>
@@ -34,6 +39,14 @@
       <br>
       <%= @inner %>
 
+    </div>
+    <div class="footer">
+      <%= if logged_in?(@conn) do %>
+        <span>... hello, <%= email(@conn) %>! </span>
+      <% else %>
+        <span>... you're not logged in, stranger. </span>
+      <% end %>
+      <span> - copyright (c) 2013 - <a href="https://github.com/entice">to.entice.so</a> ...</span>
     </div>
   </body>
 </html>
