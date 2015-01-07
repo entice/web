@@ -25,7 +25,7 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def event(socket, "area:move_entity", %{pos: %{x: x, y: y}}) do
+  def event(socket, "area:move_entity", %{"pos" => %{"x" => x, "y" => y}}) do
     Entity.put_attribute(socket |> area, socket |> entity_id,
       %Position{pos: %Coord{x: x, y: y}})
   end
