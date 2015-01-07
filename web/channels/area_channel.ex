@@ -1,32 +1,51 @@
 defmodule Entice.Web.AreaChannel do
   use Phoenix.Channel
-  use Entice.Area
   use Entice.Area.Attributes
+  alias Entice.Area
   alias Entice.Area.Entity
+  import Phoenix.Naming
 
-  def join(socket, "heroes_ascent", _handshake_msg) do
-    {:ok, id} = Entity.start(HeroesAscent, UUID.uuid4(), %{Name => %Name{name: "Test Char"}})
+  @channel "area"
+
+  def join(socket, map, _handshake_msg) do
+    join_internal(socket, map |> camelize |> Area.get_map)
+  end
+
+  defp join_internal(socket, {:error, _}), do: {:error, socket, :unauthorized}
+  defp join_internal(socket, {:ok, map}) do
+    {:ok, id} = prepare_player(map)
+
     socket = socket
-    |> assign(:area, HeroesAscent)
-    |> assign(:entity_id, id)
-    socket |> reply("join", %{entities: Entity.get_entity_dump(HeroesAscent)})
+      |> set_area(map)
+      |> set_entity_id(id)
+      |> subscribe(@channel, map.underscore_name)
+
+    socket |> reply("join:ok", %{entity: id, entities: Entity.get_entity_dump(map)})
     {:ok, socket}
   end
 
-  def join(socket, _, _) do
-    {:error, socket, :unauthorized}
+
+  def event(socket, "area:move_entity", %{pos: %{x: x, y: y}}) do
+    Entity.put_attribute(socket |> area, socket |> entity_id,
+      %Position{pos: %Coord{x: x, y: y}})
   end
 
-  def event(socket, "user:active", %{user_id: user_id}) do
-    socket.conn
-  end
-
-  def event(socket, "user:idle", %{user_id: user_id}) do
-    socket
-  end
 
   def leave(socket, _msg) do
-    Entity.stop(socket.assigns[:area], socket.assigns[:entity_id])
+    Entity.stop(socket |> area, socket |> entity_id)
     socket
   end
+
+
+  defp prepare_player(map) do
+    Entity.start(map, UUID.uuid4(), %{
+      Name => %Name{name: "Test Char"},
+      Position => %Position{pos: map.spawn}})
+  end
+
+  defp set_area(socket, area), do: socket |> assign(:area, area)
+  defp area(socket),           do: socket.assigns[:area]
+
+  defp set_entity_id(socket, entity_id), do: socket |> assign(:entity_id, entity_id)
+  defp entity_id(socket),                do: socket.assigns[:entity_id]
 end

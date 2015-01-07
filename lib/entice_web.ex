@@ -16,7 +16,12 @@ defmodule Entice.Web do
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Entice.Web.Supervisor]
-    Supervisor.start_link(children, opts)
+    {:ok, sup} = Supervisor.start_link(children, opts)
+
+    # Configure a bridge for events between the area server and the frontend
+    GenEvent.add_handler(Entice.Area.Evt, Entice.Web.AreaEventBridge, [])
+
+    {:ok, sup}
   end
 
   # Tell Phoenix to update the endpoint configuration
