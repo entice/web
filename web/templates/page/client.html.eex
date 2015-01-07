@@ -17,9 +17,9 @@
         puts("Got", "blue", JSON.stringify(message));
       });
 
-      channel.on("pong", function(message) {
-        console.log("Got " + message + " while listening for event pong");
-        channel.send("ping", {data: "json stuff"});
+      channel.on("join:ok", function(message) {
+        puts("Got", "blue", JSON.stringify(message))
+        channel.send("area:move_entity", {pos: {x: 42, y: 1337}});
       });
     });
   };
