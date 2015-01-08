@@ -5,34 +5,48 @@ defmodule Entice.Web.AreaChannel do
   alias Entice.Area.Entity
   import Phoenix.Naming
 
-  @channel "area"
 
-  def join(socket, map, _handshake_msg) do
-    join_internal(socket, map |> camelize |> Area.get_map)
+  def join("area:" <> map, _handshake_msg, socket) do
+    join_internal(map |> camelize |> Area.get_map, socket)
   end
 
-  defp join_internal(socket, {:error, _}), do: {:error, socket, :unauthorized}
-  defp join_internal(socket, {:ok, map}) do
+  defp join_internal({:error, _}, socket), do: {:error, socket, :unauthorized}
+  defp join_internal({:ok, map}, socket) do
     {:ok, id} = prepare_player(map)
 
     socket = socket
       |> set_area(map)
       |> set_entity_id(id)
-      |> subscribe(@channel, map.underscore_name)
+      |> subscribe("area:" <> map.underscore_name)
 
     socket |> reply("join:ok", %{entity: id, entities: Entity.get_entity_dump(map)})
     {:ok, socket}
   end
 
 
-  def event(socket, "area:move_entity", %{"pos" => %{"x" => x, "y" => y}}) do
+  def handle_in("entity:move", %{"pos" => %{"x" => x, "y" => y}}, socket) do
     Entity.put_attribute(socket |> area, socket |> entity_id,
       %Position{pos: %Coord{x: x, y: y}})
     socket
   end
 
 
-  def leave(socket, _msg) do
+  def handle_out("entity:add", %{entity_id: id} = msg, socket) do
+    if (id == socket |> entity_id) do
+      socket
+    else
+      socket |> reply("entity:add", msg)
+    end
+  end
+
+
+  def handle_out(event, message, socket) do
+    reply(socket, event, message)
+    socket
+  end
+
+
+  def leave(_msg, socket) do
     Entity.stop(socket |> area, socket |> entity_id)
     socket
   end

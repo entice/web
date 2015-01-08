@@ -4,18 +4,17 @@ defmodule Entice.Web.AreaEventBridgeTest do
   alias Phoenix.Socket
   alias Entice.Area.Entity
 
-  test "join and get a dump of the area state" do
-    socket = %Socket{pid: self, router: Entice.Web.Router, channel: "area"}
-    socket = socket |> Channel.subscribe("area", "heroes_ascent")
+  test "propagation of entity creations" do
+    socket = %Socket{pid: self, router: Entice.Web.Router}
+    socket |> Channel.subscribe("area:heroes_ascent")
 
     # now add an entity...
     Entity.start(Entice.Area.HeroesAscent, UUID.uuid4(), %{})
 
-    assert_receive %Phoenix.Socket.Message{
-      channel: "area",
-      topic: "heroes_ascent",
+    assert_receive {:socket_broadcast, %Phoenix.Socket.Message{
+      topic: "area:heroes_ascent",
       event: "entity:add",
-      message: %{entity_id: _}
-    }
+      payload: %{entity_id: _}
+    }}
   end
 end

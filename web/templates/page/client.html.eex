@@ -11,7 +11,7 @@
   function init() {
     var socket = new Phoenix.Socket("/ws");
 
-    socket.join("area", "<%= @area %>", {}, function(channel) {
+    socket.join("area:<%= @area %>", {}, function(channel) {
 
       channel.on("join", function(message) {
         puts("Got", "blue", JSON.stringify(message));
@@ -19,7 +19,7 @@
 
       channel.on("join:ok", function(message) {
         puts("Got", "blue", JSON.stringify(message))
-        channel.send("area:move_entity", {pos: {x: 42, y: 1337}});
+        channel.send("entity:move", {pos: {x: 42, y: 1337}});
       });
     });
   };

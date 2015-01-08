@@ -1,6 +1,6 @@
 defmodule Entice.Web.Router do
   use Phoenix.Router
-  use Phoenix.Router.Socket, mount: "/ws"
+
 
   pipeline :browser do
     plug :accepts, ~w(html)
@@ -37,6 +37,8 @@ defmodule Entice.Web.Router do
 
 
   # Websocket channels
-  channel "area", Entice.Web.AreaChannel
-  channel "chat", Entice.Web.ChatChannel
+  socket "/ws" do
+    channel "area:*", Entice.Web.AreaChannel
+    channel "chat:*", Entice.Web.ChatChannel
+  end
 end

@@ -1,7 +1,7 @@
 %{"cowboy": {:hex, :cowboy, "1.0.0"},
   "cowlib": {:hex, :cowlib, "1.0.1"},
   "entice_area": {:git, "git://github.com/entice/area.git", "ae7c6871b034e4ef987cf608ff884aa5c9db3ef7", [branch: "master"]},
-  "phoenix": {:git, "git://github.com/phoenixframework/phoenix.git", "358a390b7cd6d0943fcdc4bf7d417248fd849454", [branch: "master"]},
+  "phoenix": {:git, "git://github.com/phoenixframework/phoenix.git", "05932fb362fc49289030236f9beb43084cfcbf64", [branch: "master"]},
   "plug": {:hex, :plug, "0.9.0"},
   "poison": {:hex, :poison, "1.3.0"},
   "ranch": {:hex, :ranch, "1.0.0"},
