@@ -6,7 +6,7 @@ defmodule Entice.Web.Auth do
   import Entice.Web.Queries
 
 
-  def is_valid?(email, password), do: user_exists?(email, password)
+  def is_valid?(email, password), do: account_exists?(email, password)
 
 
   def logged_in?(conn), do: get_session(conn, :logged_in)

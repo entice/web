@@ -1,16 +1,16 @@
 defmodule Entice.Web.Queries do
   import Ecto.Query
 
-  def all_users do
-    query = from u in Entice.Web.Users,
-         select: u
+  def all_accounts do
+    query = from a in Entice.Web.Account,
+         select: a
     Entice.Web.Repo.all(query)
   end
 
-  def user_exists?(email, password) do
-    query = from u in Entice.Web.Users,
-          where: u.email == ^email and u.password == ^password,
-         select: u
+  def account_exists?(email, password) do
+    query = from a in Entice.Web.Account,
+          where: a.email == ^email and a.password == ^password,
+         select: a
     not (Entice.Web.Repo.all(query) |> Enum.empty?)
   end
 end
