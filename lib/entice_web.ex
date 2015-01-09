@@ -9,6 +9,7 @@ defmodule Entice.Web do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Entice.Web.Worker, [arg1, arg2, arg3])
+      worker(Entice.Web.Repo, []),
       worker(Entice.Web.Endpoint, []),
       supervisor(Entice.Area.Sup, [])
     ]

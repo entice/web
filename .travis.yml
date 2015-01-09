@@ -1,7 +1,11 @@
 language: erlang
+sudo: false
 otp_release:
 - 17.1
+addons:
+  postgresql: "9.3"
 before_install:
+- psql -c 'create database entice_test;' -U postgres
 - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
 - unzip -d elixir v1.0.2.zip
 before_script:
@@ -9,6 +13,7 @@ before_script:
 - mix local.hex --force
 - mix deps.get
 script:
+- MIX_ENV=test mix ecto.migrate Entice.Web.Repo
 - MIX_ENV=test mix test
 notifications:
   irc: irc.rizon.net#gwlpr

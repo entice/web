@@ -14,6 +14,10 @@ config :entice_web, Entice.Web.Endpoint,
   secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO",
   debug_errors: false
 
+# Configure the database module
+config :entice_web, Entice.Web.Repo,
+  db_url: System.get_env("DATABASE_URL")
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

@@ -15,7 +15,7 @@ defmodule Entice.Web.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Entice.Web, []},
-     applications: [:phoenix, :cowboy, :logger]]
+     applications: [:phoenix, :cowboy, :logger, :postgrex, :ecto]]
   end
 
   # Specifies your project dependencies
@@ -25,6 +25,8 @@ defmodule Entice.Web.Mixfile do
     [{:entice_area, github: "entice/area", branch: "master"},
      {:phoenix, github: "phoenixframework/phoenix", branch: "master"},
      {:cowboy, "~> 1.0"},
+     {:postgrex, ">= 0.0.0"},
+     {:ecto, "~> 0.4"},
      {:uuid, "~> 0.1.5"}] # https://github.com/zyro/elixir-uuid
   end
 end

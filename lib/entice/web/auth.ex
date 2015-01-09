@@ -3,15 +3,10 @@ defmodule Entice.Web.Auth do
   This module does handle the authentication stuff.
   """
   import Plug.Conn
-
-  # Lol
-  @accs [
-    {"root@entice.ps", "root"},
-    {"test@entice.ps", "test"}
-  ]
+  import Entice.Web.Queries
 
 
-  def is_valid?(email, password), do: {email, password} in @accs
+  def is_valid?(email, password), do: user_exists?(email, password)
 
 
   def logged_in?(conn), do: get_session(conn, :logged_in)
