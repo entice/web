@@ -9,9 +9,9 @@ defmodule Entice.Web.CharController do
   plug :action
 
 
-  def create(conn, params) do
+  def list(conn, _params) do
     id = conn |> get_session(:client_id)
-    {:ok, acc} = Client.get_account(id)
+    {:ok, acc} = Clients.get_account(id)
 
     chars = acc.characters
     |> Enum.map(&Map.from_struct/1)
@@ -25,7 +25,7 @@ defmodule Entice.Web.CharController do
   end
 
 
-  def create(conn, params) do
+  def create(conn, _params) do
     id = conn |> get_session(:client_id)
     {:ok, acc} = Client.get_account(id)
 

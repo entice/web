@@ -2,11 +2,11 @@ defmodule Entice.Web.Repo.Migrations.AddChar do
   use Ecto.Migration
 
   def up do
-    "INSERT INTO characters (name, account_id, profession, campaign, sex, height, skin_color, hair_color, hairstyle, face) \
+    "INSERT INTO characters (name, profession, campaign, sex, height, skin_color, hair_color, hairstyle, face, account_id) \
      VALUES \
-      ('Test Char', 1, 1, 0, 1, 0, 3, 0, 7, 30), \
-      ('Shit Happens', 1, 1, 0, 1, 0, 3, 0, 7, 30), \
-      ('Cool Story', 2, 1, 0, 1, 0, 3, 0, 7, 30)"
+      ('Test Char', 1, 0, 1, 0, 3, 0, 7, 30,    (SELECT id FROM accounts WHERE email = 'root@entice.ps')), \
+      ('Shit Happens', 1, 0, 1, 0, 3, 0, 7, 30, (SELECT id FROM accounts WHERE email = 'root@entice.ps')), \
+      ('Cool Story', 1, 0, 1, 0, 3, 0, 7, 30,   (SELECT id FROM accounts WHERE email = 'test@entice.ps'))"
   end
 
   def down do

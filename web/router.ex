@@ -33,16 +33,18 @@ defmodule Entice.Web.Router do
 
     post "/login",  AuthController, :login
     post "/logout", AuthController, :logout
-    get  "/token",  AuthController, :transfer_token
 
     get  "/char",   CharController, :list
     post "/char",   CharController, :create
+
+    get  "/token/area",   TokenController, :area_transfer_token
+    get  "/token/social", TokenController, :social_transfer_token
   end
 
 
   # Websocket channels
   socket "/ws" do
     channel "area:*", Entice.Web.AreaChannel
-    channel "chat:*", Entice.Web.ChatChannel
+    channel "social:*", Entice.Web.SocialChannel
   end
 end

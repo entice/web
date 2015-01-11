@@ -8,7 +8,7 @@
     $('#output').append(pre);
   };
 
-  $.get("<%= auth_path(@conn, :transfer_token) %>")
+  $.get("<%= safe token_path(@conn, :social_transfer_token, room: @room, char_name: "Test Char") %>")
    .then(function(data) {
     if (data.status === "ok") {
       puts("Message", "Green", JSON.stringify(data.message));
@@ -23,7 +23,7 @@
   function init(client_id, transfer_token) {
     var socket = new Phoenix.Socket("/ws");
 
-    socket.join("chat:<%= @chat %>", {client_id: client_id, transfer_token: transfer_token, char_name: "Test Char"}, function(channel) {
+    socket.join("social:<%= @room %>", {client_id: client_id, transfer_token: transfer_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
         channel.send("message", {text: "Hello World!"});

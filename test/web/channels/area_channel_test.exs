@@ -1,5 +1,6 @@
 defmodule Entice.Web.AreaChannelTest do
   use ExUnit.Case
+  use Entice.Area
   use Entice.Area.Attributes
   alias Entice.Web.AreaChannel
   alias Entice.Web.Account
@@ -10,13 +11,12 @@ defmodule Entice.Web.AreaChannelTest do
   test "join and get a dump of the area state" do
     socket = %Socket{pid: self, router: Entice.Web.Router}
     {:ok, cid} = Clients.add(%Account{characters: [%Character{name: "Some Char"}]})
-    {:ok, tid} = Clients.create_transfer_token(cid)
+    {:ok, tid} = Clients.create_transfer_token(cid, :area, %{area: HeroesAscent, char: %Character{}})
 
     AreaChannel.join(
       "area:heroes_ascent",
       %{"client_id" => cid,
-        "transfer_token" => tid,
-        "char_name" => "Some Char"},
+        "transfer_token" => tid},
       socket)
 
     assert_receive {:socket_reply, %Phoenix.Socket.Message{

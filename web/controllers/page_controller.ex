@@ -16,10 +16,10 @@ defmodule Entice.Web.PageController do
 
 
   def chat(conn, %{"chat" => chat}) do
-    conn |> render "chat.html", chat: chat
+    conn |> render "chat.html", room: chat
   end
 
   def client(conn, %{"area" => area}) do
-    conn |> render "client.html", area: area
+    conn |> render "client.html", map: area
   end
 end

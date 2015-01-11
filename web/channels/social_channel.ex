@@ -1,11 +1,10 @@
-defmodule Entice.Web.ChatChannel do
+defmodule Entice.Web.SocialChannel do
   use Phoenix.Channel
   alias Entice.Web.Clients
 
 
-  def join("chat:" <> chat_channel, %{"client_id" => id, "transfer_token" => token, "char_name" => name}, socket) do
-    {:ok, ^token} = Clients.get_transfer_token(id)
-    {:ok, char}   = Clients.get_char(id, name)
+  def join("social:" <> room, %{"client_id" => id, "transfer_token" => token}, socket) do
+    {:ok, ^token, :social, %{room: ^room, char: char}} = Clients.get_transfer_token(id)
     Clients.delete_transfer_token(id)
 
     socket = socket

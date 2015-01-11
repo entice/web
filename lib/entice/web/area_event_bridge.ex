@@ -25,7 +25,7 @@ defmodule Entice.Web.AreaEventBridge do
   def handle_event({:attribute_removed, area, id, attr}, state) do
     Phoenix.Channel.broadcast("area:" <> area.underscore_name,
       "entity:attribute:remove",
-      %{entity_id: id, attribute: attr})
+      %{entity_id: id, attribute_type: attr})
     {:ok, state}
   end
 end
