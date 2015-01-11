@@ -25,6 +25,7 @@ defmodule Entice.Web.Router do
   pipeline :api do
     plug :accepts, ~w(json)
     plug :fetch_session
+    plug :fetch_flash
   end
 
   # API routes
@@ -36,6 +37,8 @@ defmodule Entice.Web.Router do
 
     get  "/char",   CharController, :list
     post "/char",   CharController, :create
+
+    get  "/maps",   DocuController, :maps
 
     get  "/token/area",   TokenController, :area_transfer_token
     get  "/token/social", TokenController, :social_transfer_token
