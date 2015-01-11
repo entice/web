@@ -23,7 +23,7 @@ defmodule Entice.Web.Mixfile do
   # Type `mix help deps` for examples and options
   defp deps do
     [{:entice_area, github: "entice/area", branch: "master"},
-     {:phoenix, github: "phoenixframework/phoenix", branch: "master"},
+     {:phoenix, github: "phoenixframework/phoenix", ref: "9460dc4c3a8cf6d45c31421b03ba59468b23f196"},
      {:cowboy, "~> 1.0"},
      {:postgrex, ">= 0.0.0"},
      {:ecto, "~> 0.4"},

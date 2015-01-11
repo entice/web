@@ -18,7 +18,7 @@ defmodule Entice.Web.Router do
     get "/",             PageController, :index
     get "/auth",         PageController, :auth
     get "/client/:area", PageController, :client
-    get "/chat",         PageController, :chat
+    get "/chat/:chat",   PageController, :chat
   end
 
 
@@ -33,6 +33,10 @@ defmodule Entice.Web.Router do
 
     post "/login",  AuthController, :login
     post "/logout", AuthController, :logout
+    get  "/token",  AuthController, :transfer_token
+
+    get  "/char",   CharController, :list
+    post "/char",   CharController, :create
   end
 
 

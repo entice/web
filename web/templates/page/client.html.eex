@@ -8,21 +8,29 @@
     $('#output').append(pre);
   };
 
-  function init() {
+  $.get("<%= auth_path(@conn, :transfer_token) %>")
+   .then(function(data) {
+    if (data.status === "ok") {
+      puts("Message", "Green", JSON.stringify(data.message));
+      puts("Client", "DarkGreen", JSON.stringify(data.client_id));
+      puts("Token", "DarkGreen", JSON.stringify(data.transfer_token));
+      init(data.client_id, data.transfer_token)
+    } else {
+      $(location).attr('href','<%= page_path(@conn, :index) %>');
+    }
+  });
+
+  function init(client_id, transfer_token) {
     var socket = new Phoenix.Socket("/ws");
 
-    socket.join("area:<%= @area %>", {}, function(channel) {
+    socket.join("area:<%= @area %>", {client_id: client_id, transfer_token: transfer_token, char_name: "Test Char"}, function(channel) {
 
-      channel.on("join", function(message) {
-        puts("Got", "blue", JSON.stringify(message));
-      });
-
-      channel.on("join:ok", function(message) {
-        puts("Got", "blue", JSON.stringify(message))
+      channel.on("join:ok", function(payload) {
+        puts("Got", "Blue", JSON.stringify(payload))
         channel.send("entity:move", {pos: {x: 42, y: 1337}});
       });
     });
   };
 
-  window.addEventListener("load", init(), false);
+  /*window.addEventListener("load", init(), false);*/
 </script>

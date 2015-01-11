@@ -1,18 +1,44 @@
+<div class="outputTextbox" id="output"></div>
+
 <script>
-  var socket = new Phoenix.Socket("/ws");
+  function puts(header, headerColor, message) {
+    var pre = document.createElement("p");
+    pre.style.wordWrap = "break-word";
+    pre.innerHTML = '<span style="color: ' + headerColor + '">' + header + ':</span> ' + message;
+    $('#output').append(pre);
+  };
 
-  socket.join("chat", "global", {auth_token: "hello_world"}, function(channel) {
-
-    channel.on("join", function(message) {
-      console.log("Got " + message.content);
-    });
-
-    channel.on("pong", function(message) {
-      console.log("Got " + message + " while listening for event pong");
-    });
-
-    onSomeEvent(function() {
-      channel.send("ping", {data: "json stuff"});
-    });
+  $.get("<%= auth_path(@conn, :transfer_token) %>")
+   .then(function(data) {
+    if (data.status === "ok") {
+      puts("Message", "Green", JSON.stringify(data.message));
+      puts("Client", "DarkGreen", JSON.stringify(data.client_id));
+      puts("Token", "DarkGreen", JSON.stringify(data.transfer_token));
+      init(data.client_id, data.transfer_token)
+    } else {
+      $(location).attr('href','<%= page_path(@conn, :index) %>');
+    }
   });
+
+  function init(client_id, transfer_token) {
+    var socket = new Phoenix.Socket("/ws");
+
+    socket.join("chat:<%= @chat %>", {client_id: client_id, transfer_token: transfer_token, char_name: "Test Char"}, function(channel) {
+
+      channel.on("join:ok", function(payload) {
+        channel.send("message", {text: "Hello World!"});
+        channel.send("emote", {action: "dance"});
+      });
+
+      channel.on("message", function(payload) {
+        puts("Msg", "Blue", JSON.stringify(payload))
+      });
+
+      channel.on("emote", function(payload) {
+        puts("Act", "DarkBlue", JSON.stringify(payload))
+      });
+    });
+  };
+
+  /*window.addEventListener("load", init(), false);*/
 </script>

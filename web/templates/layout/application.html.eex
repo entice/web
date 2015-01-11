@@ -20,7 +20,7 @@
 
       <%= if logged_in?(@conn) do %>
         <span>| <a href="<%= page_path(@conn, :client, "heroes_ascent") %>">Client... </a></span>
-        <span>| <a href="<%= page_path(@conn, :chat) %>">Chat... </a></span>
+        <span>| <a href="<%= page_path(@conn, :chat, "all") %>">Chat... </a></span>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Logout... </a></span>
       <% else %>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Login... </a></span>

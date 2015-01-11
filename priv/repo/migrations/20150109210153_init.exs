@@ -4,12 +4,12 @@ defmodule Entice.Web.Repo.Migrations.Init do
   def up do
     ["CREATE TABLE accounts( \
         id serial primary key, \
-        email varchar(60), \
+        email varchar(60) UNIQUE, \
         password varchar(50))",
 
      "CREATE TABLE characters( \
         id serial primary key, \
-        name varchar(30), \
+        name varchar(30) UNIQUE, \
         profession int, \
         campaign int, \
         sex int, \
@@ -18,7 +18,7 @@ defmodule Entice.Web.Repo.Migrations.Init do
         hair_color int, \
         hairstyle int, \
         face int, \
-        account serial references accounts(id))",
+        account_id serial references accounts(id))",
 
      "INSERT INTO accounts(email, password) \
       VALUES \

@@ -7,6 +7,7 @@ defmodule Entice.Web.View do
     quote do
       # Import common functionality
       import Entice.Web.Router.Helpers
+      import Entice.Web.Auth
 
       # Use Phoenix.HTML to import all HTML functions (forms, tags, etc)
       use Phoenix.HTML
@@ -15,8 +16,6 @@ defmodule Entice.Web.View do
 
   # Functions defined here are available to all other views/templates
   def title, do: "... entice server ..."
-
-  def logged_in?(conn), do: Plug.Conn.get_session(conn, :logged_in)
 
   def email(conn), do: Plug.Conn.get_session(conn, :email)
 end

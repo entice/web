@@ -3,6 +3,6 @@ defmodule Entice.Web.AuthTest do
   alias Entice.Web.Auth
 
   test "default accounts" do
-    assert Auth.is_valid?("root@entice.ps", "root") == true
+    assert {:ok, _id} = Auth.try_log_in("root@entice.ps", "root")
   end
 end

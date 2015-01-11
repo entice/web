@@ -6,7 +6,7 @@
 use Mix.Config
 
 config :entice_web,
-  phoenix_namespace: Entice.Web
+  app_namespace: Entice.Web
 
 # Configures the endpoint
 config :entice_web, Entice.Web.Endpoint,

@@ -7,10 +7,15 @@ defmodule Entice.Web.Queries do
     Entice.Web.Repo.all(query)
   end
 
-  def account_exists?(email, password) do
+  def get_account(email, password) do
     query = from a in Entice.Web.Account,
           where: a.email == ^email and a.password == ^password,
+        preload: :characters,
          select: a
-    not (Entice.Web.Repo.all(query) |> Enum.empty?)
+
+    case Entice.Web.Repo.all(query) do
+      [acc] -> {:ok, acc}
+      _     -> {:error, :no_matching_account}
+    end
   end
 end
