@@ -72,6 +72,18 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
+  def handle_in("group:merge", %{"target" => id}, socket) do
+    Groups.merge(socket |> area, socket |> entity_id, id)
+    {:ok, socket}
+  end
+
+
+  def handle_in("group:kick", %{"target" => id}, socket) do
+    Groups.kick(socket |> area, socket |> entity_id, id)
+    {:ok, socket}
+  end
+
+
   def handle_in(event, _data, socket) do
     socket |> reply(event <> ":error", %{})
     {:leave, socket}
