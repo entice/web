@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/entice/server-elixir.svg)](https://travis-ci.org/entice/server-elixir)
+[![Build Status](https://travis-ci.org/entice/web.svg)](https://travis-ci.org/entice/web)
 
 # Entice.Web
 
