@@ -6,7 +6,10 @@ config :entice_web, Entice.Web.Endpoint,
   cache_static_lookup: false
 
 config :entice_web, Entice.Web.Repo,
-  db_url: "ecto://postgres:@localhost/entice"
+  database: "entice",
+  username: "postgres",
+  password: "",
+  hostname: "localhost"
 
 # Enables code reloading for development
 config :phoenix, :code_reloader, true

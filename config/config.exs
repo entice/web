@@ -16,7 +16,7 @@ config :entice_web, Entice.Web.Endpoint,
 
 # Configure the database module
 config :entice_web, Entice.Web.Repo,
-  db_url: System.get_env("DATABASE_URL")
+  url: System.get_env("DATABASE_URL")
 
 # Configures Elixir's Logger
 config :logger, :console,
