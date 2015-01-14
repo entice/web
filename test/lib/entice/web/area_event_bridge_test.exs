@@ -1,7 +1,6 @@
 defmodule Entice.Web.AreaEventBridgeTest do
   use ExUnit.Case
   alias Phoenix.PubSub
-  alias Phoenix.Socket
   alias Entice.Area.Entity
 
   test "propagation of entity creations" do

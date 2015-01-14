@@ -1,5 +1,6 @@
 defmodule Entice.Web.AuthController do
   use Phoenix.Controller
+  alias Entice.Web.Clients
   import Entice.Web.Auth
   import Entice.Web.ApiMessage
 
@@ -14,7 +15,7 @@ defmodule Entice.Web.AuthController do
     email = conn.params["email"]
     password = conn.params["password"]
 
-    try_log_in(email, password)
+    Clients.log_in(email, password)
     |> maybe_log_in(conn, email)
   end
 
@@ -32,6 +33,7 @@ defmodule Entice.Web.AuthController do
 
   defp logout(conn, _params, false), do: conn |> json error(%{message: "Already logged out."})
   defp logout(conn, _params, true) do
+    Clients.log_out(get_session(conn, :client_id))
     conn
     |> configure_session(renew: true)
     |> json ok(%{message: "Logged out."})
