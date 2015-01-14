@@ -19,22 +19,4 @@ defmodule Entice.Web.Players do
     Entity.stop(map, id)
     :ok
   end
-
-  def start_transfer(map, id) do
-    Groups.delete_for(map, id)
-    :ok = Entity.change_area(map, Transfer, id)
-    reset_pos(Transfer, id)
-    :ok
-  end
-
-  def continue_transfer(map, id) do
-    :ok = Entity.change_area(Transfer, map, id)
-    reset_pos(map, id)
-    Groups.create_for(map, id)
-    :ok
-  end
-
-  defp reset_pos(map, id) do
-    Entity.put_attribute(map, id, map.spawn)
-  end
 end

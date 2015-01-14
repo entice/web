@@ -65,12 +65,10 @@
           }
         });
       });
-
-
     </script>
 
   </form>
 <% end %>
 
 <br>
-<div class="authMessage">
+<div class="authMessage"></div>

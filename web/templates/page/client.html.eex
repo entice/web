@@ -28,14 +28,6 @@
       channel.on("join:ok", function(payload) {
         puts("Got", "Blue", JSON.stringify(payload))
         channel.send("entity:move", {pos: {x: 42, y: 1337}});
-        if (map != "random_arenas") {
-          channel.send("map:change", {new_map: "random_arenas"});
-        }
-      });
-
-      channel.on("map:change:ok", function(payload) {
-        puts("Got", "Blue", JSON.stringify(payload))
-        init("random_arenas", payload.client_id, payload.transfer_token)
       });
 
     });

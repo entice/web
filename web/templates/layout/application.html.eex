@@ -38,8 +38,8 @@
 
       <br>
       <%= @inner %>
-
     </div>
+
     <div class="footer">
       <%= if logged_in?(@conn) do %>
         <span>... hello, <%= email(@conn) %>! </span>

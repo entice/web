@@ -13,30 +13,12 @@ defmodule Entice.Web.AreaChannel do
 
 
   def join("area:" <> map, %{"client_id" => client_id, "transfer_token" => token}, socket) do
-    join_internal1(map, client_id, token, Clients.get_transfer_token(client_id), socket)
-  end
-
-  # Join stage 1: either create a new entity or transfer it from somewhere else
-
-  defp join_internal1(map, client_id, token, {:ok, token, :area, %{area: map_mod, char: char}}, socket) do
+    {:ok, ^token, :area, %{area: map_mod, char: char}} = Clients.get_transfer_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
     Clients.delete_transfer_token(client_id)
 
     {:ok, entity_id} = Players.prepare_player(map_mod, char)
-    join_internal2(map_mod, client_id, entity_id, socket)
-  end
 
-  defp join_internal1(map, client_id, token, {:ok, token, :area_change, %{area: map_mod, entity_id: entity_id}}, socket) do
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
-    Clients.delete_transfer_token(client_id)
-
-    :ok = Players.continue_transfer(map_mod, entity_id)
-    join_internal2(map_mod, client_id, entity_id, socket)
-  end
-
-  # Joins stage 2: initialize the socket properly, reply and we're good to go!
-
-  defp join_internal2(map_mod, client_id, entity_id, socket) do
     socket = socket
       |> set_area(map_mod)
       |> set_entity_id(entity_id)
@@ -47,22 +29,7 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  # Event API
-
-
-  def handle_in("map:change", %{"new_map" => map}, socket) do
-    {:ok, map_mod} = Area.get_map(camelize(map))
-
-    :ok = Players.start_transfer(socket |> area, socket |> entity_id)
-
-    {:ok, token} = Clients.create_transfer_token(
-      socket |> client_id,
-      :area_change,
-      %{area: map_mod, entity_id: socket |> entity_id})
-
-    socket |> reply("map:change:ok", %{client_id: socket |> client_id, transfer_token: token})
-    {:leave, socket}
-  end
+  # Incoming Event API
 
 
   def handle_in("entity:move", %{"pos" => %{"x" => x, "y" => y}}, socket) do
@@ -90,6 +57,9 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
+  # Outgoing Event API
+
+
   def handle_out("entity:add", %{entity_id: id} = msg, socket) do
     if (id != socket |> entity_id), do: socket |> reply("entity:add", msg)
     {:ok, socket}
@@ -102,6 +72,9 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
+  # Socket leave
+
+
   def leave(_msg, socket) do
     Players.delete_player(socket |> area, socket |> entity_id)
     {:ok, socket}
@@ -111,8 +84,8 @@ defmodule Entice.Web.AreaChannel do
   # Internal
 
 
-  defp set_area(socket, area), do: socket |> assign(:area, area)
-  defp area(socket),           do: socket.assigns[:area]
+  defp set_area(socket, area),           do: socket |> assign(:area, area)
+  defp area(socket),                     do: socket.assigns[:area]
 
   defp set_entity_id(socket, entity_id), do: socket |> assign(:entity_id, entity_id)
   defp entity_id(socket),                do: socket.assigns[:entity_id]
