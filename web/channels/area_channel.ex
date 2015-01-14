@@ -91,7 +91,7 @@ defmodule Entice.Web.AreaChannel do
 
 
   def handle_out("entity:add", %{entity_id: id} = msg, socket) do
-    if (id == socket |> entity_id), do: socket |> reply("entity:add", msg)
+    if (id != socket |> entity_id), do: socket |> reply("entity:add", msg)
     {:ok, socket}
   end
 
@@ -103,7 +103,7 @@ defmodule Entice.Web.AreaChannel do
 
 
   def leave(_msg, socket) do
-    Entity.stop(socket |> area, socket |> entity_id)
+    Players.delete_player(socket |> area, socket |> entity_id)
     {:ok, socket}
   end
 

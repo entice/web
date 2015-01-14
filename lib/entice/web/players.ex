@@ -14,6 +14,12 @@ defmodule Entice.Web.Players do
     {:ok, id}
   end
 
+  def delete_player(map, id) do
+    Groups.delete_for(map, id)
+    Entity.stop(map, id)
+    :ok
+  end
+
   def start_transfer(map, id) do
     Groups.delete_for(map, id)
     :ok = Entity.change_area(map, Transfer, id)
