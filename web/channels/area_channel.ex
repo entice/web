@@ -4,6 +4,7 @@ defmodule Entice.Web.AreaChannel do
   use Entice.Area.Attributes
   alias Entice.Web.Clients
   alias Entice.Web.Players
+  alias Entice.Web.Groups
   alias Entice.Area
   alias Entice.Area.Entity
   import Phoenix.Naming
