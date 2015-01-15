@@ -1,7 +1,12 @@
+html {
+  height: 100%;
+}
 
 body {
+  position: relative;
+  margin: 0;
   background-color:#241C1C;
-
+  min-height: 100%;
   font-family: 'Trebuchet MS';
   color: #9e0400;
   text-decoration: none;
@@ -51,7 +56,7 @@ fieldset {
 .center {
   text-align: center;
   width: 400px;
-  position: absolute;
+  position: relative;
   left: 50%;
   padding: 60px 0 100px 0;
   margin: 0 0 0 -200px;
