@@ -1,10 +1,10 @@
 defmodule Entice.Web.AreaEventBridge do
   use GenEvent
 
-  def handle_event({:entity_added, area, id}, state) do
+  def handle_event({:entity_added, area, id, attrs}, state) do
     Phoenix.Channel.broadcast("area:" <> area.underscore_name,
       "entity:add",
-      %{entity_id: id})
+      %{entity_id: id, attributes: attrs})
     {:ok, state}
   end
 

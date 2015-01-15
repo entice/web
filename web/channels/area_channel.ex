@@ -60,7 +60,7 @@ defmodule Entice.Web.AreaChannel do
   # Outgoing Event API
 
 
-  def handle_out("entity:add", %{entity_id: id} = msg, socket) do
+  def handle_out("entity:add", %{entity_id: id, attributes: _attrs} = msg, socket) do
     if (id != socket |> entity_id), do: socket |> reply("entity:add", msg)
     {:ok, socket}
   end
