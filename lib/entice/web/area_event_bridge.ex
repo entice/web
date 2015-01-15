@@ -15,10 +15,10 @@ defmodule Entice.Web.AreaEventBridge do
     {:ok, state}
   end
 
-  def handle_event({:attribute_updated, area, id, attr}, state) do
+  def handle_event({:attribute_updated, area, id, %{__struct__: attr_type} = attr}, state) do
     Phoenix.Channel.broadcast("area:" <> area.underscore_name,
       "entity:attribute:update",
-      %{entity_id: id, attribute: attr})
+      Map.put(%{entity_id: id}, attr_type, attr))
     {:ok, state}
   end
 
