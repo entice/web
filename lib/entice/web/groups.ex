@@ -72,7 +72,11 @@ defmodule Entice.Web.Groups do
   defp merge_internal1(map, id1, grp1, {:ok, %Group{leader: id1} = group1}, grp2, {:ok, %Group{invited: inv}}) when grp1 != grp2 do
     if grp1 in inv do
       # if already invited, merge
-      Entity.update_attribute(map, grp2, Group, fn g -> %Group{g | members: g.members ++ [group1.leader] ++ group1.members} end)
+      Entity.update_attribute(map, grp2, Group,
+        fn g -> %Group{g |
+          members: g.members ++ [group1.leader] ++ group1.members,
+          invited: g.invited -- [grp1]}
+        end)
       Entity.stop(map, grp1)
       Entity.put_attribute(map, id1, %Member{group: grp2})
     else
