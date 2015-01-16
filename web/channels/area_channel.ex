@@ -24,6 +24,7 @@ defmodule Entice.Web.AreaChannel do
       |> set_area(map_mod)
       |> set_entity_id(entity_id)
       |> set_client_id(client_id)
+      |> set_character(char)
 
     socket |> reply("join:ok", %{entity: entity_id, entities: Entity.get_entity_dump(map_mod)})
     {:ok, socket}
@@ -31,6 +32,20 @@ defmodule Entice.Web.AreaChannel do
 
 
   # Incoming Event API
+
+
+  def handle_in("area:change", %{"map" => map}, socket) do
+    {:ok, map_mod} = Area.get_map(camelize(map))
+    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
+      area: map_mod,
+      char: socket |> character
+    })
+
+    # TODO: if in a group, initiate group area change here.
+
+    socket |> reply("area:change:ok", %{client_id: socket |> client_id, transfer_token: token})
+    {:leave, socket}
+  end
 
 
   def handle_in("entity:move", %{"pos" => %{"x" => x, "y" => y}}, socket) do
@@ -93,4 +108,7 @@ defmodule Entice.Web.AreaChannel do
 
   defp set_client_id(socket, client_id), do: socket |> assign(:client_id, client_id)
   defp client_id(socket),                do: socket.assigns[:client_id]
+
+  defp set_character(socket, character), do: socket |> assign(:character, character)
+  defp character(socket),                do: socket.assigns[:character]
 end
