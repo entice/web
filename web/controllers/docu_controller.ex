@@ -27,6 +27,7 @@ defmodule Entice.Web.DocuController do
       {:ok, s} ->
         conn |> json ok(%{
           message: "Requested skill...",
+          id: s.id,
           skill_name: s.underscore_name,
           skill_description: s.description})
     end
@@ -36,8 +37,9 @@ defmodule Entice.Web.DocuController do
   def skills(conn, _params) do
     sk = Skills.get_skills
     |> Enum.map(&(%{
-      skill_name: &1.underscore_name,
-      skill_description: &1.description}))
+      id: &1.id,
+      skill_name: &1.skill.underscore_name,
+      skill_description: &1.skill.description}))
 
     conn |> json ok(%{
       message: "All skills...",
