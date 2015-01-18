@@ -116,6 +116,7 @@ defmodule Entice.Web.Groups do
     cond do
       grp1 in inv2 -> Entity.update_attribute(map, grp2, Group, fn g -> %Group{g | invited: g.invited -- [grp1]} end)
       grp2 in inv1 -> Entity.update_attribute(map, grp1, Group, fn g -> %Group{g | invited: g.invited -- [grp2]} end)
+      true -> :ok # this can fail due to clien racing conditions
     end
     :ok
   end
