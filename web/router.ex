@@ -38,7 +38,9 @@ defmodule Entice.Web.Router do
     get  "/char",   CharController, :list
     post "/char",   CharController, :create
 
-    get  "/maps",   DocuController, :maps
+    get  "/maps",       DocuController, :maps
+    get  "/skills",     DocuController, :skills
+    get  "/skills/:id", DocuController, :skills
 
     get  "/token/area",   TokenController, :area_transfer_token
     get  "/token/social", TokenController, :social_transfer_token

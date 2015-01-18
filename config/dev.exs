@@ -9,7 +9,8 @@ config :entice_web, Entice.Web.Repo,
   database: "entice",
   username: "postgres",
   password: "",
-  hostname: "localhost"
+  hostname: "localhost",
+  priv: "priv/repo"
 
 # Enables code reloading for development
 config :phoenix, :code_reloader, true

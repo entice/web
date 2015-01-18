@@ -7,7 +7,8 @@ config :entice_web, Entice.Web.Repo,
   database: "entice_test",
   username: "postgres",
   password: "",
-  hostname: "localhost"
+  hostname: "localhost",
+  priv: "priv/repo"
 
 # Enables code reloading for test
 config :phoenix, :code_reloader, true
