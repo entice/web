@@ -48,9 +48,19 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def handle_in("entity:move", %{"pos" => %{"x" => x, "y" => y}}, socket) do
+  def handle_in("entity:move", %{
+      "pos" => %{"x" => x, "y" => y},
+      "goal" => %{"x" => gx, "y" => gy},
+      "movetype" => mtype,
+      "speed" => speed}, socket) when 0 < mtype < 10 and 0 <= speed <= 1 do
+
+    #pos upd
     Entity.put_attribute(socket |> area, socket |> entity_id,
       %Position{pos: %Coord{x: x, y: y}})
+    # move upd
+    Entity.put_attribute(socket |> area, socket |> entity_id,
+      %Movement{goal: %Coord{x: gx, y: gy}, movetype: mtype, speed: speed})
+
     {:ok, socket}
   end
 

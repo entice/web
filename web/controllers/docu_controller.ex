@@ -22,14 +22,15 @@ defmodule Entice.Web.DocuController do
 
 
   def skills(conn, %{"id" => id}) do
-    case Skills.get_skill(id) do
-      :error   -> conn |> json error(%{message: "Skill not found."})
-      {:ok, s} ->
+    case id |> String.to_integer |> Skills.get_skill do
+      {:error, m} -> conn |> json error(%{message: m})
+      {:ok, s}    ->
         conn |> json ok(%{
           message: "Requested skill...",
-          id: s.id,
-          skill_name: s.underscore_name,
-          skill_description: s.description})
+          skill: %{
+            id: s.id,
+            name: s.underscore_name,
+            description: s.description}})
     end
   end
 
@@ -38,8 +39,8 @@ defmodule Entice.Web.DocuController do
     sk = Skills.get_skills
     |> Enum.map(&(%{
       id: &1.id,
-      skill_name: &1.skill.underscore_name,
-      skill_description: &1.skill.description}))
+      name: &1.skill.underscore_name,
+      description: &1.skill.description}))
 
     conn |> json ok(%{
       message: "All skills...",
