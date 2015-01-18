@@ -3,6 +3,7 @@ defmodule Entice.Web.Character do
 
   schema "characters" do
     field :name, :string
+    field :available_skills, :string, default: "3FF"
     field :profession, :integer, default: 1
     field :campaign, :integer, default: 0
     field :sex, :integer, default: 1
