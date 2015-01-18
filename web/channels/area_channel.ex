@@ -7,6 +7,7 @@ defmodule Entice.Web.AreaChannel do
   alias Entice.Web.Groups
   alias Entice.Area
   alias Entice.Area.Entity
+  alias Entice.Skills
   import Phoenix.Naming
 
 
@@ -73,6 +74,16 @@ defmodule Entice.Web.AreaChannel do
 
   def handle_in("group:kick", %{"target" => id}, socket) do
     Groups.kick(socket |> area, socket |> entity_id, id)
+    {:ok, socket}
+  end
+
+
+  def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when 0 < slot < 10 do
+    # replace with a sophisticated check of the client's skills
+    {:ok, skill} = Skills.get_skill(id)
+    Entity.update_attribute(socket |> area, socket |> entity_id,
+      SkillBar,
+      fn s -> %SkillBar{slots: Map.put(s.slots, slot, skill)} end)
     {:ok, socket}
   end
 
