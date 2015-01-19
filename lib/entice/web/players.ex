@@ -10,8 +10,8 @@ defmodule Entice.Web.Players do
       Name => %Name{name: char.name},
       Position => %Position{pos: map.spawn},
       Movement => %Movement{},
-      Appearance => copy_into(%Appearance{}, char)},
-      SkillBar => %SkillBar{})
+      Appearance => copy_into(%Appearance{}, char),
+      SkillBar => %SkillBar{}})
     Groups.create_for(map, id)
     {:ok, id}
   end
