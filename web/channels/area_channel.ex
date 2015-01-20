@@ -79,7 +79,7 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when 0 < slot < 10 do
+  def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 do
     # replace with a sophisticated check of the client's skills
     {:ok, skill} = Skills.get_skill(id)
     Entity.update_attribute(socket |> area, socket |> entity_id,
