@@ -53,7 +53,7 @@ defmodule Entice.Web.AreaChannel do
       "pos" => %{"x" => x, "y" => y},
       "goal" => %{"x" => gx, "y" => gy},
       "movetype" => mtype,
-      "speed" => speed}, socket) when 0 < mtype < 10 and 0 <= speed <= 1 do
+      "speed" => speed}, socket) when 0 < mtype and mtype < 10 and -1 < speed and speed < 2 do
 
     #pos upd
     Entity.put_attribute(socket |> area, socket |> entity_id,
