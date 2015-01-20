@@ -113,7 +113,7 @@ defmodule Entice.Web.AreaChannel do
     socket |> reply(
       "entity:attribute:update",
       %{msg | SkillBar => %SkillBar{
-        slots: Enum.map(slots, fn {slot, skill} -> {slot |> to_string, skill.id} end)}})
+        slots: Enum.map(slots, fn {slot, skill} -> %{slot: slot, id: skill.id} end)}})
     {:ok, socket}
   end
 
