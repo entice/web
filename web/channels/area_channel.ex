@@ -113,9 +113,13 @@ defmodule Entice.Web.AreaChannel do
     socket |> reply(
       "entity:attribute:update",
       %{msg | SkillBar => %SkillBar{
-        slots: Enum.map(slots, fn {slot, skill} -> {slot, skill.id} end)}})
+        slots: Enum.map(slots, fn {slot, skill} -> {slot |> to_string, skill.id} end)}})
     {:ok, socket}
   end
+
+
+  #def handle_out("area:change:ok", %{client_id: socket |> client_id, transfer_token: token}, socket) do
+  #end
 
 
   def handle_out(event, message, socket) do
