@@ -5,7 +5,7 @@
   "entice_area": {:git, "git://github.com/entice/area.git", "42fe7346df2d3ff1dbefbc8694c2f05bebaef760", [branch: "master"]},
   "entice_skill": {:git, "git://github.com/entice/skill.git", "c4edbfcb0e0fc69431c921274259e4423afbd00c", [branch: "master"]},
   "inflex": {:hex, :inflex, "0.2.9"},
-  "phoenix": {:hex, :phoenix, "0.8.0"},
+  "phoenix": {:git, "git://github.com/phoenixframework/phoenix.git", "85ea87a672d8e0410b0842e138a71510cb531d90", [ref: "85ea87a672d8e0410b0842e138a71510cb531d90"]},
   "plug": {:hex, :plug, "0.9.0"},
   "poison": {:hex, :poison, "1.3.0"},
   "poolboy": {:hex, :poolboy, "1.4.2"},

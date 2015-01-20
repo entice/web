@@ -24,7 +24,7 @@ defmodule Entice.Web.Mixfile do
   defp deps do
     [{:entice_area, github: "entice/area", branch: "master"},
      {:entice_skill, github: "entice/skill", branch: "master"},
-     {:phoenix, "~> 0.8"},
+     {:phoenix, github: "phoenixframework/phoenix", ref: "85ea87a672d8e0410b0842e138a71510cb531d90"},
      {:cowboy, "~> 1.0"},
      {:postgrex, ">= 0.0.0"},
      {:ecto, "~> 0.4"},
