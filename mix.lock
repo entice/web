@@ -2,7 +2,7 @@
   "cowlib": {:hex, :cowlib, "1.0.1"},
   "decimal": {:hex, :decimal, "0.2.5"},
   "ecto": {:hex, :ecto, "0.6.0"},
-  "entice_area": {:git, "git://github.com/entice/area.git", "3bbb4338e77359c91050679cca2552fc21a1a174", [branch: "master"]},
+  "entice_area": {:git, "git://github.com/entice/area.git", "6f2430a6385c2077ace89aa95830ab6a834966ec", [branch: "master"]},
   "entice_skill": {:git, "git://github.com/entice/skill.git", "c4edbfcb0e0fc69431c921274259e4423afbd00c", [branch: "master"]},
   "inflex": {:hex, :inflex, "0.2.9"},
   "phoenix": {:hex, :phoenix, "0.8.0"},
