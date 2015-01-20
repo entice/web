@@ -9,7 +9,7 @@ defmodule Entice.Web.Players do
     {:ok, id} = Entity.start(map, UUID.uuid4(), %{
       Name => %Name{name: char.name},
       Position => %Position{pos: map.spawn},
-      Movement => %Movement{},
+      Movement => %Movement{goal: map.spawn},
       Appearance => copy_into(%Appearance{}, char),
       SkillBar => %SkillBar{}})
     Groups.create_for(map, id)
