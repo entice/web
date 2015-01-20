@@ -30,6 +30,7 @@
         channel.send("entity:move", {
           pos: {x: 42, y: 1337},
           goal: { x: 2784.94165, y: -3240.23218 },
+          plane: 1,
           movetype: 9,
           speed: 1.0});
       });
