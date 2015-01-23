@@ -2,10 +2,13 @@ defmodule Entice.Web.Clients do
   use Entice.Area
   alias Entice.Web.Account
   alias Entice.Area.Entity
+  alias Phoenix.Socket
   import Entice.Web.Queries
 
   # Some additional client only attributes:
   defmodule TransferToken, do: defstruct id: "", type: :simple, payload: %{}
+
+  defmodule Sockets, do: defstruct sockets: %{}
 
 
   def exists?(id) do
@@ -25,7 +28,9 @@ defmodule Entice.Web.Clients do
 
     case existing do
       %{id: id} -> {:ok, id}
-      nil       -> Entity.start(Lobby, UUID.uuid4(), %{Account => account})
+      nil -> Entity.start(Lobby, UUID.uuid4(), %{
+        Account => account,
+        Sockets => %Sockets{}})
     end
   end
 
@@ -80,5 +85,21 @@ defmodule Entice.Web.Clients do
     {:ok, _acc} = Entity.update_attribute(Lobby, id, Account,
       fn acc -> %Account{acc | characters: [acc.characters|char]} end)
     char
+  end
+
+
+  # Socket storage API
+
+  def add_socket(id, %Socket{topic: topic} = socket) do
+    {:ok, _sock} = Entity.update_attribute(Lobby, id, Sockets,
+      fn sock -> %Sockets{sock | sockets: Map.put(sock.sockets, topic, socket)} end)
+    :ok
+  end
+
+  def remove_socket(id, %Socket{topic: topic}), do: remove_socket(id, topic)
+  def remove_socket(id, topic) do
+    {:ok, _sock} = Entity.update_attribute(Lobby, id, Sockets,
+      fn sock -> %Sockets{sock | sockets: Map.delete(sock.sockets, topic)} end)
+    :ok
   end
 end

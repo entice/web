@@ -30,6 +30,20 @@ defmodule Entice.Web.Groups do
   end
 
   @doc """
+  Checks if this player is a leader of a group,
+  if so, return the members.
+  """
+  def get_my_members(map, entity_id) do
+    {:ok, %Member{group: grp}} = Entity.get_attribute(map, entity_id, Member)
+    {:ok, %Group{leader: id, members: mems}} =  Entity.get_attribute(map, grp, Group)
+
+    case id == entity_id do
+      true  -> mems
+      false -> []
+    end
+  end
+
+  @doc """
   Leave a group, become the leader of a new one.
   """
   def leave_group(map, entity_id) do
@@ -37,15 +51,15 @@ defmodule Entice.Web.Groups do
     leave_group_internal(map, entity_id, grp, Entity.get_attribute(map, grp, Group))
   end
 
-  def leave_group_internal(_,   id, _,     {:ok, %Group{leader: id, members: []}}), do: :ok
+  defp leave_group_internal(_,   id, _,     {:ok, %Group{leader: id, members: []}}), do: :ok
 
-  def leave_group_internal(map, id, group, {:ok, %Group{leader: id, members: [hd | tl]}}) do
+  defp leave_group_internal(map, id, group, {:ok, %Group{leader: id, members: [hd | tl]}}) do
     Entity.update_attribute(map, group, Group, fn g -> %Group{g | leader: hd, members: tl} end)
     create_for(map, id)
     :ok
   end
 
-  def leave_group_internal(map, id, group, {:ok, _grp}) do
+  defp leave_group_internal(map, id, group, {:ok, _grp}) do
     Entity.update_attribute(map, group, Group, fn g -> %Group{g | members: g.members -- [id]} end)
     create_for(map, id)
     :ok

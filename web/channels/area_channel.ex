@@ -19,7 +19,9 @@ defmodule Entice.Web.AreaChannel do
     {:ok, ^map_mod} = Area.get_map(camelize(map))
     Clients.delete_transfer_token(client_id)
 
-    {:ok, entity_id} = Players.prepare_player(map_mod, char)
+    # link the client and the entity to the new socket
+    {:ok, entity_id} = Players.prepare_player(map_mod, socket, char)
+    :ok = Clients.add_socket(client_id, socket)
 
     socket = socket
       |> set_area(map_mod)
@@ -27,7 +29,11 @@ defmodule Entice.Web.AreaChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    socket |> reply("join:ok", %{entity: entity_id, entities: Entity.get_entity_dump(map_mod)})
+    # filter the dump
+    dump = Entity.get_entity_dump(map_mod)
+      |> Enum.map(&(%{&1| attributes: Map.delete(&1.attributes, Players.Network)}))
+
+    socket |> reply("join:ok", %{entity: entity_id, entities: dump })
     {:ok, socket}
   end
 
@@ -39,12 +45,21 @@ defmodule Entice.Web.AreaChannel do
     {:ok, map_mod} = Area.get_map(camelize(map))
     {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
       area: map_mod,
-      char: socket |> character
-    })
+      char: socket |> character})
 
-    # TODO: if in a group, initiate group area change here.
+    members = Groups.get_my_members(socket |> entity_id)
 
-    socket |> reply("area:change:ok", %{client_id: socket |> client_id, transfer_token: token})
+    # prepare leader
+    socket |> reply("area:change:ok", %{
+      client_id: socket |> client_id,
+      transfer_token: token})
+
+    # prepare members
+    for member <- members do
+      Clients.get_socket(map_mod, member)
+      |> reply("area:change:pre", %{map: map_mod})
+    end
+
     {:leave, socket}
   end
 
@@ -118,8 +133,24 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  #def handle_out("area:change:ok", %{client_id: socket |> client_id, transfer_token: token}, socket) do
-  #end
+  def handle_out("entity:attribute:update", %{:entity_id => _id, Players.Network => _net}, socket) do
+    # simply drop, since internal
+    {:ok, socket}
+  end
+
+
+  def handle_out("area:change:pre", %{map: map_mod}, socket) do
+    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
+      area: map_mod,
+      char: socket |> character})
+
+    socket |> reply("area:change:force", %{
+      client_id: socket |> client_id,
+      transfer_token: token,
+      map: map_mod.underscore_name})
+
+    {:leave, socket}
+  end
 
 
   def handle_out(event, message, socket) do
@@ -133,6 +164,7 @@ defmodule Entice.Web.AreaChannel do
 
   def leave(_msg, socket) do
     Players.delete_player(socket |> area, socket |> entity_id)
+    Clients.remove_socket(socket |> client_id, socket)
     {:ok, socket}
   end
 
