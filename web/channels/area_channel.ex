@@ -15,12 +15,15 @@ defmodule Entice.Web.AreaChannel do
 
 
   def join("area:" <> map, %{"client_id" => client_id, "transfer_token" => token}, socket) do
-    {:ok, ^token, :area, %{area: map_mod, char: char}} = Clients.get_transfer_token(client_id)
+    {:ok, ^token, token_type, %{area: map_mod, char: char} = payload} = Clients.get_transfer_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
     Clients.delete_transfer_token(client_id)
 
     # link the client and the entity to the new socket
-    {:ok, entity_id} = Players.prepare_player(map_mod, socket, char)
+    {:ok, entity_id} = case token_type do
+      :area        -> Players.prepare_new_player(map_mod, socket, char)
+      :area_change -> Players.prepare_grouped_player(map_mod, socket, char, payload[:entity_id], payload[:group_id])
+    end
     :ok = Clients.add_socket(client_id, socket)
 
     socket = socket
@@ -43,21 +46,10 @@ defmodule Entice.Web.AreaChannel do
 
   def handle_in("area:change", %{"map" => map}, socket) do
     {:ok, map_mod} = Area.get_map(camelize(map))
-    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
-      area: map_mod,
-      char: socket |> character})
 
-    members = Groups.get_my_members(socket |> entity_id)
-
-    # prepare leader
-    socket |> reply("area:change:ok", %{
-      client_id: socket |> client_id,
-      transfer_token: token})
-
-    # prepare members
-    for member <- members do
-      Clients.get_socket(map_mod, member)
-      |> reply("area:change:pre", %{map: map_mod})
+    case Groups.get_my_members(socket |> entity_id) do
+      []    -> area_change_single(map_mod, socket)
+      [_|_] -> area_change_group(map_mod, Groups.get_for(socket |> entity_id), socket)
     end
 
     {:leave, socket}
@@ -139,10 +131,12 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def handle_out("area:change:pre", %{map: map_mod}, socket) do
-    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
+  def handle_out("area:change:pre", %{map: map_mod, entity_id: entity_id, group_id: group_id}, socket) do
+    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area_change, %{
       area: map_mod,
-      char: socket |> character})
+      char: socket |> character,
+      entity_id: entity_id,
+      group_id: group_id})
 
     socket |> reply("area:change:force", %{
       client_id: socket |> client_id,
@@ -183,4 +177,28 @@ defmodule Entice.Web.AreaChannel do
 
   defp set_character(socket, character), do: socket |> assign(:character, character)
   defp character(socket),                do: socket.assigns[:character]
+
+  defp area_change_single(map_mod, socket) do
+    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
+      area: map_mod,
+      char: socket |> character})
+
+    socket |> reply("area:change:ok", %{
+      client_id: socket |> client_id,
+      transfer_token: token})
+  end
+
+  defp area_change_group(map_mod, {:ok, group_id, group}, socket) do
+    all_members    = [group.leader | group.members]
+    new_group_dict = Groups.prepare_area_change(socket |> area, map_mod, group_id)
+
+    # prepare members
+    for member <- all_members do
+      Clients.get_socket(map_mod, member)
+      |> reply("area:change:pre", %{
+        map: map_mod,
+        entity_id: new_group_dict[member],
+        group_id: new_group_dict[group_id]})
+    end
+  end
 end

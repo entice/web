@@ -20,6 +20,37 @@ defmodule Entice.Web.Groups do
   end
 
   @doc """
+  Returns this entity's group id
+  """
+  def get_for(map, entity_id) do
+    {:ok, %Member{group: group_id}} = Entity.get_attribute(map, entity_id, Member)
+    {:ok, group}                    = Entity.get_attribute(map, group_id, Group)
+    {:ok, group_id, group}
+  end
+
+  @doc """
+  Assign a player to an existing group.
+  Note that this doesnt care for exiting groups of the player.
+  Use merge to merge existing groups.
+  """
+  def assign_to(map, entity_id, group_id) do
+    assign_to(map, entity_id, group_id, Entity.get_attribute(map, group_id, Group))
+  end
+
+  defp assign_to(map, entity_id, group_id, {:ok, %Group{members: mems}}) do
+    if not (entity_id in mems) do
+      Entity.update_attribute(map, group_id, Group,
+        fn g -> %Group{g | members: g.members ++ entity_id} end)
+    end
+    Entity.put_attribute(map, entity_id, %Member{group: group_id})
+    :ok
+  end
+
+  defp assign_to(_map, _entity_id, _group_id, {:error, _msg}) do
+    :error
+  end
+
+  @doc """
   Deletes the group of this entity.
   """
   def delete_for(map, entity_id) do
@@ -42,6 +73,32 @@ defmodule Entice.Web.Groups do
       false -> []
     end
   end
+
+  @doc """
+  Prepare a new group in the new map. Create all the entity-ids and return
+  a map from the old entity-ids to the new ones. The resulting map also contains the new groups id,
+  which is also mapped to its old one.
+  """
+  def prepare_area_change(map, new_map, group_id) do
+    prepare_area_change(map, new_map, group_id, Entity.get_attribute(map, group_id, Group))
+  end
+
+  defp prepare_area_change(_map, new_map, group_id, {:ok, %Group{leader: lead, members: mems}}) do
+    # create new ids
+    leader = UUID.uuid4()
+    members = mems |> Enum.map(&({&1, UUID.uuid4()}))
+
+    # create a new group out of them
+    {:ok, new_grp} = Entity.start(new_map, UUID.uuid4(), %{Group => %Group{
+      leader: leader,
+      members: members |> Enum.map(&(elem(&1, 1))) }})
+
+    # create the mapping
+    Enum.map_reduce(members, %{}, fn {{old, new}, acc} -> Map.put(acc, old, new) end)
+    |> Map.put(group_id, new_grp)
+    |> Map.put(lead, leader)
+  end
+
 
   @doc """
   Leave a group, become the leader of a new one.
