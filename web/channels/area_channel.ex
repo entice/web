@@ -11,7 +11,7 @@ defmodule Entice.Web.AreaChannel do
   import Phoenix.Naming
 
 
-  # Initilizing the connection
+  # Initializing the connection
 
 
   def join("area:" <> map, %{"client_id" => client_id, "transfer_token" => token}, socket) do
