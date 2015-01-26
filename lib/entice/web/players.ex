@@ -51,6 +51,6 @@ defmodule Entice.Web.Players do
 
   def get_socket(map, id) do
     {:ok, %Network{socket: socket}} = Entity.get_attribute(map, id, Network)
-    {:ok, socket}
+    socket
   end
 end

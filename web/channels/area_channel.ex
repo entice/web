@@ -194,7 +194,7 @@ defmodule Entice.Web.AreaChannel do
 
     # prepare members
     for member <- all_members do
-      Players.get_socket(map_mod, member)
+      Players.get_socket(socket |> area, member)
       |> reply("area:change:pre", %{
         map: map_mod,
         entity_id: new_group_dict[member],
