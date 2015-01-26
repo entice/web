@@ -94,7 +94,7 @@ defmodule Entice.Web.Groups do
       members: members |> Enum.map(&(elem(&1, 1))) }})
 
     # create the mapping
-    Enum.map_reduce(members, %{}, fn {{old, new}, acc} -> Map.put(acc, old, new) end)
+    Enum.reduce(members, %{}, fn {old, new}, acc -> Map.put(acc, old, new) end)
     |> Map.put(group_id, new_grp)
     |> Map.put(lead, leader)
   end
