@@ -47,9 +47,9 @@ defmodule Entice.Web.AreaChannel do
   def handle_in("area:change", %{"map" => map}, socket) do
     {:ok, map_mod} = Area.get_map(camelize(map))
 
-    case Groups.get_my_members(socket |> entity_id) do
+    case Groups.get_my_members(socket |> area, socket |> entity_id) do
       []    -> area_change_single(map_mod, socket)
-      [_|_] -> area_change_group(map_mod, Groups.get_for(socket |> entity_id), socket)
+      [_|_] -> area_change_group(map_mod, Groups.get_for(socket |> area, socket |> entity_id), socket)
     end
 
     {:leave, socket}
