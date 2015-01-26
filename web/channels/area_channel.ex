@@ -48,11 +48,9 @@ defmodule Entice.Web.AreaChannel do
     {:ok, map_mod} = Area.get_map(camelize(map))
 
     case Groups.get_my_members(socket |> area, socket |> entity_id) do
-      []    -> area_change_single(map_mod, socket)
       [_|_] -> area_change_group(map_mod, Groups.get_for(socket |> area, socket |> entity_id), socket)
+      []    -> area_change_single(map_mod, socket)
     end
-
-    {:leave, socket}
   end
 
 
@@ -186,6 +184,8 @@ defmodule Entice.Web.AreaChannel do
     socket |> reply("area:change:ok", %{
       client_id: socket |> client_id,
       transfer_token: token})
+
+    {:leave, socket}
   end
 
   defp area_change_group(map_mod, {:ok, group_id, group}, socket) do
@@ -200,5 +200,7 @@ defmodule Entice.Web.AreaChannel do
         entity_id: new_group_dict[member],
         group_id: new_group_dict[group_id]})
     end
+
+    {:ok, socket}
   end
 end

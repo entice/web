@@ -66,7 +66,7 @@ defmodule Entice.Web.Groups do
   """
   def get_my_members(map, entity_id) do
     {:ok, %Member{group: grp}} = Entity.get_attribute(map, entity_id, Member)
-    {:ok, %Group{leader: id, members: mems}} =  Entity.get_attribute(map, grp, Group)
+    {:ok, %Group{leader: id, members: mems}} = Entity.get_attribute(map, grp, Group)
 
     case id == entity_id do
       true  -> mems
