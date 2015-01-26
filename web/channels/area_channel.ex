@@ -129,7 +129,7 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def handle_out("area:change:pre", %{map: map_mod, entity_id: entity_id, group_id: group_id}, socket) do
+  def handle_out("area:change:pre", %{map: map_mod, entity_id: entity_id, group_id: group_id, socket: socket}, socket) do
     {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area_change, %{
       area: map_mod,
       char: socket |> character,
@@ -194,11 +194,13 @@ defmodule Entice.Web.AreaChannel do
 
     # prepare members
     for member <- all_members do
-      Players.get_socket(socket |> area, member)
-      |> reply("area:change:pre", %{
+      mem_socket = Players.get_socket(socket |> area, member)
+
+      mem_socket |> broadcast("area:change:pre", %{
         map: map_mod,
         entity_id: new_group_dict[member],
-        group_id: new_group_dict[group_id]})
+        group_id: new_group_dict[group_id],
+        socket: mem_socket})
     end
 
     {:ok, socket}
