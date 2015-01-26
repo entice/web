@@ -110,8 +110,8 @@ defmodule Entice.Web.AreaChannel do
   # Outgoing Event API
 
 
-  def handle_out("entity:add", %{entity_id: id, attributes: _attrs} = msg, socket) do
-    if (id != socket |> entity_id), do: socket |> reply("entity:add", msg)
+  def handle_out("entity:add", %{entity_id: id, attributes: attrs} = msg, socket) do
+    if (id != socket |> entity_id), do: socket |> reply("entity:add", %{msg | attributes: Map.delete(attrs, Players.Network)})
     {:ok, socket}
   end
 
