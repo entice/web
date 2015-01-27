@@ -123,10 +123,7 @@ defmodule Entice.Web.AreaChannel do
   end
 
 
-  def handle_out("entity:attribute:update", %{:entity_id => _id, Players.Network => _net}, socket) do
-    # simply drop, since internal
-    {:ok, socket}
-  end
+  def handle_out("entity:attribute:update", %{:entity_id => _id, Players.Network => _net}, socket), do: {:ok, socket}
 
 
   def handle_out("area:change:pre", %{map: map_mod, entity_id: entity_id, group_id: group_id, socket: socket}, socket) do
@@ -143,6 +140,9 @@ defmodule Entice.Web.AreaChannel do
 
     {:leave, socket}
   end
+
+
+  def handle_out("area:change:pre", _msg, socket), do: {:ok, socket}
 
 
   def handle_out(event, message, socket) do
