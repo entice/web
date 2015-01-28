@@ -25,7 +25,7 @@ defmodule Entice.Web.Players do
   """
   def prepare_grouped_player(map, socket, char, entity_id, group_id) do
     {:ok, id} = prepare_player(map, socket, char, entity_id)
-    Groups.assign_to(map, group_id)
+    Groups.assign_to(map, id, group_id)
     {:ok, id}
   end
 
