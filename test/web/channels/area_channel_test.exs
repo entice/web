@@ -116,13 +116,28 @@ defmodule Entice.Web.AreaChannelTest do
 
     AreaChannel.handle_in("area:change", %{"map" => "random_arenas"}, socket1)
 
-    assert_receive {:socket_broadcast, %Phoenix.Socket.Message{
+    timeout = 3000
+    res = receive do
+      {:socket_broadcast, %Phoenix.Socket.Message{
+        topic: "area:heroes_ascent",
+        event: "area:change:pre",
+        payload: %{
+          old_entity_id: _,
+          new_entity_id: _,
+          group_id: _,
+          map: RandomArenas} = msg}} -> msg
+    after
+      timeout -> assert false
+    end
+
+    AreaChannel.handle_out("area:change:pre", res, socket1)
+
+    assert_receive {:socket_reply, %Phoenix.Socket.Message{
       topic: "area:heroes_ascent",
-      event: "area:change:pre",
+      event: "area:change:force",
       payload: %{
-        entity_id: _,
-        group_id: _,
-        map: RandomArenas,
-        socket: socket1}}}
+        client_id: _,
+        transfer_token: _,
+        map: "random_arenas"}}}
   end
 end

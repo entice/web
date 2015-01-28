@@ -126,23 +126,24 @@ defmodule Entice.Web.AreaChannel do
   def handle_out("entity:attribute:update", %{:entity_id => _id, Players.Network => _net}, socket), do: {:ok, socket}
 
 
-  def handle_out("area:change:pre", %{map: map_mod, entity_id: entity_id, group_id: group_id, socket: socket}, socket) do
-    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area_change, %{
-      area: map_mod,
-      char: socket |> character,
-      entity_id: entity_id,
-      group_id: group_id})
+  def handle_out("area:change:pre", %{map: map_mod, old_entity_id: old_id, new_entity_id: new_id, group_id: group_id}, socket) do
+    if (old_id == socket |> entity_id) do
+      {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area_change, %{
+        area: map_mod,
+        char: socket |> character,
+        entity_id: new_id,
+        group_id: group_id})
 
-    socket |> reply("area:change:force", %{
-      client_id: socket |> client_id,
-      transfer_token: token,
-      map: map_mod.underscore_name})
+      socket |> reply("area:change:force", %{
+        client_id: socket |> client_id,
+        transfer_token: token,
+        map: map_mod.underscore_name})
 
-    {:leave, socket}
+      {:leave, socket}
+    else
+      {:ok, socket}
+    end
   end
-
-
-  def handle_out("area:change:pre", _msg, socket), do: {:ok, socket}
 
 
   def handle_out(event, message, socket) do
@@ -198,9 +199,9 @@ defmodule Entice.Web.AreaChannel do
 
       mem_socket |> broadcast("area:change:pre", %{
         map: map_mod,
-        entity_id: new_group_dict[member],
-        group_id: new_group_dict[group_id],
-        socket: mem_socket})
+        old_entity_id: member,
+        new_entity_id: new_group_dict[member],
+        group_id: new_group_dict[group_id]})
     end
 
     {:ok, socket}
