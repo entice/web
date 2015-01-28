@@ -79,7 +79,7 @@ defmodule Entice.Web.AreaChannelTest do
     socket2 = %Socket{pid: self, router: Entice.Web.Router, topic: "area:heroes_ascent", authorized: true}
 
     PubSub.subscribe(self, "area:heroes_ascent")
-    PubSub.subscribe(self, "area:random_arenas")
+    #PubSub.subscribe(self, "area:random_arenas")
 
     # prep players
 
@@ -116,7 +116,6 @@ defmodule Entice.Web.AreaChannelTest do
 
     AreaChannel.handle_in("area:change", %{"map" => "random_arenas"}, socket1)
 
-    timeout = 3000
     res = receive do
       {:socket_broadcast, %Phoenix.Socket.Message{
         topic: "area:heroes_ascent",
@@ -127,8 +126,9 @@ defmodule Entice.Web.AreaChannelTest do
           group_id: _,
           map: RandomArenas} = msg}} -> msg
     after
-      timeout -> assert false
+      3000 -> assert false
     end
+
 
     AreaChannel.handle_out("area:change:pre", res, socket1)
 
@@ -139,5 +139,17 @@ defmodule Entice.Web.AreaChannelTest do
         client_id: _,
         transfer_token: _,
         map: "random_arenas"}}}
+
+    AreaChannel.leave(:no_msg, socket1)
+
+    assert_receive {:socket_broadcast, %Phoenix.Socket.Message{event: "entity:remove"}} # Us
+    assert_receive {:socket_broadcast, %Phoenix.Socket.Message{event: "entity:remove"}} # The partner
+    assert_receive {:socket_broadcast, %Phoenix.Socket.Message{event: "entity:remove"}} # Our group
+
+    # assert_receive {:socket_reply, %Phoenix.Socket.Message{
+    #   topic: "area:heroes_ascent",
+    #   event: "leave",
+    #   payload: %{}}}
+
   end
 end

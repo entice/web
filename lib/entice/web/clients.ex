@@ -91,14 +91,14 @@ defmodule Entice.Web.Clients do
   # Socket storage API
 
   def add_socket(id, %Socket{topic: topic} = socket) do
-    {:ok, _sock} = Entity.update_attribute(Lobby, id, Sockets,
+    Entity.update_attribute(Lobby, id, Sockets,
       fn sock -> %Sockets{sock | sockets: Map.put(sock.sockets, topic, socket)} end)
     :ok
   end
 
   def remove_socket(id, %Socket{topic: topic}), do: remove_socket(id, topic)
   def remove_socket(id, topic) do
-    {:ok, _sock} = Entity.update_attribute(Lobby, id, Sockets,
+    Entity.update_attribute(Lobby, id, Sockets,
       fn sock -> %Sockets{sock | sockets: Map.delete(sock.sockets, topic)} end)
     :ok
   end
