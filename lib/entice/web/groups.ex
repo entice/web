@@ -40,7 +40,7 @@ defmodule Entice.Web.Groups do
   defp assign_to(map, entity_id, group_id, {:ok, %Group{members: mems}}) do
     if not (entity_id in mems) do
       Entity.update_attribute(map, group_id, Group,
-        fn g -> %Group{g | members: g.members ++ entity_id} end)
+        fn g -> %Group{g | members: g.members ++ [entity_id]} end)
     end
     Entity.put_attribute(map, entity_id, %Member{group: group_id})
     :ok
