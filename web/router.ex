@@ -18,7 +18,6 @@ defmodule Entice.Web.Router do
     get "/",             PageController, :index
     get "/auth",         PageController, :auth
     get "/client/:area", PageController, :client
-    get "/chat/:chat",   PageController, :chat
   end
 
 
@@ -32,24 +31,24 @@ defmodule Entice.Web.Router do
   scope "/api", Entice.Web do
     pipe_through :api
 
-    post "/login",  AuthController, :login
-    post "/logout", AuthController, :logout
+    post "/login",        AuthController, :login
+    post "/logout",       AuthController, :logout
 
-    get  "/char",   CharController, :list
-    post "/char",   CharController, :create
+    get  "/char",         CharController, :list
+    post "/char",         CharController, :create
 
-    get  "/maps",       DocuController, :maps
-    get  "/skills",     DocuController, :skills
-    get  "/skills/:id", DocuController, :skills
+    get  "/maps",         DocuController, :maps
+    get  "/skills",       DocuController, :skills
+    get  "/skills/:id",   DocuController, :skills
 
-    get  "/token/area",   TokenController, :area_transfer_token
-    get  "/token/social", TokenController, :social_transfer_token
+    get  "/token/player", TokenController, :player_token
   end
 
 
   # Websocket channels
   socket "/ws" do
     channel "area:*", Entice.Web.AreaChannel
+    channel "group:*", Entice.Web.GroupChannel
     channel "social:*", Entice.Web.SocialChannel
   end
 end

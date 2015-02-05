@@ -9,15 +9,16 @@ defmodule Entice.Web.AreaChannel do
   alias Entice.Area.Entity
   alias Entice.Skills
   import Phoenix.Naming
+  import Entice.Web.ChannelHelpers
 
 
   # Initializing the connection
 
 
-  def join("area:" <> map, %{"client_id" => client_id, "transfer_token" => token}, socket) do
-    {:ok, ^token, token_type, %{area: map_mod, char: char} = payload} = Clients.get_transfer_token(client_id)
+  def join("area:" <> map, %{"client_id" => client_id, "player_token" => token}, socket) do
+    {:ok, ^token, token_type, %{area: map_mod, char: char} = payload} = Clients.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
-    Clients.delete_transfer_token(client_id)
+    Clients.delete_token(client_id)
 
     # link the client and the entity to the new socket
     {:ok, entity_id} = case token_type do
@@ -36,7 +37,13 @@ defmodule Entice.Web.AreaChannel do
     dump = Entity.get_entity_dump(map_mod)
       |> Enum.map(&(%{&1| attributes: Map.delete(&1.attributes, Players.Network)}))
 
-    socket |> reply("join:ok", %{entity: entity_id, entities: dump })
+    # create access token for other channels
+    {:ok, token} = Clients.create_token(socket |> client_id, :player, %{
+      area: map_mod,
+      entity_id: entity_id,
+      char: socket |> character})
+
+    socket |> reply("join:ok", %{access_token: token, entity: entity_id, entities: dump})
     {:ok, socket}
   end
 
@@ -46,11 +53,7 @@ defmodule Entice.Web.AreaChannel do
 
   def handle_in("area:change", %{"map" => map}, socket) do
     {:ok, map_mod} = Area.get_map(camelize(map))
-
-    case Groups.get_my_members(socket |> area, socket |> entity_id) do
-      [_|_] -> area_change_group(map_mod, Groups.get_for(socket |> area, socket |> entity_id), socket)
-      []    -> area_change_single(map_mod, socket)
-    end
+    area_change_single(map_mod, socket)
   end
 
 
@@ -68,18 +71,6 @@ defmodule Entice.Web.AreaChannel do
     Entity.put_attribute(socket |> area, socket |> entity_id,
       %Movement{goal: %Coord{x: gx, y: gy}, plane: plane, movetype: mtype, speed: speed})
 
-    {:ok, socket}
-  end
-
-
-  def handle_in("group:merge", %{"target" => id}, socket) do
-    Groups.merge(socket |> area, socket |> entity_id, id)
-    {:ok, socket}
-  end
-
-
-  def handle_in("group:kick", %{"target" => id}, socket) do
-    Groups.kick(socket |> area, socket |> entity_id, id)
     {:ok, socket}
   end
 
@@ -126,24 +117,24 @@ defmodule Entice.Web.AreaChannel do
   def handle_out("entity:attribute:update", %{:entity_id => _id, Players.Network => _net}, socket), do: {:ok, socket}
 
 
-  def handle_out("area:change:pre", %{map: map_mod, old_entity_id: old_id, new_entity_id: new_id, group_id: group_id}, socket) do
-    if (old_id == socket |> entity_id) do
-      {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area_change, %{
-        area: map_mod,
-        char: socket |> character,
-        entity_id: new_id,
-        group_id: group_id})
+  # def handle_out("area:change:pre", %{map: map_mod, old_entity_id: old_id, new_entity_id: new_id, group_id: group_id}, socket) do
+  #   if (old_id == socket |> entity_id) do
+  #     {:ok, token} = Clients.create_token(socket |> client_id, :area_change, %{
+  #       area: map_mod,
+  #       char: socket |> character,
+  #       entity_id: new_id,
+  #       group_id: group_id})
 
-      socket |> reply("area:change:force", %{
-        client_id: socket |> client_id,
-        transfer_token: token,
-        map: map_mod.underscore_name})
+  #     socket |> reply("area:change:force", %{
+  #       client_id: socket |> client_id,
+  #       player_token: token,
+  #       map: map_mod.underscore_name})
 
-      {:leave, socket}
-    else
-      {:ok, socket}
-    end
-  end
+  #     {:leave, socket}
+  #   else
+  #     {:ok, socket}
+  #   end
+  # end
 
 
   def handle_out(event, message, socket) do
@@ -164,46 +155,33 @@ defmodule Entice.Web.AreaChannel do
 
   # Internal
 
-
-  defp set_area(socket, area),           do: socket |> assign(:area, area)
-  defp area(socket),                     do: socket.assigns[:area]
-
-  defp set_entity_id(socket, entity_id), do: socket |> assign(:entity_id, entity_id)
-  defp entity_id(socket),                do: socket.assigns[:entity_id]
-
-  defp set_client_id(socket, client_id), do: socket |> assign(:client_id, client_id)
-  defp client_id(socket),                do: socket.assigns[:client_id]
-
-  defp set_character(socket, character), do: socket |> assign(:character, character)
-  defp character(socket),                do: socket.assigns[:character]
-
   defp area_change_single(map_mod, socket) do
-    {:ok, token} = Clients.create_transfer_token(socket |> client_id, :area, %{
+    {:ok, token} = Clients.create_token(socket |> client_id, :area, %{
       area: map_mod,
       char: socket |> character})
 
     socket |> reply("area:change:ok", %{
       client_id: socket |> client_id,
-      transfer_token: token})
+      player_token: token})
 
     {:leave, socket}
   end
 
-  defp area_change_group(map_mod, {:ok, group_id, group}, socket) do
-    all_members    = [group.leader | group.members]
-    new_group_dict = Groups.prepare_area_change(socket |> area, map_mod, group_id)
+#   defp area_change_group(map_mod, {:ok, group_id, group}, socket) do
+#     all_members    = [group.leader | group.members]
+#     new_group_dict = Groups.prepare_area_change(socket |> area, map_mod, group_id)
 
-    # prepare members
-    for member <- all_members do
-      mem_socket = Players.get_socket(socket |> area, member)
+#     # prepare members
+#     for member <- all_members do
+#       mem_socket = Players.get_socket(socket |> area, member)
 
-      mem_socket |> broadcast("area:change:pre", %{
-        map: map_mod,
-        old_entity_id: member,
-        new_entity_id: new_group_dict[member],
-        group_id: new_group_dict[group_id]})
-    end
+#       mem_socket |> broadcast("area:change:pre", %{
+#         map: map_mod,
+#         old_entity_id: member,
+#         new_entity_id: new_group_dict[member],
+#         group_id: new_group_dict[group_id]})
+#     end
 
-    {:ok, socket}
-  end
+#     {:ok, socket}
+#   end
 end

@@ -2,7 +2,7 @@ defmodule Entice.Web.Groups do
   alias Entice.Area.Entity
 
   # Attribute to be attached to a group entity
-  defmodule Group, do: defstruct leader: "", members: [], invited: []
+  defmodule Group, do: defstruct members: [], invited: []
 
   # Attribute to be attached to a player
   defmodule Member, do: defstruct group: ""
@@ -15,8 +15,9 @@ defmodule Entice.Web.Groups do
   Initializes this entity with a new group.
   """
   def create_for(map, entity_id) do
-    {:ok, id} = Entity.start(map, UUID.uuid4(), %{Group => %Group{leader: entity_id}})
+    {:ok, id} = Entity.start(map, UUID.uuid4(), %{Group => %Group{members: [entity_id]}})
     Entity.put_attribute(map, entity_id, %Member{group: id})
+    {:ok, id}
   end
 
   @doc """
@@ -66,10 +67,10 @@ defmodule Entice.Web.Groups do
   """
   def get_my_members(map, entity_id) do
     {:ok, %Member{group: grp}} = Entity.get_attribute(map, entity_id, Member)
-    {:ok, %Group{leader: id, members: mems}} = Entity.get_attribute(map, grp, Group)
+    {:ok, %Group{members: [leader | members]}} = Entity.get_attribute(map, grp, Group)
 
-    case id == entity_id do
-      true  -> mems
+    case leader == entity_id do
+      true  -> members
       false -> []
     end
   end
@@ -83,20 +84,19 @@ defmodule Entice.Web.Groups do
     prepare_area_change(map, new_map, group_id, Entity.get_attribute(map, group_id, Group))
   end
 
-  defp prepare_area_change(_map, new_map, group_id, {:ok, %Group{leader: lead, members: mems}}) do
+  defp prepare_area_change(_map, new_map, group_id, {:ok, %Group{members: [leader | members]}}) do
     # create new ids
-    leader = UUID.uuid4()
-    members = mems |> Enum.map(&({&1, UUID.uuid4()}))
+    new_leader = UUID.uuid4()
+    new_members = members |> Enum.map(&({&1, UUID.uuid4()}))
 
     # create a new group out of them
     {:ok, new_grp} = Entity.start(new_map, UUID.uuid4(), %{Group => %Group{
-      leader: leader,
-      members: members |> Enum.map(&(elem(&1, 1))) }})
+      members: [new_leader | (new_members |> Enum.map(&(elem(&1, 1))))] }})
 
     # create the mapping
-    Enum.reduce(members, %{}, fn {old, new}, acc -> Map.put(acc, old, new) end)
+    Enum.reduce(new_members, %{}, fn {old, new}, acc -> Map.put(acc, old, new) end)
     |> Map.put(group_id, new_grp)
-    |> Map.put(lead, leader)
+    |> Map.put(leader, new_leader)
   end
 
 
@@ -108,10 +108,10 @@ defmodule Entice.Web.Groups do
     leave_group_internal(map, entity_id, grp, Entity.get_attribute(map, grp, Group))
   end
 
-  defp leave_group_internal(_,   id, _,     {:ok, %Group{leader: id, members: []}}), do: :ok
+  defp leave_group_internal(_,   id, _,     {:ok, %Group{members: [id, []]}}), do: :ok
 
-  defp leave_group_internal(map, id, group, {:ok, %Group{leader: id, members: [hd | tl]}}) do
-    Entity.update_attribute(map, group, Group, fn g -> %Group{g | leader: hd, members: tl} end)
+  defp leave_group_internal(map, id, group, {:ok, %Group{members: [id | members]}}) do
+    Entity.update_attribute(map, group, Group, fn g -> %Group{g | members: members} end)
     create_for(map, id)
     :ok
   end
@@ -140,12 +140,12 @@ defmodule Entice.Web.Groups do
   end
 
   # accept an invite
-  defp merge_internal1(map, id1, grp1, {:ok, %Group{leader: id1} = group1}, grp2, {:ok, %Group{invited: inv}}) when grp1 != grp2 do
+  defp merge_internal1(map, id1, grp1, {:ok, %Group{members: [id1 | _]} = group1}, grp2, {:ok, %Group{invited: inv}}) when grp1 != grp2 do
     if grp1 in inv do
       # if already invited, merge
       Entity.update_attribute(map, grp2, Group,
         fn g -> %Group{g |
-          members: g.members ++ [group1.leader] ++ group1.members,
+          members: g.members ++ group1.members,
           invited: g.invited -- [grp1]}
         end)
       Entity.stop(map, grp1)
@@ -177,13 +177,13 @@ defmodule Entice.Web.Groups do
   end
 
   # as leader, throw out a player
-  defp kick_internal1(map, id1, grp1, {:ok, %Group{leader: id1}}, id2, grp1, {:ok, _group2}) do
+  defp kick_internal1(map, id1, grp1, {:ok, %Group{members: [id1 | _]}}, id2, grp1, {:ok, _group2}) do
     leave_group(map, id2)
     :ok
   end
 
   # decline an invite
-  defp kick_internal1(map, id1, grp1, {:ok, %Group{leader: id1, invited: inv1}}, _id2, grp2, {:ok, %Group{invited: inv2}}) when grp1 != grp2 do
+  defp kick_internal1(map, id1, grp1, {:ok, %Group{members: [id1 | _], invited: inv1}}, _id2, grp2, {:ok, %Group{invited: inv2}}) when grp1 != grp2 do
     cond do
       grp1 in inv2 -> Entity.update_attribute(map, grp2, Group, fn g -> %Group{g | invited: g.invited -- [grp1]} end)
       grp2 in inv1 -> Entity.update_attribute(map, grp1, Group, fn g -> %Group{g | invited: g.invited -- [grp2]} end)

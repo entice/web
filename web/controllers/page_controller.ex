@@ -14,11 +14,6 @@ defmodule Entice.Web.PageController do
   def not_found(conn, _), do: conn |> render "not_found.html"
   def error(conn, _),     do: conn |> render "error.html"
 
-
-  def chat(conn, %{"chat" => chat}) do
-    conn |> render "chat.html", room: chat
-  end
-
   def client(conn, %{"area" => area}) do
     conn |> render "client.html", map: area
   end

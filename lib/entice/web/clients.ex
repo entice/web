@@ -6,7 +6,7 @@ defmodule Entice.Web.Clients do
   import Entice.Web.Queries
 
   # Some additional client only attributes:
-  defmodule TransferToken, do: defstruct id: "", type: :simple, payload: %{}
+  defmodule Token, do: defstruct id: "", type: :simple, payload: %{}
 
   defmodule Sockets, do: defstruct sockets: %{}
 
@@ -51,21 +51,21 @@ defmodule Entice.Web.Clients do
   # Transfer token api
 
 
-  def create_transfer_token(id, type \\ :simple, payload \\ %{}) do
+  def create_token(id, type \\ :simple, payload \\ %{}) do
     tid = UUID.uuid4()
-    Entity.put_attribute(Lobby, id, %TransferToken{id: tid, type: type, payload: payload})
+    Entity.put_attribute(Lobby, id, %Token{id: tid, type: type, payload: payload})
     {:ok, tid}
   end
 
 
-  def get_transfer_token(id) do
-    {:ok, token} = Entity.get_attribute(Lobby, id, TransferToken)
+  def get_token(id) do
+    {:ok, token} = Entity.get_attribute(Lobby, id, Token)
     {:ok, token.id, token.type, token.payload}
   end
 
 
-  def delete_transfer_token(id) do
-    Entity.remove_attribute(Lobby, id, TransferToken)
+  def delete_token(id) do
+    Entity.remove_attribute(Lobby, id, Token)
   end
 
 

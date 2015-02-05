@@ -1,7 +1,6 @@
 defmodule Entice.Web.Players do
   use Entice.Area
   use Entice.Area.Attributes
-  alias Entice.Web.Groups
   alias Entice.Area.Entity
   import Entice.Web.Utils
 
@@ -14,7 +13,6 @@ defmodule Entice.Web.Players do
   """
   def prepare_new_player(map, socket, char) do
     {:ok, id} = prepare_player(map, socket, char, UUID.uuid4())
-    Groups.create_for(map, id)
     {:ok, id}
   end
 
@@ -23,9 +21,8 @@ defmodule Entice.Web.Players do
   Prepares a player that already is part of a group.
   You need to create the group separately.
   """
-  def prepare_grouped_player(map, socket, char, entity_id, group_id) do
+  def prepare_grouped_player(map, socket, char, entity_id, _group_id) do
     {:ok, id} = prepare_player(map, socket, char, entity_id)
-    Groups.assign_to(map, id, group_id)
     {:ok, id}
   end
 
