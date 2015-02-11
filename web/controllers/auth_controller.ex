@@ -2,7 +2,7 @@ defmodule Entice.Web.AuthController do
   use Phoenix.Controller
   alias Entice.Web.Clients
   import Entice.Web.Auth
-  import Entice.Web.ApiMessage
+  import Entice.Web.ControllerHelper
 
 
   plug :action

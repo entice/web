@@ -3,7 +3,7 @@ defmodule Entice.Web.TokenController do
   alias Entice.Web.Clients
   alias Entice.Area
   import Entice.Web.Auth
-  import Entice.Web.ApiMessage
+  import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
   plug :ensure_login

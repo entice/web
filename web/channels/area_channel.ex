@@ -4,12 +4,11 @@ defmodule Entice.Web.AreaChannel do
   use Entice.Area.Attributes
   alias Entice.Web.Clients
   alias Entice.Web.Players
-  alias Entice.Web.Groups
   alias Entice.Area
   alias Entice.Area.Entity
   alias Entice.Skills
   import Phoenix.Naming
-  import Entice.Web.ChannelHelpers
+  import Entice.Web.ChannelHelper
 
 
   # Initializing the connection
@@ -21,10 +20,7 @@ defmodule Entice.Web.AreaChannel do
     Clients.delete_token(client_id)
 
     # link the client and the entity to the new socket
-    {:ok, entity_id} = case token_type do
-      :area        -> Players.prepare_new_player(map_mod, socket, char)
-      :area_change -> Players.prepare_grouped_player(map_mod, socket, char, payload[:entity_id], payload[:group_id])
-    end
+    {:ok, entity_id} = Players.prepare_player(map_mod, char)
     :ok = Clients.add_socket(client_id, socket)
 
     socket = socket

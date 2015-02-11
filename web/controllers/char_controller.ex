@@ -3,7 +3,7 @@ defmodule Entice.Web.CharController do
   alias Entice.Web.Character
   alias Entice.Web.Clients
   import Entice.Web.Auth
-  import Entice.Web.ApiMessage
+  import Entice.Web.ControllerHelper
 
   plug :ensure_login
   plug :action

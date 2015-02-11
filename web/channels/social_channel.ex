@@ -2,7 +2,7 @@ defmodule Entice.Web.SocialChannel do
   use Phoenix.Channel
   alias Entice.Web.Clients
   import Phoenix.Naming
-  import Entice.Web.ChannelHelpers
+  import Entice.Web.ChannelHelper
 
 
   def join("social:" <> map, %{"client_id" => id, "access_token" => token}, socket) do

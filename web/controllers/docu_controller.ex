@@ -4,7 +4,7 @@ defmodule Entice.Web.DocuController do
   alias Entice.Area
   alias Entice.Skills
   import Entice.Web.Auth
-  import Entice.Web.ApiMessage
+  import Entice.Web.ControllerHelper
 
   plug :ensure_login
   plug :action

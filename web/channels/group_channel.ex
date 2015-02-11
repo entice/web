@@ -5,7 +5,7 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Web.Clients
   alias Entice.Web.Groups
   import Phoenix.Naming
-  import Entice.Web.ChannelHelpers
+  import Entice.Web.ChannelHelper
 
 
   def join("group:" <> map, %{"client_id" => client_id, "access_token" => token}, socket) do
