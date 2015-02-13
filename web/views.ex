@@ -7,7 +7,7 @@ defmodule Entice.Web.View do
     quote do
       # Import common functionality
       import Entice.Web.Router.Helpers
-      import Entice.Web.Auth
+      import Entice.Web.Client
 
       # Use Phoenix.HTML to import all HTML functions (forms, tags, etc)
       use Phoenix.HTML

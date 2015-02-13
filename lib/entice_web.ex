@@ -11,16 +11,13 @@ defmodule Entice.Web do
       # worker(Entice.Web.Worker, [arg1, arg2, arg3])
       worker(Entice.Web.Repo, []),
       worker(Entice.Web.Endpoint, []),
-      supervisor(Entice.Area.Sup, [])
+      supervisor(Entice.Entity.Supervisor, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Entice.Web.Supervisor]
     {:ok, sup} = Supervisor.start_link(children, opts)
-
-    # Configure a bridge for events between the area server and the frontend
-    GenEvent.add_handler(Entice.Area.Evt, Entice.Web.AreaEventBridge, [])
 
     {:ok, sup}
   end

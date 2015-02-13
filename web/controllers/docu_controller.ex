@@ -1,9 +1,7 @@
 defmodule Entice.Web.DocuController do
   use Phoenix.Controller
-  use Entice.Area
-  alias Entice.Area
+  alias Entice.Logic.Area
   alias Entice.Skills
-  import Entice.Web.Auth
   import Entice.Web.ControllerHelper
 
   plug :ensure_login

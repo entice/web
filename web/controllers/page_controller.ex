@@ -1,9 +1,9 @@
 defmodule Entice.Web.PageController do
   use Phoenix.Controller
-  import Entice.Web.Auth
+  import Entice.Web.ControllerHelper
 
 
-  plug :ensure_login when action in [:chat, :client]
+  plug :ensure_login when action in [:client]
   plug :action
   plug :put_view, Entice.Web.PageView
 

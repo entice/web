@@ -1,15 +1,15 @@
 defmodule Entice.Web.GroupChannel do
   use Phoenix.Channel
-  use Entice.Area
-  alias Entice.Area
-  alias Entice.Web.Clients
-  alias Entice.Web.Groups
+  use Entice.Logic.Area
+  alias Entice.Logic.Area
+  alias Entice.Logic.Group
+  alias Entice.Web.Client
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
 
   def join("group:" <> map, %{"client_id" => client_id, "access_token" => token}, socket) do
-    {:ok, ^token, :player, %{area: map_mod, entity_id: entity_id, char: char}} = Clients.get_token(client_id)
+    {:ok, ^token, :player, %{area: map_mod, entity_id: entity_id, char: char}} = Client.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     socket = socket
@@ -18,9 +18,9 @@ defmodule Entice.Web.GroupChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    {:ok, group} = Groups.create_for(map_mod, entity_id)
+    :ok = Group.init(entity_id)
 
-    socket |> reply("join:ok", %{group: group})
+    socket |> reply("join:ok", %{})
     {:ok, socket}
   end
 
@@ -38,8 +38,8 @@ defmodule Entice.Web.GroupChannel do
 
 
   def leave(_msg, socket) do
-    Players.delete_player(socket |> area, socket |> entity_id)
-    Clients.remove_socket(socket |> client_id, socket)
+    Player.delete_player(socket |> area, socket |> entity_id)
+    Client.remove_socket(socket |> client_id, socket)
     {:ok, socket}
   end
 end

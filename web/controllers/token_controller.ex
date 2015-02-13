@@ -1,8 +1,7 @@
 defmodule Entice.Web.TokenController do
   use Phoenix.Controller
-  alias Entice.Web.Clients
-  alias Entice.Area
-  import Entice.Web.Auth
+  alias Entice.Web.Client
+  alias Entice.Logic.Area
   import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
@@ -14,8 +13,8 @@ defmodule Entice.Web.TokenController do
     id = conn |> get_session(:client_id)
 
     {:ok, map_mod} = Area.get_map(camelize(conn.params["map"]))
-    {:ok, char}  = Clients.get_char(id, conn.params["char_name"])
-    {:ok, token} = Clients.create_token(id, :area, %{area: map_mod, char: char})
+    {:ok, char}  = Client.get_char(id, conn.params["char_name"])
+    {:ok, token} = Client.create_token(id, :player, %{area: map_mod, char: char})
 
     conn |> json ok(%{
       message: "Transferring...",

@@ -1,8 +1,7 @@
 defmodule Entice.Web.CharController do
   use Phoenix.Controller
   alias Entice.Web.Character
-  alias Entice.Web.Clients
-  import Entice.Web.Auth
+  alias Entice.Web.Client
   import Entice.Web.ControllerHelper
 
   plug :ensure_login
@@ -11,7 +10,7 @@ defmodule Entice.Web.CharController do
 
   def list(conn, _params) do
     id = conn |> get_session(:client_id)
-    {:ok, acc} = Clients.get_account(id)
+    {:ok, acc} = Client.get_account(id)
 
     chars = acc.characters
     |> Enum.map(&Map.from_struct/1)
@@ -33,7 +32,7 @@ defmodule Entice.Web.CharController do
     char = %Character{name: name, account: acc}
       |> Entice.Web.Repo.insert
 
-    Clients.add_char(id, char)
+    Client.add_char(id, char)
 
     conn |> json ok(%{
       message: "Char created.",
