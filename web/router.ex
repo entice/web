@@ -41,14 +41,16 @@ defmodule Entice.Web.Router do
     get  "/skills",       DocuController, :skills
     get  "/skills/:id",   DocuController, :skills
 
-    get  "/token/player", TokenController, :player_token
+    get  "/token/entity", TokenController, :entity_token
   end
 
 
   # Websocket channels
-  socket "/ws" do
-    channel "area:*", Entice.Web.AreaChannel
-    channel "group:*", Entice.Web.GroupChannel
-    channel "social:*", Entice.Web.SocialChannel
+  socket "/ws", Entice.Web do
+    channel "entity:*",   EntityChannel
+    channel "group:*",    GroupChannel
+    channel "movement:*", MovementChannel
+    channel "skill:*",    SkillChannel
+    channel "social:*",   SocialChannel
   end
 end

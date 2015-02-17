@@ -1,16 +1,23 @@
 defmodule Entice.Web.GroupChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
+  use Entice.Logic.Attributes
+  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Group
   alias Entice.Web.Client
+  alias Entice.Web.Token
+  alias Entice.Web.GroupChannel.AttributeObserver
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
 
-  def join("group:" <> map, %{"client_id" => client_id, "access_token" => token}, socket) do
-    {:ok, ^token, :player, %{area: map_mod, entity_id: entity_id, char: char}} = Client.get_token(client_id)
+  def join("group:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
+    {:ok, ^token, :entity, %{area: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
+
+    :ok = Entity.put_behaviour(entity_id, AttributeObserver, %{area: map_mod})
+    :ok = Group.init(entity_id)
 
     socket = socket
       |> set_area(map_mod)
@@ -18,28 +25,50 @@ defmodule Entice.Web.GroupChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    :ok = Group.init(entity_id)
-
     socket |> reply("join:ok", %{})
     {:ok, socket}
   end
 
 
   def handle_in("merge", %{"target" => id}, socket) do
-    Groups.merge(socket |> area, socket |> entity_id, id)
+    Group.merge(socket |> entity_id, id)
     {:ok, socket}
   end
 
 
   def handle_in("kick", %{"target" => id}, socket) do
-    Groups.kick(socket |> area, socket |> entity_id, id)
+    Group.kick(socket |> entity_id, id)
+    {:ok, socket}
+  end
+
+
+  def handle_out("leader_changed", %{entity_id: id, new: %Leader{members: mems, invited: invs}}, socket) do
+    socket |> reply("group:change", %{leader: id, members: mems, invited: invs})
     {:ok, socket}
   end
 
 
   def leave(_msg, socket) do
-    Player.delete_player(socket |> area, socket |> entity_id)
-    Client.remove_socket(socket |> client_id, socket)
+    socket
+    |> entity_id
+    |> Group.remove()
+    |> Entity.remove_behaviour(AttributeObserver)
     {:ok, socket}
+  end
+
+
+  defmodule AttributeObserver do
+    use Entice.Entity.Behaviour
+
+
+    def init(id, attributes, %{area: area}), do: {:ok, attributes, %{entity_id: id, area: area}}
+
+
+    def handle_attributes_changed(%{Leader => _old}, %{Leader => new_lead} = attributes,  %{entity_id: id, area: area} = state) do
+      Entice.Web.Endpoint.publish(
+        "group:" <> area.underscore_name,
+        "leader_changed", %{entity_id: id, new: new_lead})
+      {:ok, attributes, state}
+    end
   end
 end

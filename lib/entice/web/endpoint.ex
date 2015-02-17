@@ -2,7 +2,8 @@ defmodule Entice.Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :entice_web
 
   plug Plug.Static,
-    at: "/", from: :entice_web
+    at: "/", from: :entice_web,
+    only: ~w(css images js favicon.ico robots.txt)
 
   plug Plug.Logger
 
@@ -25,4 +26,14 @@ defmodule Entice.Web.Endpoint do
     encryption_salt: "KzX0FbQY"
 
   plug :router, Entice.Web.Router
+
+
+  def subscribe(pid, topic),
+  do: Phoenix.PubSub.subscribe(@pubsub_server, pid, topic)
+
+  def unsubscribe(pid, topic),
+  do: Phoenix.PubSub.unsubscribe(@pubsub_server, pid, topic)
+
+  def broadcast(topic, message),
+  do: Phoenix.PubSub.broadcast(@pubsub_server, topic, message)
 end

@@ -1,10 +1,12 @@
 defmodule Entice.Web.GroupChannelTest do
   use ExUnit.Case
   use Entice.Logic.Area
+  alias Entice.Entity
   alias Entice.Web.GroupChannel
   alias Entice.Web.Account
   alias Entice.Web.Character
   alias Entice.Web.Client
+  alias Entice.Web.Token
   alias Entice.Web.Player
   alias Phoenix.Socket
 
@@ -16,16 +18,17 @@ defmodule Entice.Web.GroupChannelTest do
     socket = %Socket{pid: self, router: Entice.Web.Router}
     acc = %Account{characters: [%Character{name: "Some Char"}]}
     {:ok, cid, _pid} = Client.add(acc)
-    {:ok, eid} = Player.init(RandomArenas, acc.characters |> hd)
-    {:ok, tid} = Client.create_token(cid, :player, %{area: RandomArenas, entity_id: eid, char: acc.characters |> hd})
+    {:ok, eid, _pid} = Entity.start()
+    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, area: RandomArenas, char: acc.characters |> hd})
+    Player.init(eid, RandomArenas, acc.characters |> hd)
 
     GroupChannel.join(
       "group:random_arenas",
       %{"client_id" => cid,
-        "access_token" => tid},
+        "entity_token" => tid},
       socket)
 
-    assert_receive {:socket_reply, %Phoenix.Socket.Message{
+    assert_receive {:socket_reply, %Socket.Message{
       topic: nil,
       event: "join:ok",
       payload: %{}}}

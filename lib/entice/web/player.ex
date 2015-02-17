@@ -7,16 +7,16 @@ defmodule Entice.Web.Player do
   @doc """
   Prepares a single, simple player
   """
-  def init(map, char) do
-    {:ok, eid, _pid} = Entity.start(UUID.uuid4(), %{
-      Name => %Name{name: char.name},
-      Position => %Position{pos: map.spawn},
-      Movement => %Movement{goal: map.spawn},
-      Appearance => copy_into(%Appearance{}, char),
-      SkillBar => %SkillBar{}})
-    {:ok, eid}
+  def init(entity_id, map, char) do
+    entity_id |> Entity.put_attribute(%Name{name: char.name})
+    entity_id |> Entity.put_attribute(%Position{pos: map.spawn})
+    entity_id |> Entity.put_attribute(copy_into(%Appearance{}, char))
   end
 
 
-  def stop(id), do: Entity.stop(id)
+  def remove(entity_id) do
+    entity_id |> Entity.remove_attribute(Name)
+    entity_id |> Entity.remove_attribute(Position)
+    entity_id |> Entity.remove_attribute(Appearance)
+  end
 end

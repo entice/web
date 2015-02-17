@@ -3,7 +3,7 @@
   "decimal": {:hex, :decimal, "1.1.0"},
   "ecto": {:hex, :ecto, "0.8.1"},
   "entice_entity": {:git, "git://github.com/entice/entity.git", "edc8740b04b80b9cc08adbe624c6fca3b76126bd", [ref: "edc8740b04b80b9cc08adbe624c6fca3b76126bd"]},
-  "entice_logic": {:git, "git://github.com/entice/logic.git", "e7085bbcfc5fb589a8a60b04dbf832b571ab3327", [ref: "e7085bbcfc5fb589a8a60b04dbf832b571ab3327"]},
+  "entice_logic": {:git, "git://github.com/entice/logic.git", "355ccd5d8c563aa8697b3c6a5191cd2e7f945d9b", [ref: "355ccd5d8c563aa8697b3c6a5191cd2e7f945d9b"]},
   "entice_skill": {:git, "git://github.com/entice/skill.git", "c4edbfcb0e0fc69431c921274259e4423afbd00c", [ref: "c4edbfcb0e0fc69431c921274259e4423afbd00c"]},
   "entice_utils": {:git, "git://github.com/entice/utils.git", "3150853ee019d0eee44be9baf97e45ca6f0abf68", [ref: "3150853ee019d0eee44be9baf97e45ca6f0abf68"]},
   "inflex": {:hex, :inflex, "0.2.9"},

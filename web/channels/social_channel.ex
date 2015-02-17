@@ -1,12 +1,14 @@
 defmodule Entice.Web.SocialChannel do
   use Phoenix.Channel
-  alias Entice.Web.Clients
+  use Entice.Logic.Area
+  alias Entice.Web.Client
+  alias Entice.Web.Token
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
 
-  def join("social:" <> map, %{"client_id" => id, "access_token" => token}, socket) do
-    {:ok, ^token, :player, %{area: map_mod, entity_id: entity_id, char: char}} = Clients.get_token(id)
+  def join("social:" <> map, %{"client_id" => id, "entity_token" => token}, socket) do
+    {:ok, ^token, :entity, %{area: map_mod, entity_id: entity_id, char: char}} = Token.get_token(id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     socket = socket

@@ -6,12 +6,6 @@ defmodule Entice.Web.Client do
   import Entice.Web.Queries
 
 
-  # Some additional client only attributes:
-  defmodule Token, do: defstruct id: "", type: :simple, payload: %{}
-
-  defmodule Sockets, do: defstruct sockets: %{}
-
-
   def exists?(id), do: Entity.exists?(id)
 
 
@@ -38,24 +32,6 @@ defmodule Entice.Web.Client do
 
 
   def log_out(id), do: Entity.stop(id)
-
-
-  # Transfer token api
-
-
-  def create_token(id, type \\ :simple, payload \\ %{}) do
-    tid = UUID.uuid4()
-    Entity.put_attribute(id, %Token{id: tid, type: type, payload: payload})
-    {:ok, tid}
-  end
-
-
-  def get_token(id) when is_bitstring(id), do: get_token(Entity.fetch_attribute(id, Token))
-  def get_token({:ok, token}),      do: {:ok, token.id, token.type, token.payload}
-  def get_token({:error, _reason}), do: {:error, :token_not_found}
-
-
-  def delete_token(id), do: Entity.remove_attribute(id, Token)
 
 
   # Account api
