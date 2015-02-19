@@ -40,7 +40,7 @@ defmodule Entice.Web.EntityChannelTest do
         "entity_token" => tid2},
       socket2)
 
-    {:ok, [e1: eid1, e2: eid2, c1: cid1, c2: cid2]}
+    {:ok, [e1: eid1, e2: eid2, s1: socket1]}
   end
 
 
@@ -61,15 +61,43 @@ defmodule Entice.Web.EntityChannelTest do
   end
 
 
+  test "adding entities", %{e1: e1, e2: e2} do
+    #receive raw message (will be post processed by the socket)
+    assert_receive %{
+      sender: ^e1,
+      event: {:socket_broadcast, %Socket.Message{
+        topic: "entity:heroes_ascent",
+        event: "entity_added",
+        payload: %{added: ^e2, attributes: %{
+          Name => _,
+          Appearance => _,
+          Position => _}}}}}
+  end
+
+
   test "getting a dump of the other entities", %{e1: e1, e2: e2} do
     #receive raw message (will be post processed by the socket)
     assert_receive %{
       sender: ^e2,
       event: {:socket_broadcast, %Socket.Message{
-        topic: "dump:heroes_ascent",
+        topic: "entity:heroes_ascent",
         event: "entity_dump",
         payload: %{new: ^e2, existing: ^e1, attributes: %{
           Name => _,
-          }}}}}
+          Appearance => _,
+          Position => _}}}}}
+  end
+
+
+  test "getting a dump of the other entities", %{e1: e1, e2: e2, s1: s1} do
+    EntityChannel.leave(:some_reason, s1)
+
+    #receive raw message (will be post processed by the socket)
+    assert_receive %{
+      sender: ^e2,
+      event: {:socket_broadcast, %Socket.Message{
+        topic: "entity:heroes_ascent",
+        event: "entity_removed",
+        payload: %{removed: ^e1}}}}
   end
 end

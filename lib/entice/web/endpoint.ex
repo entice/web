@@ -34,6 +34,9 @@ defmodule Entice.Web.Endpoint do
   def unsubscribe(pid, topic),
   do: Phoenix.PubSub.unsubscribe(@pubsub_server, pid, topic)
 
-  def broadcast(topic, message),
+  def entity_broadcast(topic, message),
   do: Phoenix.PubSub.broadcast(@pubsub_server, topic, message)
+
+  def entity_broadcast_from(topic, message),
+  do: Phoenix.PubSub.broadcast_from(@pubsub_server, self, topic, message)
 end
