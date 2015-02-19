@@ -8,31 +8,26 @@
     $('#output').append(pre);
   };
 
-  $.get("<%= safe token_path(@conn, :player_token, map: @map, char_name: "Test Char") %>")
+  $.get("<%= safe token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
    .then(function(data) {
     if (data.status === "ok") {
       puts("Message", "Green", JSON.stringify(data.message));
       puts("Client", "DarkGreen", JSON.stringify(data.client_id));
-      puts("Token", "DarkGreen", JSON.stringify(data.player_token));
-      init("<%= @map %>", data.client_id, data.player_token)
+      puts("Entity", "DarkGreen", JSON.stringify(data.entity_id));
+      puts("Token", "DarkGreen", JSON.stringify(data.entity_token));
+      init("<%= @map %>", data.client_id, data.entity_id, data.entity_token)
     } else {
       $(location).attr('href','<%= page_path(@conn, :index) %>');
     }
   });
 
-  function init(map, client_id, player_token) {
+  function init(map, client_id, entity_id, entity_token) {
     var socket = new Phoenix.Socket("/ws");
 
-    socket.join("area:"+map, {client_id: client_id, player_token: player_token}, function(channel) {
+    socket.join("entity:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
         puts("Got", "Blue", JSON.stringify(payload))
-        channel.send("entity:move", {
-          pos: {x: 42, y: 1337},
-          goal: { x: 2784.94165, y: -3240.23218 },
-          plane: 1,
-          movetype: 9,
-          speed: 1.0});
       });
 
 
@@ -41,14 +36,6 @@
       });
 
       channel.on("entity:remove", function(payload) {
-        puts("Got", "Red", JSON.stringify(payload))
-      });
-
-      channel.on("entity:attribute:update", function(payload) {
-        puts("Got", "Red", JSON.stringify(payload))
-      });
-
-      channel.on("entity:attribute:remove", function(payload) {
         puts("Got", "Red", JSON.stringify(payload))
       });
     });

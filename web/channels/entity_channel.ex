@@ -19,9 +19,8 @@ defmodule Entice.Web.EntityChannel do
   def join(@chan <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
     {:ok, ^token, :entity, %{entity_id: entity_id, area: map_mod, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
-    Token.delete_token(client_id)
 
-    # fetch a dump of the state of pther entities
+    # fetch a dump of the state of other entities
     :ok = EntityChannel.Behaviour.init(entity_id, map_mod)
 
     socket = socket
@@ -40,21 +39,21 @@ defmodule Entice.Web.EntityChannel do
 
   def handle_out("entity_added", %{added: entity_id, attributes: attributes}, socket) do
     if (entity_id != socket |> entity_id),
-    do: socket |> reply("entity:add", %{entity_id: entity_id, attributes: attributes})
+    do: socket |> reply("add", %{entity_id: entity_id, attributes: attributes})
     {:ok, socket}
   end
 
 
   def handle_out("entity_dump", %{new: new_entity_id, existing: entity_id, attributes: attributes}, socket) do
     if (new_entity_id == socket |> entity_id),
-    do: socket |> reply("entity:add", %{entity_id: entity_id, attributes: attributes})
+    do: socket |> reply("add", %{entity_id: entity_id, attributes: attributes})
     {:ok, socket}
   end
 
 
   def handle_out("entity_removed", %{removed: entity_id}, socket) do
     if (entity_id != socket |> entity_id),
-    do: socket |> reply("entity:remove", %{entity_id: entity_id})
+    do: socket |> reply("remove", %{entity_id: entity_id})
     {:ok, socket}
   end
 
@@ -73,57 +72,60 @@ end
 
 
 defmodule Entice.Web.EntityChannel.Behaviour do
-    use Entice.Entity.Behaviour
-    use Entice.Logic.Attributes
-    alias Entice.Entity
-    alias Entice.Web.EntityChannel
+  use Entice.Entity.Behaviour
+  use Entice.Logic.Attributes
+  alias Entice.Entity
+  alias Entice.Web.EntityChannel
 
-    @chan "entity:"
-
-    # Outside API
-
-    def init(entity_id, area) when is_atom(area),
-    do: Entity.put_behaviour(entity_id, EntityChannel.Behaviour, %{area: area})
+  @chan "entity:"
+  @internal "dump:"
 
 
-    def remove(entity_id),
-    do: Entity.remove_behaviour(entity_id, EntityChannel.Behaviour)
+  # Outside API
 
 
-    # Behaviour internals
+  def init(entity_id, area) when is_atom(area),
+  do: Entity.put_behaviour(entity_id, EntityChannel.Behaviour, %{area: area})
 
 
-    def init(id, %{Name => n, Position => p, Appearance => a} = attributes, %{area: area}) do
-      Entice.Web.Endpoint.subscribe(self, @chan <> area.underscore_name)
-
-      # send to entities
-      Entice.Web.Endpoint.entity_broadcast_from(@chan <> area.underscore_name, {:added, id})
-      # send to sockets
-      Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_added", %{
-        added: id,
-        attributes: %{Name => n, Position => p, Appearance => a}})
-
-      {:ok, attributes, %{entity_id: id, area: area}}
-    end
+  def remove(entity_id),
+  do: Entity.remove_behaviour(entity_id, EntityChannel.Behaviour)
 
 
-    def handle_event(
-        {:added, sender_id},
-        %{Name => n, Position => p, Appearance => a} = attributes,
-        %{entity_id: id, area: area} = state) do
-
-      Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_dump", %{
-        new: sender_id,
-        existing: id,
-        attributes: %{Name => n, Position => p, Appearance => a}})
-
-      {:ok, attributes, state}
-    end
+  # Behaviour internals
 
 
-    def terminate(_reason, attributes, %{entity_id: id, area: area}) do
-      Entice.Web.Endpoint.unsubscribe(self, @chan <> area.underscore_name)
-      Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_removed", %{removed: id})
-      {:ok, attributes}
-    end
+  def init(id, %{Name => n, Position => p, Appearance => a} = attributes, %{area: area}) do
+    Entice.Web.Endpoint.subscribe(self, @internal <> area.underscore_name)
+
+    # send to entities
+    Entice.Web.Endpoint.entity_broadcast_from(@internal <> area.underscore_name, {:added, id})
+    # send to sockets
+    Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_added", %{
+      added: id,
+      attributes: %{Name => n, Position => p, Appearance => a}})
+
+    {:ok, attributes, %{entity_id: id, area: area}}
   end
+
+
+  def handle_event(
+      {:added, sender_id},
+      %{Name => n, Position => p, Appearance => a} = attributes,
+      %{entity_id: id, area: area} = state) do
+
+    Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_dump", %{
+      new: sender_id,
+      existing: id,
+      attributes: %{Name => n, Position => p, Appearance => a}})
+
+    {:ok, attributes, state}
+  end
+
+
+  def terminate(_reason, attributes, %{entity_id: id, area: area}) do
+    Entice.Web.Endpoint.unsubscribe(self, @internal <> area.underscore_name)
+    Entice.Web.Endpoint.broadcast(@chan <> area.underscore_name, "entity_removed", %{removed: id})
+    {:ok, attributes}
+  end
+end

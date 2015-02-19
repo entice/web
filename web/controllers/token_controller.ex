@@ -1,8 +1,10 @@
 defmodule Entice.Web.TokenController do
   use Phoenix.Controller
   alias Entice.Web.Client
+  alias Entice.Web.Player
   alias Entice.Web.Token
   alias Entice.Logic.Area
+  alias Entice.Entity
   import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
