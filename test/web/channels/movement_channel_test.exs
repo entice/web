@@ -13,7 +13,7 @@ defmodule Entice.Web.MovementChannelTest do
 
   test "joining" do
     socket = %Socket{pid: self, router: Entice.Web.Router}
-    {:ok, cid, _pid} = Client.add(%Account{characters: [%Character{name: "Some Char"}]})
+    {:ok, cid} = Client.add(%Account{characters: [%Character{name: "Some Char"}]})
     {:ok, eid, _pid} = Entity.start()
     {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, area: HeroesAscent, char: %Character{}})
 

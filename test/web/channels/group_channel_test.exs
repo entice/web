@@ -17,7 +17,7 @@ defmodule Entice.Web.GroupChannelTest do
   test "join and get a group assigned" do
     socket = %Socket{pid: self, router: Entice.Web.Router}
     acc = %Account{characters: [%Character{name: "Some Char"}]}
-    {:ok, cid, _pid} = Client.add(acc)
+    {:ok, cid} = Client.add(acc)
     {:ok, eid, _pid} = Entity.start()
     {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, area: RandomArenas, char: acc.characters |> hd})
     Player.init(eid, RandomArenas, acc.characters |> hd)

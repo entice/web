@@ -3,6 +3,6 @@ defmodule Entice.Web.ClientTest do
   alias Entice.Web.Client
 
   test "default accounts" do
-    assert {:ok, _id, _pid} = Client.log_in("root@entice.ps", "root")
+    assert {:ok, _id} = Client.log_in("root@entice.ps", "root")
   end
 end

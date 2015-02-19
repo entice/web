@@ -14,7 +14,7 @@ defmodule Entice.Web.EntityChannelTest do
 
 
   setup do
-    {:ok, cid1, _pid} = Client.add(%Account{characters: [%Character{name: "Some Char1"}]})
+    {:ok, cid1} = Client.add(%Account{characters: [%Character{name: "Some Char1"}]})
     {:ok, eid1, pid1} = Entity.start()
     {:ok, tid1} = Token.create_entity_token(cid1, %{entity_id: eid1, area: HeroesAscent, char: %Character{}})
     socket1 = %Socket{pid: pid1, router: Entice.Web.Router}
@@ -27,7 +27,7 @@ defmodule Entice.Web.EntityChannelTest do
         "entity_token" => tid1},
       socket1)
 
-    {:ok, cid2, _pid} = Client.add(%Account{characters: [%Character{name: "Some Char2"}]})
+    {:ok, cid2} = Client.add(%Account{characters: [%Character{name: "Some Char2"}]})
     {:ok, eid2, pid2} = Entity.start()
     {:ok, tid2} = Token.create_entity_token(cid2, %{entity_id: eid2, area: HeroesAscent, char: %Character{}})
     socket2 = %Socket{pid: pid2, router: Entice.Web.Router}
@@ -50,14 +50,14 @@ defmodule Entice.Web.EntityChannelTest do
     event: {:socket_reply, %Socket.Message{
       topic: nil,
       event: "join:ok",
-      payload: %{entity: ^e1}}}}
+      payload: %{}}}}
 
     assert_receive %{
       sender: ^e2,
       event: {:socket_reply, %Socket.Message{
         topic: nil,
         event: "join:ok",
-        payload: %{entity: ^e2}}}}
+        payload: %{}}}}
   end
 
 
