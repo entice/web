@@ -30,7 +30,7 @@ defmodule Entice.Web.EntityChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    socket |> reply("join:ok", %{entity: entity_id})
+    socket |> reply("join:ok", %{})
     {:ok, socket}
   end
 

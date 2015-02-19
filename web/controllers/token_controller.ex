@@ -23,6 +23,7 @@ defmodule Entice.Web.TokenController do
     conn |> json ok(%{
       message: "Transferring...",
       client_id: id,
+      entity_id: eid,
       entity_token: token})
   end
 end
