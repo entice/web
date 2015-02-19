@@ -1,7 +1,6 @@
 defmodule Entice.Web.Client do
   alias Entice.Web.Account
   alias Entice.Entity
-  alias Phoenix.Socket
   import Plug.Conn
   import Entice.Web.Queries
 
@@ -24,10 +23,12 @@ defmodule Entice.Web.Client do
   defp log_in({:ok, acc}) do
     existing = nil
 
-    case existing do
-      %{id: id} -> {:ok, id}
+    {:ok, id, _pid} = case existing do
+      %{id: id} -> {:ok, id, :no_pid}
       nil -> Entity.start(UUID.uuid4(), %{Account => acc})
     end
+
+    {:ok, id}
   end
 
 
