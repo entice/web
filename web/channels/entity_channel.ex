@@ -22,6 +22,7 @@ defmodule Entice.Web.EntityChannel do
 
     # fetch a dump of the state of other entities
     :ok = EntityChannel.Behaviour.init(entity_id, map_mod)
+    attrs = Player.attributes(entity_id)
 
     socket = socket
       |> set_area(map_mod)
@@ -29,7 +30,11 @@ defmodule Entice.Web.EntityChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    socket |> reply("join:ok", %{})
+    socket |> reply("join:ok", %{
+      name:       attrs[Name].name,
+      position:   Map.from_struct(attrs[Position].pos),
+      appearance: Map.from_struct(attrs[Appearance])})
+
     {:ok, socket}
   end
 

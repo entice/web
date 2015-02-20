@@ -31,6 +31,9 @@ defmodule Entice.Web.Endpoint do
   def subscribe(pid, topic),
   do: Phoenix.PubSub.subscribe(@pubsub_server, pid, topic)
 
+  def subscribers(topic),
+  do: Phoenix.PubSub.subscribers(@pubsub_server, topic)
+
   def unsubscribe(pid, topic),
   do: Phoenix.PubSub.unsubscribe(@pubsub_server, pid, topic)
 

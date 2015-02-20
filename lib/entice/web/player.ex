@@ -19,4 +19,11 @@ defmodule Entice.Web.Player do
     entity_id |> Entity.remove_attribute(Position)
     entity_id |> Entity.remove_attribute(Appearance)
   end
+
+
+  def attributes(entity_id) do
+    %{Name       => case entity_id |> Entity.fetch_attribute(Name) do {:ok, x} -> x end,
+      Position   => case entity_id |> Entity.fetch_attribute(Position) do {:ok, x} -> x end,
+      Appearance => case entity_id |> Entity.fetch_attribute(Appearance) do {:ok, x} -> x end}
+  end
 end
