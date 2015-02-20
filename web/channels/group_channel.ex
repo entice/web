@@ -5,7 +5,6 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Group
-  alias Entice.Web.Client
   alias Entice.Web.Token
   alias Entice.Web.GroupChannel.AttributeObserver
   import Phoenix.Naming
@@ -65,7 +64,7 @@ defmodule Entice.Web.GroupChannel do
 
 
     def handle_attributes_changed(%{Leader => _old}, %{Leader => new_lead} = attributes,  %{entity_id: id, area: area} = state) do
-      Entice.Web.Endpoint.publish(
+      Entice.Web.Endpoint.broadcast(
         "group:" <> area.underscore_name,
         "leader_changed", %{entity_id: id, new: new_lead})
       {:ok, attributes, state}

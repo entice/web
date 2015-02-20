@@ -2,6 +2,7 @@ defmodule Entice.Web.SkillChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
+  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Web.Client
   alias Entice.Web.Token
@@ -22,6 +23,7 @@ defmodule Entice.Web.SkillChannel do
 
     # retrieve skill bar here
     skillbar = %SkillBar{}
+    Entity.put_attribute(entity_id, skillbar)
 
     socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: skillbar})
     {:ok, socket}
