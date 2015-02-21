@@ -48,10 +48,8 @@ defmodule Entice.Web.GroupChannel do
 
 
   def leave(_msg, socket) do
-    socket
-    |> entity_id
-    |> Group.remove()
-    |> Entity.remove_behaviour(AttributeObserver)
+    Group.remove(socket |> entity_id)
+    Entity.remove_behaviour(socket |> entity_id, AttributeObserver)
     {:ok, socket}
   end
 
@@ -59,9 +57,7 @@ defmodule Entice.Web.GroupChannel do
   defmodule AttributeObserver do
     use Entice.Entity.Behaviour
 
-
     def init(id, attributes, %{area: area}), do: {:ok, attributes, %{entity_id: id, area: area}}
-
 
     def handle_attributes_changed(%{Leader => _old}, %{Leader => new_lead} = attributes,  %{entity_id: id, area: area} = state) do
       Entice.Web.Endpoint.broadcast(
