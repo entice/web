@@ -2,7 +2,6 @@ defmodule Entice.Web.EntityChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
-  alias Entice.Web.Client
   alias Entice.Web.Token
   alias Entice.Web.Player
   alias Entice.Web.EntityChannel
@@ -42,16 +41,24 @@ defmodule Entice.Web.EntityChannel do
   # Outgoing Event API
 
 
-  def handle_out("entity_added", %{added: entity_id, attributes: attributes}, socket) do
+  def handle_out("entity_added", %{added: entity_id, attributes: attrs}, socket) do
     if (entity_id != socket |> entity_id),
-    do: socket |> reply("add", %{entity_id: entity_id, attributes: attributes})
+    do: socket |> reply("add", %{
+      entity_id:  entity_id,
+      name:       attrs[Name].name,
+      position:   Map.from_struct(attrs[Position].pos),
+      appearance: Map.from_struct(attrs[Appearance])})
     {:ok, socket}
   end
 
 
-  def handle_out("entity_dump", %{new: new_entity_id, existing: entity_id, attributes: attributes}, socket) do
+  def handle_out("entity_dump", %{new: new_entity_id, existing: entity_id, attributes: attrs}, socket) do
     if (new_entity_id == socket |> entity_id),
-    do: socket |> reply("add", %{entity_id: entity_id, attributes: attributes})
+    do: socket |> reply("add", %{
+      entity_id:  entity_id,
+      name:       attrs[Name].name,
+      position:   Map.from_struct(attrs[Position].pos),
+      appearance: Map.from_struct(attrs[Appearance])})
     {:ok, socket}
   end
 
