@@ -26,6 +26,17 @@ defmodule Entice.Web.EntityChannelTest do
   end
 
 
+  test "join", %{e1: e1, e2: e2} do
+    assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
+      topic: "entity:heroes_ascent",
+      event: "join:ok",
+      payload: %{
+        name: _,
+        position: _,
+        appearance: _}}}}
+  end
+
+
   test "adding entities", %{e1: e1, e2: e2} do
     assert_receive %{sender: ^e1, event: {:socket_broadcast, %Message{
       topic: "entity:heroes_ascent",

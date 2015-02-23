@@ -19,6 +19,8 @@ defmodule Entice.Web.EntityChannel do
     {:ok, ^token, :entity, %{entity_id: entity_id, area: map_mod, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
+    Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, @chan <> map, link: true)
+
     # fetch a dump of the state of other entities
     :ok = EntityChannel.Behaviour.init(entity_id, map_mod)
     attrs = Player.attributes(entity_id)
