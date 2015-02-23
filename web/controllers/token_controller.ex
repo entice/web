@@ -1,6 +1,7 @@
 defmodule Entice.Web.TokenController do
   use Phoenix.Controller
   alias Entice.Web.Client
+  alias Entice.Web.Discovery
   alias Entice.Web.Player
   alias Entice.Web.Token
   alias Entice.Logic.Area
@@ -21,6 +22,7 @@ defmodule Entice.Web.TokenController do
     {:ok, token}     = Token.create_entity_token(id, %{entity_id: eid, area: map_mod, char: char})
 
     Player.init(eid, map_mod, char)
+    Discovery.init(eid, map_mod)
 
     conn |> json ok(%{
       message: "Transferring...",

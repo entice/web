@@ -35,36 +35,4 @@ defmodule Entice.Web.EntityChannelTest do
         position: _,
         appearance: _}}}}
   end
-
-
-  test "adding entities", %{e1: e1, e2: e2} do
-    assert_receive %{sender: ^e1, event: {:socket_broadcast, %Message{
-      topic: "entity:heroes_ascent",
-      event: "entity_added",
-      payload: %{added: ^e2, attributes: %{
-        Name => _,
-        Appearance => _,
-        Position => _}}}}}
-  end
-
-
-  test "getting a dump of the other entities", %{e1: e1, e2: e2} do
-    assert_receive %{sender: ^e1, event: {:socket_broadcast, %Message{
-      topic: "entity:heroes_ascent",
-      event: "entity_dump",
-      payload: %{new: ^e2, existing: ^e1, attributes: %{
-        Name => _,
-        Appearance => _,
-        Position => _}}}}}
-  end
-
-
-  test "removing entities", %{e1: e1, s1: s1, e2: e2} do
-    Transport.dispatch(s1, "entity:heroes_ascent", "leave", %{})
-
-    assert_receive %{sender: ^e2, event: {:socket_broadcast, %Message{
-      topic: "entity:heroes_ascent",
-      event: "entity_removed",
-      payload: %{removed: ^e1}}}}
-  end
 end

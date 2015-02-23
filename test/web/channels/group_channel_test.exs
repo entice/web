@@ -1,36 +1,26 @@
 defmodule Entice.Web.GroupChannelTest do
   use ExUnit.Case
   use Entice.Logic.Area
-  alias Entice.Entity
-  alias Entice.Web.GroupChannel
-  alias Entice.Web.Account
-  alias Entice.Web.Character
-  alias Entice.Web.Client
-  alias Entice.Web.Token
-  alias Entice.Web.Player
-  alias Phoenix.Socket
+  alias Entice.Test.Factories
+  alias Entice.Test.Spy
+  alias Phoenix.Socket.Message
+  alias Phoenix.Channel.Transport
 
 
-  # TODO: dont rely on shared maps in tests, it fucks up the expected values
+  setup do
+    p1 = Factories.create_player("group", HeroesAscent, true)
+    Spy.inject_into(p1[:entity_id], self)
+
+    assert {:ok, sock1} = Transport.dispatch(p1[:socket], "group:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
+
+    {:ok, [e1: p1[:entity_id]]}
+  end
 
 
-  test "join and get a group assigned" do
-    socket = %Socket{pid: self, router: Entice.Web.Router}
-    acc = %Account{characters: [%Character{name: "Some Char"}]}
-    {:ok, cid} = Client.add(acc)
-    {:ok, eid, _pid} = Entity.start()
-    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, area: RandomArenas, char: acc.characters |> hd})
-    Player.init(eid, RandomArenas, acc.characters |> hd)
-
-    GroupChannel.join(
-      "group:random_arenas",
-      %{"client_id" => cid,
-        "entity_token" => tid},
-      socket)
-
-    assert_receive {:socket_reply, %Socket.Message{
-      topic: nil,
+  test "join", %{e1: e1} do
+    assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
+      topic: "group:heroes_ascent",
       event: "join:ok",
-      payload: %{}}}
+      payload: %{}}}}
   end
 end
