@@ -2,6 +2,7 @@ defmodule Entice.Web.EntityChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
+  alias Entice.Entity
   alias Entice.Web.Token
   alias Entice.Web.Player
   alias Entice.Web.Discovery
@@ -72,6 +73,7 @@ defmodule Entice.Web.EntityChannel do
 
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Name, Position, Appearance])
+    Entity.stop(socket |> entity_id)
     {:ok, socket}
   end
 end

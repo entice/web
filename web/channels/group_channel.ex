@@ -33,7 +33,7 @@ defmodule Entice.Web.GroupChannel do
   end
 
 
-  # incoming
+  # Incoming events
 
 
   def handle_in("merge", %{"target" => id}, socket) do
@@ -48,8 +48,7 @@ defmodule Entice.Web.GroupChannel do
   end
 
 
-  # outgoing
-
+  # Outgoing events
 
 
   def handle_out("leader_changed", %{entity_id: id, new: %Leader{members: mems, invited: invs}}, socket) do
