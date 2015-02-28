@@ -15,6 +15,13 @@ defmodule Entice.Web.TokenController do
   def entity_token(conn, _params) do
     id = get_session(conn, :client_id)
 
+    # make sure any old entities are killed before being able to play
+    case Client.get_entity(id) do
+      old when is_bitstring(old) -> Entity.stop(old)
+      _ ->
+    end
+
+    # create the token (or use the mapchange token)
     token = case Token.get_token(id) do
       {:ok, token, :mapchange, %{entity_id: _, map: _, char: _} = t} -> %{t | token: token}
       _ ->
@@ -25,6 +32,8 @@ defmodule Entice.Web.TokenController do
         %{token: token, entity_id: eid, map: map_mod, char: char}
     end
 
+    # init the entity and update the client
+    Client.set_entity(token[:entity_id])
     Player.init(token[:entity_id], token[:map], token[:char])
 
     conn |> json ok(%{

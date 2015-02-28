@@ -1,33 +1,26 @@
 defmodule Entice.Web.SkillChannelTest do
   use ExUnit.Case
   use Entice.Logic.Area
-  use Entice.Logic.Attributes
-  alias Entice.Web.SkillChannel
-  alias Entice.Web.Account
-  alias Entice.Web.Character
-  alias Entice.Web.Client
-  alias Entice.Web.Token
-  alias Entice.Entity
-  alias Phoenix.Socket
+  alias Entice.Test.Factories
+  alias Entice.Test.Spy
+  alias Phoenix.Socket.Message
+  alias Phoenix.Channel.Transport
 
 
-  test "joining" do
-    socket = %Socket{pid: self, router: Entice.Web.Router}
-    {:ok, cid} = Client.add(%Account{characters: [%Character{name: "Some Char"}]})
-    {:ok, eid, _pid} = Entity.start()
-    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, map: HeroesAscent, char: %Character{}})
+  setup do
+    p1 = Factories.create_player("skill", HeroesAscent, true)
+    Spy.inject_into(p1[:entity_id], self)
 
-    SkillChannel.join(
-      "skill:heroes_ascent",
-      %{"client_id" => cid,
-        "entity_token" => tid},
-      socket)
+    assert {:ok, sock1} = Transport.dispatch(p1[:socket], "skill:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
 
-    assert_receive {:socket_reply, %Socket.Message{
-      topic: nil,
+    {:ok, [e1: p1[:entity_id]]}
+  end
+
+
+  test "join", %{e1: e1} do
+    assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
+      topic: "skill:heroes_ascent",
       event: "join:ok",
-      payload: %{
-        unlocked_skills: _,
-        skillbar: _}}}
+      payload: %{}}}}
   end
 end
