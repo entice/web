@@ -2,12 +2,11 @@ defmodule Entice.Web.GroupChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
-  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Group
   alias Entice.Web.Token
   alias Entice.Web.Discovery
-  alias Entice.Web.GroupChannel.AttributeObserver
+  alias Entice.Web.Observer
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
@@ -19,7 +18,8 @@ defmodule Entice.Web.GroupChannel do
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "group:" <> map, link: true)
 
     Discovery.notify_active(entity_id, "group:" <> map, [Leader])
-    :ok = Entity.put_behaviour(entity_id, AttributeObserver, %{area: map_mod})
+    Observer.init(entity_id, "group:" <> map, [Leader])
+
     :ok = Group.init(entity_id)
 
     socket = socket
@@ -51,7 +51,7 @@ defmodule Entice.Web.GroupChannel do
   # Outgoing events
 
 
-  def handle_out("leader_changed", %{entity_id: id, new: %Leader{members: mems, invited: invs}}, socket) do
+  def handle_out("observed", %{entity_id: id, new: %Leader{members: mems, invited: invs}}, socket) do
     socket |> reply("change", %{
       leader: id,
       members: mems,
@@ -75,22 +75,8 @@ defmodule Entice.Web.GroupChannel do
 
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Leader])
+    Observer.deactivate(socket |> entity_id, socket.topic)
     Group.remove(socket |> entity_id)
-    Entity.remove_behaviour(socket |> entity_id, AttributeObserver)
     {:ok, socket}
-  end
-
-
-  defmodule AttributeObserver do
-    use Entice.Entity.Behaviour
-
-    def init(id, attributes, %{area: area}), do: {:ok, attributes, %{entity_id: id, area: area}}
-
-    def handle_attributes_changed(%{Leader => _old}, %{Leader => new_lead} = attributes,  %{entity_id: id, area: area} = state) do
-      Entice.Web.Endpoint.broadcast(
-        "group:" <> area.underscore_name,
-        "leader_changed", %{entity_id: id, new: new_lead})
-      {:ok, attributes, state}
-    end
   end
 end
