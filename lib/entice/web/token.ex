@@ -1,5 +1,4 @@
 defmodule Entice.Web.Token do
-  alias Entice.Web.Client
   alias Entice.Entity
   alias Entice.Web.Token
   @moduledoc """
@@ -30,7 +29,7 @@ defmodule Entice.Web.Token do
 
   def get_token(id) when is_bitstring(id), do: get_token(Entity.fetch_attribute(id, Token))
   def get_token({:ok, token}),             do: {:ok, token.id, token.type, token.payload}
-  def get_token({:error, _reason}),        do: {:error, :token_not_found}
+  def get_token(:error),                   do: {:error, :token_not_found}
 
 
   def delete_token(id), do: Entity.remove_attribute(id, Token)

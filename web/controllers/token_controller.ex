@@ -13,7 +13,7 @@ defmodule Entice.Web.TokenController do
 
 
   def entity_token(conn, _params) do
-    id = conn |> get_session(:client_id)
+    id = get_session(conn, :client_id)
 
     token = case Token.get_token(id) do
       {:ok, token, :mapchange, %{entity_id: _, map: _, char: _} = t} -> %{t | token: token}
