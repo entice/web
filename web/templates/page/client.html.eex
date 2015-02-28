@@ -27,7 +27,7 @@
     socket.join("entity:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
-        puts("Got", "Blue", JSON.stringify(payload))
+        puts("Joined", "Blue", JSON.stringify(payload))
       });
 
 

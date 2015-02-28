@@ -53,16 +53,19 @@
           email = $form.find("input[name='email']").val(),
           passw = $form.find("input[name='password']").val();
 
-        $.post("<%= auth_path(@conn, :login) %>", {email: email, password: passw})
-         .then(function(data) {
-          if (data.status === "ok") {
-            $('.authMessage').append(data.message);
-            $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
-            $(location).attr('href','<%= page_path(@conn, :index) %>');
-          } else {
-            $('.authMessage').append(data.message);
-            $('.authMessage').append("<br/>Please try again!");
-          }
+        $.ajax("<%= auth_path(@conn, :login) %>", {
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({"email": email, "password": passw})
+        })
+        .done(function(data) {
+          $('.authMessage').append(data.message);
+          $('.authMessage').append('<br/><a href="<%= page_path(@conn, :index) %>">... go back ...</a>');
+          $(location).attr('href','<%= page_path(@conn, :index) %>');
+        })
+        .fail(function(data) {
+          $('.authMessage').append(data.message);
+          $('.authMessage').append("<br/>Please try again!");
         });
       });
     </script>
