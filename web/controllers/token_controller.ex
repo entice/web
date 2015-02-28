@@ -33,7 +33,7 @@ defmodule Entice.Web.TokenController do
     end
 
     # init the entity and update the client
-    Client.set_entity(token[:entity_id])
+    Client.set_entity(id, token[:entity_id])
     Player.init(token[:entity_id], token[:map], token[:char])
 
     conn |> json ok(%{
