@@ -17,8 +17,11 @@ defmodule Entice.Web.GroupChannel do
 
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "group:" <> map, link: true)
 
+    Discovery.init(entity_id, map_mod)
     Discovery.notify_active(entity_id, "group:" <> map, [Leader])
-    Observer.init(entity_id, "group:" <> map, [Leader])
+
+    Observer.init(entity_id)
+    Observer.notify_active(entity_id, "group:" <> map, [Leader])
 
     :ok = Group.init(entity_id)
 
@@ -51,9 +54,10 @@ defmodule Entice.Web.GroupChannel do
   # Outgoing events
 
 
-  def handle_out("observed", %{entity_id: id, new: %Leader{members: mems, invited: invs}}, socket) do
-    socket |> reply("change", %{
-      leader: id,
+  def handle_out("observed", %{entity_id: rec_id, attributes: %{Leader => %Leader{members: mems, invited: invs}}}, socket) do
+    if (rec_id == socket |> entity_id),
+    do: socket |> reply("update", %{
+      leader: rec_id,
       members: mems,
       invited: invs})
     {:ok, socket}
@@ -62,10 +66,17 @@ defmodule Entice.Web.GroupChannel do
 
   def handle_out("discovered", %{recipient: rec_id, entity_id: entity_id, attributes: %{Leader => leader}}, socket) do
     if (rec_id == socket |> entity_id),
-    do: socket |> reply("add", %{
+    do: socket |> reply("update", %{
       leader: entity_id,
       members: leader.members,
       invited: leader.invited})
+    {:ok, socket}
+  end
+
+
+  def handle_out("missed", %{recipient: rec_id, entity_id: entity_id, attributes: attrs}, socket) do
+    if (rec_id == socket |> entity_id) and (Leader in attrs),
+    do: socket |> reply("remove", %{entity: entity_id})
     {:ok, socket}
   end
 
@@ -75,7 +86,7 @@ defmodule Entice.Web.GroupChannel do
 
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Leader])
-    Observer.deactivate(socket |> entity_id, socket.topic)
+    Observer.notify_inactive(socket |> entity_id, socket.topic)
     Group.remove(socket |> entity_id)
     {:ok, socket}
   end

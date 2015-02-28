@@ -11,6 +11,7 @@ defmodule Entice.Logic.ObserverTest do
     {:ok, eid, _pid} = Entity.start
 
     Entity.put_attribute(eid, %Name{name: "Test1"})
+    Observer.init(eid)
     Spy.inject_into(eid, self)
 
     Entice.Web.Endpoint.subscribe(self, "test:observer")
@@ -22,10 +23,10 @@ defmodule Entice.Logic.ObserverTest do
   test "enable sufficient", %{entity_id: eid} do
     Entity.put_attribute(eid, %Position{})
 
-    Observer.init(eid, "test:observer", [Name, Position])
+    Observer.notify_active(eid, "test:observer", [Name, Position])
 
     assert_receive %{sender: ^eid, event: {
-      :observer_enable,
+      :observer_active,
       "test:observer",
       [Name, Position]}}
 
@@ -43,7 +44,7 @@ defmodule Entice.Logic.ObserverTest do
   test "change", %{entity_id: eid} do
     Entity.put_attribute(eid, %Position{})
 
-    Observer.init(eid, "test:observer", [Name, Position])
+    Observer.notify_active(eid, "test:observer", [Name, Position])
 
     Entity.update_attribute(eid, Position, fn pos -> %Position{pos | pos: %Coord{x: 1337}} end)
 
@@ -59,10 +60,10 @@ defmodule Entice.Logic.ObserverTest do
 
 
   test "change insufficient to sufficient", %{entity_id: eid} do
-    Observer.init(eid, "test:observer", [Name, Position])
+    Observer.notify_active(eid, "test:observer", [Name, Position])
 
     assert_receive %{sender: ^eid, event: {
-      :observer_enable,
+      :observer_active,
       "test:observer",
       [Name, Position]}}
 
@@ -81,5 +82,35 @@ defmodule Entice.Logic.ObserverTest do
         attributes: %{
           Name => %Name{name: "Test1"},
           Position => %Position{}}}}}
+  end
+
+
+  test "report missing", %{entity_id: eid} do
+    Entity.put_attribute(eid, %Position{})
+
+    Observer.notify_active(eid, "test:observer", [Name, Position])
+
+    Entity.remove_attribute(eid, Position)
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "missed",
+      payload: %{
+        entity_id: ^eid,
+        attributes: [Position]}}}
+  end
+
+
+  test "disable", %{entity_id: eid} do
+    Entity.put_attribute(eid, %Position{})
+
+    Observer.notify_inactive(eid, "test:observer")
+
+    Entity.update_attribute(eid, Position, fn pos -> %Position{pos | pos: %Coord{x: 1337}} end)
+
+    refute_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "observed",
+      payload: _}}
   end
 end

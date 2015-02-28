@@ -20,7 +20,9 @@ defmodule Entice.Web.EntityChannel do
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "entity:" <> map, link: true)
 
     # fetch a dump of the state of other entities
-    Discovery.notify_active(entity_id, "entity:" <> map, [Name, Position, Appearance])
+    Discovery.init(entity_id, map_mod)
+    Discovery.notify_active(entity_id, "group:" <> map, [Name, Position, Appearance])
+
     attrs = Player.attributes(entity_id)
 
     socket = socket

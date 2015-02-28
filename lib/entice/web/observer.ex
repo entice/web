@@ -9,16 +9,18 @@ defmodule Entice.Web.Observer do
   # Outside API
 
 
-  def init(entity_id, topic, attribute_types) when is_bitstring(topic) do
+  def init(entity_id) do
     if not (entity_id |> Entity.has_behaviour?(Observer.Behaviour)),
     do: Entity.put_behaviour(entity_id, Observer.Behaviour, [])
-
-    Entity.notify(entity_id, {:observer_enable, topic, attribute_types})
   end
 
 
-  def deactivate(entity_id, topic),
-  do: Entity.notify(entity_id, {:observer_disable, topic})
+  def notify_active(entity_id, topic, attribute_types),
+  do: Entity.notify(entity_id, {:observer_active, topic, attribute_types})
+
+
+  def notify_inactive(entity_id, topic),
+  do: Entity.notify(entity_id, {:observer_inactive, topic})
 
 
   def remove(entity_id),
@@ -36,7 +38,7 @@ defmodule Entice.Web.Observer do
     def init(id, attributes, _args), do: {:ok, attributes, %{entity_id: id, reporters: %{}}}
 
 
-    def handle_event({:observer_enable, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
+    def handle_event({:observer_active, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
       reporters = reporters |> Map.put(topic, attribute_types)
       report(id, reporters, attributes)
 
@@ -44,14 +46,15 @@ defmodule Entice.Web.Observer do
     end
 
 
-    def handle_event({:observer_disable, topic}, attributes, %{entity_id: id, reporters: reporters}) do
+    def handle_event({:observer_inactive, topic}, attributes, %{entity_id: id, reporters: reporters}) do
       reporters = reporters |> Map.delete(topic)
       {:ok, attributes, %{entity_id: id, reporters: reporters}}
     end
 
 
-    def handle_attributes_changed(_old, attributes, %{entity_id: id, reporters: reporters} = state) do
+    def handle_attributes_changed(old, attributes, %{entity_id: id, reporters: reporters} = state) do
       report(id, reporters, attributes)
+      report_missing(id, reporters, old, attributes)
       {:ok, attributes, state}
     end
 
@@ -67,6 +70,15 @@ defmodule Entice.Web.Observer do
           |> (&(if not Enum.empty?(&1),
                 do: Entice.Web.Endpoint.broadcast(topic, "observed", %{entity_id: entity_id, attributes: &1}))).()
         end
+      end
+    end
+
+    defp report_missing(entity_id, reporters, attrs_before, attrs_after) do
+      for (topic <- reporters |> Map.keys) do
+        reporters[topic]
+        |> Enum.filter(fn attr -> (attrs_before |> Map.has_key?(attr)) and not (attrs_after |> Map.has_key?(attr)) end)
+        |> (&(if not Enum.empty?(&1),
+              do: Entice.Web.Endpoint.broadcast(topic, "missed", %{entity_id: entity_id, attributes: &1}))).()
       end
     end
   end

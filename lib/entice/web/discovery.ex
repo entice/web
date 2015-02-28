@@ -9,8 +9,10 @@ defmodule Entice.Web.Discovery do
   # Outside API
 
 
-  def init(entity_id, area) when is_atom(area),
-  do: Entity.put_behaviour(entity_id, Discovery.Behaviour, %{area: area})
+  def init(entity_id, area) when is_atom(area) do
+    if not (entity_id |> Entity.has_behaviour?(Discovery.Behaviour)),
+    do: Entity.put_behaviour(entity_id, Discovery.Behaviour, %{area: area})
+  end
 
 
   def notify_active(entity_id, topic, attribute_types),
