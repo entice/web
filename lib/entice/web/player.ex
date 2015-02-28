@@ -29,8 +29,8 @@ defmodule Entice.Web.Player do
   do: Entity.notify(entity_id, {:player_remove_listener, topic})
 
 
-  def notify_mapchange(entity_id, map),
-  do: Entity.notify(entity_id, {:player_notify_mapchange, map})
+  def notify_mapchange(entity_id, new_entity_id, map),
+  do: Entity.notify(entity_id, {:player_notify_mapchange, new_entity_id, map})
 
 
   def remove(entity_id) do
@@ -66,9 +66,9 @@ defmodule Entice.Web.Player do
     do: {:ok, attributes, %{state | listeners: [listeners] -- [topic]}}
 
 
-    def handle_event({:player_notify_mapchange, map}, attributes, %{entity_id: id, listeners: listeners} = state) do
+    def handle_event({:player_notify_mapchange, new_entity_id, map}, attributes, %{entity_id: id, listeners: listeners} = state) do
       for topic <- listeners,
-      do: Entice.Web.Endpoint.broadcast(topic, "mapchange", %{entity_id: id, map: map})
+      do: Entice.Web.Endpoint.broadcast(topic, "mapchange", %{entity_id: id, new_entity_id: new_entity_id, map: map, attributes: attributes})
       {:ok, attributes, state}
     end
 

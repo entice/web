@@ -1,8 +1,8 @@
 defmodule Entice.Web.ChannelHelper do
   import Phoenix.Socket
 
-  def set_area(socket, area),           do: socket |> assign(:area, area)
-  def area(socket),                     do: socket.assigns[:area]
+  def set_map(socket, map),             do: socket |> assign(:map, map)
+  def map(socket),                      do: socket.assigns[:map]
 
   def set_entity_id(socket, entity_id), do: socket |> assign(:entity_id, entity_id)
   def entity_id(socket),                do: socket.assigns[:entity_id]

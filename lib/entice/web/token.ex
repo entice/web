@@ -24,6 +24,10 @@ defmodule Entice.Web.Token do
   do: create_token(id, :entity, payload)
 
 
+  def create_mapchange_token(id, %{entity_id: _} = payload),
+  do: create_token(id, :mapchange, payload)
+
+
   def get_token(id) when is_bitstring(id), do: get_token(Entity.fetch_attribute(id, Token))
   def get_token({:ok, token}),             do: {:ok, token.id, token.type, token.payload}
   def get_token({:error, _reason}),        do: {:error, :token_not_found}

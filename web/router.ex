@@ -17,7 +17,7 @@ defmodule Entice.Web.Router do
 
     get "/",             PageController, :index
     get "/auth",         PageController, :auth
-    get "/client/:area", PageController, :client
+    get "/client/:map",  PageController, :client
   end
 
 

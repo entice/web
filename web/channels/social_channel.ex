@@ -8,7 +8,7 @@ defmodule Entice.Web.SocialChannel do
 
 
   def join("social:" <> map, %{"client_id" => id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{area: map_mod, entity_id: entity_id, char: char}} = Token.get_token(id)
+    {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     socket = socket

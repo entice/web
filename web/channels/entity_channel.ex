@@ -14,7 +14,7 @@ defmodule Entice.Web.EntityChannel do
 
 
   def join("entity:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{entity_id: entity_id, area: map_mod, char: char}} = Token.get_token(client_id)
+    {:ok, ^token, :entity, %{entity_id: entity_id, map: map_mod, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "entity:" <> map, link: true)
@@ -26,7 +26,7 @@ defmodule Entice.Web.EntityChannel do
     attrs = Player.attributes(entity_id)
 
     socket = socket
-      |> set_area(map_mod)
+      |> set_map(map_mod)
       |> set_entity_id(entity_id)
       |> set_client_id(client_id)
       |> set_character(char)
@@ -36,6 +36,24 @@ defmodule Entice.Web.EntityChannel do
       position:   Map.from_struct(attrs[Position].pos),
       appearance: Map.from_struct(attrs[Appearance])})
 
+    {:ok, socket}
+  end
+
+
+  # Incoming
+
+
+  def handle_in("map:change", %{"map" => map}, socket) do
+    {:ok, map_mod}   = Area.get_map(camelize(map))
+    {:ok, eid, _pid} = Entity.start()
+    {:ok, _token}    = Token.create_mapchange_token(socket |> client_id, %{
+      entity_id: eid,
+      map: map_mod,
+      char: socket |> character})
+
+    Player.notify_mapchange(socket |> entity_id, eid, map_mod)
+
+    socket |> reply("map:change:ok", %{})
     {:ok, socket}
   end
 

@@ -64,7 +64,7 @@ defmodule Entice.Test.Factories do
     acc        = create_account(char)
     cid        = create_client(acc)
     {eid, pid} = create_entity
-    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, area: map, char: char})
+    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, map: map, char: char})
 
     socket =
       if entity_as_socket_pid do

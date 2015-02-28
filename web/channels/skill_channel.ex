@@ -12,11 +12,11 @@ defmodule Entice.Web.SkillChannel do
 
 
   def join("skill:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{area: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
+    {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     socket = socket
-      |> set_area(map_mod)
+      |> set_map(map_mod)
       |> set_entity_id(entity_id)
       |> set_client_id(client_id)
       |> set_character(char)

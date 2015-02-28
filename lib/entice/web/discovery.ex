@@ -9,9 +9,9 @@ defmodule Entice.Web.Discovery do
   # Outside API
 
 
-  def init(entity_id, area) when is_atom(area) do
+  def init(entity_id, map) when is_atom(map) do
     if not (entity_id |> Entity.has_behaviour?(Discovery.Behaviour)),
-    do: Entity.put_behaviour(entity_id, Discovery.Behaviour, %{area: area})
+    do: Entity.put_behaviour(entity_id, Discovery.Behaviour, %{map: map})
   end
 
 
@@ -35,14 +35,14 @@ defmodule Entice.Web.Discovery do
     use Entice.Logic.Attributes
 
 
-    def init(id, attributes, %{area: area}) do
-      Entice.Web.Endpoint.subscribe(self, "discovery:" <> area.underscore_name)
-      {:ok, attributes, %{entity_id: id, area: area}}
+    def init(id, attributes, %{map: map}) do
+      Entice.Web.Endpoint.subscribe(self, "discovery:" <> map.underscore_name)
+      {:ok, attributes, %{entity_id: id, map: map}}
     end
 
 
-    def terminate(_reason, attributes, %{area: area}) do
-      Entice.Web.Endpoint.unsubscribe(self, "discovery:" <> area.underscore_name)
+    def terminate(_reason, attributes, %{map: map}) do
+      Entice.Web.Endpoint.unsubscribe(self, "discovery:" <> map.underscore_name)
       {:ok, attributes}
     end
 
@@ -50,16 +50,16 @@ defmodule Entice.Web.Discovery do
     # setting your own status
 
 
-    def handle_event({:discovery_active, topic, attribute_types}, attributes, %{entity_id: id, area: area} = state) do
-      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> area.underscore_name, {
+    def handle_event({:discovery_active, topic, attribute_types}, attributes, %{entity_id: id, map: map} = state) do
+      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> map.underscore_name, {
         :discovery_activated, id, topic, attribute_types, Map.take(attributes, attribute_types)})
 
       {:ok, attributes, state}
     end
 
 
-    def handle_event({:discovery_inactive, topic, attribute_types}, attributes, %{entity_id: id, area: area} = state) do
-      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> area.underscore_name, {
+    def handle_event({:discovery_inactive, topic, attribute_types}, attributes, %{entity_id: id, map: map} = state) do
+      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> map.underscore_name, {
         :discovery_deactivated, id, topic, attribute_types})
 
       {:ok, attributes, state}

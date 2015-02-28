@@ -7,12 +7,13 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Web.Token
   alias Entice.Web.Discovery
   alias Entice.Web.Observer
+  alias Entice.Web.Player
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
 
   def join("group:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{area: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
+    {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "group:" <> map, link: true)
@@ -23,10 +24,12 @@ defmodule Entice.Web.GroupChannel do
     Observer.init(entity_id)
     Observer.notify_active(entity_id, "group:" <> map, [Leader])
 
+    Player.add_listener(entity_id, "group:" <> map)
+
     :ok = Group.init(entity_id)
 
     socket = socket
-      |> set_area(map_mod)
+      |> set_map(map_mod)
       |> set_entity_id(entity_id)
       |> set_client_id(client_id)
       |> set_character(char)
@@ -54,10 +57,9 @@ defmodule Entice.Web.GroupChannel do
   # Outgoing events
 
 
-  def handle_out("observed", %{entity_id: rec_id, attributes: %{Leader => %Leader{members: mems, invited: invs}}}, socket) do
-    if (rec_id == socket |> entity_id),
-    do: socket |> reply("update", %{
-      leader: rec_id,
+  def handle_out("observed", %{entity_id: entity_id, attributes: %{Leader => %Leader{members: mems, invited: invs}}}, socket) do
+    socket |> reply("update", %{
+      leader: entity_id,
       members: mems,
       invited: invs})
     {:ok, socket}
@@ -74,10 +76,21 @@ defmodule Entice.Web.GroupChannel do
   end
 
 
-  def handle_out("missed", %{recipient: rec_id, entity_id: entity_id, attributes: attrs}, socket) do
-    if (rec_id == socket |> entity_id) and (Leader in attrs),
-    do: socket |> reply("remove", %{entity: entity_id})
+  def handle_out("missed", %{entity_id: entity_id, attributes: attrs}, socket) do
+    if Leader in attrs, do: socket |> reply("remove", %{entity: entity_id})
     {:ok, socket}
+  end
+
+
+  def handle_out("mapchange", %{
+      entity_id: _id,
+      new_entity_id: new_id,
+      map: map,
+      attributes: %{Leader => %Leader{members: mems}}}, socket) do
+    # if we are part of the members we need to leave the map as well
+    if (socket |> entity_id) in mems,
+    do: socket |> reply("mapchange", %{leader: new_id, map: map})
+    {:leave, socket}
   end
 
 
@@ -87,6 +100,7 @@ defmodule Entice.Web.GroupChannel do
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Leader])
     Observer.notify_inactive(socket |> entity_id, socket.topic)
+    Player.remove_listener(socket |> entity_id, socket.topic)
     Group.remove(socket |> entity_id)
     {:ok, socket}
   end
