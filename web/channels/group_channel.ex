@@ -84,12 +84,11 @@ defmodule Entice.Web.GroupChannel do
 
   def handle_out("mapchange", %{
       entity_id: _id,
-      new_entity_id: new_id,
-      map: map,
+      map: map_mod,
       attributes: %{Leader => %Leader{members: mems}}}, socket) do
     # if we are part of the members we need to leave the map as well
     if (socket |> entity_id) in mems,
-    do: socket |> reply("map:change", %{leader: new_id, map: map})
+    do: socket |> reply("map:change", %{map: map_mod.underscore_name})
     {:leave, socket}
   end
 

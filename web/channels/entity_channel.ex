@@ -45,14 +45,12 @@ defmodule Entice.Web.EntityChannel do
 
   def handle_in("map:change", %{"map" => map}, socket) do
     {:ok, map_mod}   = Area.get_map(camelize(map))
-    {:ok, eid, _pid} = Entity.start()
     {:ok, _token}    = Token.create_mapchange_token(socket |> client_id, %{
-      entity_id: eid,
-      old_entity_id: socket |> entity_id,
+      entity_id: socket |> entity_id,
       map: map_mod,
       char: socket |> character})
 
-    Player.notify_mapchange(socket |> entity_id, eid, map_mod)
+    Player.notify_mapchange(socket |> entity_id, map_mod)
 
     socket |> reply("map:change:ok", %{map: map})
     {:ok, socket}

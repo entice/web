@@ -21,27 +21,30 @@ defmodule Entice.Web.TokenController do
       _ ->
     end
 
+    {:ok, map_mod}   = Area.get_map(camelize(conn.params["map"]))
+    {:ok, char}      = Client.get_char(id, conn.params["char_name"])
+    {:ok, eid, _pid} = Entity.start()
+
     # create the token (or use the mapchange token)
     token = case Token.get_token(id) do
-      {:ok, _token, :mapchange, %{entity_id: eid, map: map_mod, char: char}} ->
+      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: ^char}} ->
         {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
-        %{token: token, entity_id: eid, map: map_mod, char: char}
-      _ ->
-        {:ok, map_mod}   = Area.get_map(camelize(conn.params["map"]))
-        {:ok, char}      = Client.get_char(id, conn.params["char_name"])
-        {:ok, eid, _pid} = Entity.start()
-        {:ok, token}     = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
-        %{token: token, entity_id: eid, map: map_mod, char: char}
+        token
+      {:error, :token_not_found} ->
+        {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
+        token
+      token ->
+        raise "Token did not match expectations. Map: #{inspect map_mod}, Char: #{inspect char}, Actual: #{inspect token}"
     end
 
     # init the entity and update the client
-    Client.set_entity(id, token[:entity_id])
-    Player.init(token[:entity_id], token[:map], token[:char])
+    Client.set_entity(id, eid)
+    Player.init(eid, map_mod, char)
 
     conn |> json ok(%{
       message: "Transferring...",
       client_id: id,
-      entity_id: token[:entity_id],
-      entity_token: token[:token]})
+      entity_id: eid,
+      entity_token: token})
   end
 end

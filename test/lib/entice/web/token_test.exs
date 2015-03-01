@@ -17,8 +17,6 @@ defmodule Entice.Web.TokenTest do
       map: RandomArenas,
       char: char})
 
-    assert {:ok, ^token, :mapchange, %{entity_id: ^eid, map: RandomArenas, char: ^char} = t} = Token.get_token(cid)
-
-    assert %{token: ^token, entity_id: ^eid} = Map.put(t, :token, token)
+    assert {:ok, ^token, :mapchange, %{entity_id: ^eid, map: RandomArenas, char: ^char}} = Token.get_token(cid)
   end
 end

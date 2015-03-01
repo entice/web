@@ -28,31 +28,26 @@ defmodule Entice.Logic.PlayerTest do
 
 
   test "notify mapchange if subscribed", %{entity_id: eid} do
-    {:ok, eid2, _pid} = Entity.start
-
     Player.add_listener(eid, "test:player")
 
-    Player.notify_mapchange(eid, eid2, RandomArenas)
+    Player.notify_mapchange(eid, RandomArenas)
 
     assert_receive {:socket_broadcast, %{
       topic: "test:player",
       event: "mapchange",
       payload: %{
         entity_id: ^eid,
-        new_entity_id: ^eid2,
         map: RandomArenas,
         attributes: _}}}
   end
 
 
   test "dont notify mapchange if unsubscribed", %{entity_id: eid} do
-    {:ok, eid2, _pid} = Entity.start
-
     Player.add_listener(eid, "test:player")
 
     Player.remove_listener(eid, "test:player")
 
-    Player.notify_mapchange(eid, eid2, RandomArenas)
+    Player.notify_mapchange(eid, RandomArenas)
 
     refute_receive {:socket_broadcast, %{
       topic: "test:player",
