@@ -26,16 +26,15 @@ defmodule Entice.Web.TokenController do
     {:ok, eid, _pid} = Entity.start()
 
     # create the token (or use the mapchange token)
-    token = case Token.get_token(id) do
-      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: ^char}} ->
-        {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
-        token
-      {:error, :token_not_found} ->
-        {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
-        token
+    :ok = case Token.get_token(id) do
+      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: ^char}} -> :ok
+      {:ok, _token, :entity, _data} -> :ok
+      {:error, :token_not_found} -> :ok
       token ->
         raise "Token did not match expectations. Map: #{inspect map_mod}, Char: #{inspect char}, Actual: #{inspect token}"
     end
+
+    {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
 
     # init the entity and update the client
     Client.set_entity(id, eid)

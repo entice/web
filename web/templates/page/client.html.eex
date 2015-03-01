@@ -44,7 +44,7 @@
 
       channel.on("join:ok", function(payload) {
         puts("[skill] Joined", "Blue", JSON.stringify(payload))
-        channel.send("skillbar:set", {slot: 1, id: 0});
+        //channel.send("skillbar:set", {slot: 1, id: 3});
       });
 
       channel.on("skillbar:ok", function(payload) {

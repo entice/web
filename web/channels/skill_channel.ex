@@ -5,6 +5,7 @@ defmodule Entice.Web.SkillChannel do
   alias Entice.Entity
   alias Entice.Skills
   alias Entice.Logic.Area
+  alias Entice.Web.Character
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
@@ -25,37 +26,27 @@ defmodule Entice.Web.SkillChannel do
       |> set_character(char)
 
     # retrieve skill bar here
-    {:ok, skill} = Skills.get_skill(1)
-    skillbar = %SkillBar{slots: %{"1" => skill}} # set first slot to be HealingSignet
+    skillbar = %SkillBar{slots: to_skills(char)}
     Entity.put_attribute(entity_id, skillbar)
 
-    socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: format_slots(skillbar.slots)})
+    socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: to_skill_ids(skillbar.slots)})
     {:ok, socket}
   end
 
 
-  def handle_in("skillbar:set", %{"slot" => slot, "id" => 0}, socket) when slot in 0..10 do
-    new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> Map.delete(skillbar.slots, to_string(slot))
-      _               -> %{}
-    end
-    Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
-    socket |> reply("skillbar:ok", %{skillbar: format_slots(new_slots)})
-    {:ok, socket}
-  end
-
-
-  def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > 0 do
+  def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     # replace with a sophisticated check of the client's skills
     {:ok, skill} = Skills.get_skill(id)
 
     new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> Map.put(skillbar.slots, to_string(slot), skill)
+      {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot - 1), skill)
       _               -> %{}
     end
 
+    Entice.Web.Repo.update(%{(socket |> character) | skillbar: to_skill_ids(new_slots)})
     Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
-    socket |> reply("skillbar:ok", %{skillbar: format_slots(new_slots)})
+
+    socket |> reply("skillbar:ok", %{skillbar: to_skill_ids(new_slots)})
     {:ok, socket}
   end
 
@@ -81,11 +72,17 @@ defmodule Entice.Web.SkillChannel do
   # Internal
 
 
-  defp format_slots(slots) when is_map(slots) do
-    slots
-    |> Map.keys
-    |> Enum.reduce(%{}, fn (slot, acc) ->
-        Map.put(acc, to_string(slot), slots[slot].id)
+  defp to_skills(%Character{skillbar: skillbar}), do: to_skills(skillbar)
+  defp to_skills(skillbar) when is_list(skillbar) do
+    skillbar
+    |> Enum.map(fn skill_id ->
+        {:ok, skill} = Skills.get_skill(skill_id)
+        skill
       end)
+  end
+
+  defp to_skill_ids(skillbar) when is_list(skillbar) do
+    skillbar
+    |> Enum.map(fn skill -> skill.id end)
   end
 end
