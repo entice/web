@@ -43,7 +43,7 @@ defmodule Entice.Web.GroupChannel do
 
 
   def handle_in("merge", %{"target" => id}, socket) do
-    Group.merge(socket |> entity_id, id)
+    Group.invite(socket |> entity_id, id)
     {:ok, socket}
   end
 
