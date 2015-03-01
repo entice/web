@@ -4,9 +4,7 @@ defmodule Entice.Web.SkillChannel do
   use Entice.Logic.Attributes
   alias Entice.Entity
   alias Entice.Logic.Area
-  alias Entice.Web.Client
   alias Entice.Web.Token
-  alias Entice.Web.Group
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 

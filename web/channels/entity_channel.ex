@@ -21,7 +21,7 @@ defmodule Entice.Web.EntityChannel do
 
     # fetch a dump of the state of other entities
     Discovery.init(entity_id, map_mod)
-    Discovery.notify_active(entity_id, "group:" <> map, [Name, Position, Appearance])
+    Discovery.notify_active(entity_id, "entity:" <> map, [Name, Position, Appearance])
 
     attrs = Player.attributes(entity_id)
 
