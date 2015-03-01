@@ -43,7 +43,7 @@ defmodule Entice.Web.MovementChannel do
   end
 
 
-   def handle_in("update:speed", %{"movetype" => mtype}, socket) when mtype in 0..10 do
+   def handle_in("update:movetype", %{"movetype" => mtype}, socket) when mtype in 0..10 do
     Move.change_move_type(socket |> entity_id, mtype)
     broadcast!(socket, "update:movetype", %{entity: socket |> entity_id, movetype: mtype})
 
