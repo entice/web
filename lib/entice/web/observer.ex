@@ -52,7 +52,7 @@ defmodule Entice.Web.Observer do
     end
 
 
-    def handle_attributes_changed(old, attributes, %{entity_id: id, reporters: reporters} = state) do
+    def handle_change(old, attributes, %{entity_id: id, reporters: reporters} = state) do
       report(id, reporters, attributes)
       report_missing(id, reporters, old, attributes)
       {:ok, attributes, state}

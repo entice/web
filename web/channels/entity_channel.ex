@@ -48,7 +48,6 @@ defmodule Entice.Web.EntityChannel do
     {:ok, eid, _pid} = Entity.start()
     {:ok, _token}    = Token.create_mapchange_token(socket |> client_id, %{
       entity_id: eid,
-      old_entity_id: socket |> entity_id,
       map: map_mod,
       char: socket |> character})
 
