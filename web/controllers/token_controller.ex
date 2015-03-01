@@ -23,7 +23,9 @@ defmodule Entice.Web.TokenController do
 
     # create the token (or use the mapchange token)
     token = case Token.get_token(id) do
-      {:ok, token, :mapchange, %{entity_id: _, map: _, char: _} = t} -> %{t | token: token}
+      {:ok, _token, :mapchange, %{entity_id: eid, map: map_mod, char: char}} ->
+        {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
+        %{token: token, entity_id: eid, map: map_mod, char: char}
       _ ->
         {:ok, map_mod}   = Area.get_map(camelize(conn.params["map"]))
         {:ok, char}      = Client.get_char(id, conn.params["char_name"])
