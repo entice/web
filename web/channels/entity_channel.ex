@@ -54,7 +54,7 @@ defmodule Entice.Web.EntityChannel do
 
     Player.notify_mapchange(socket |> entity_id, eid, map_mod)
 
-    socket |> reply("map:change:ok", %{})
+    socket |> reply("map:change:ok", %{map: map})
     {:ok, socket}
   end
 
