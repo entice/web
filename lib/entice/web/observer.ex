@@ -62,16 +62,15 @@ defmodule Entice.Web.Observer do
 
 
     def handle_event({:observer_active, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
-      reporters = reporters |> Map.put(topic, attribute_types)
-      report(id, reporters, attributes)
-
-      {:ok, attributes, %{entity_id: id, reporters: reporters}}
+      new_reporters = reporters |> Map.put(topic, attribute_types)
+      report(id, new_reporters, attributes)
+      {:ok, attributes, %{entity_id: id, reporters: new_reporters}}
     end
 
 
     def handle_event({:observer_inactive, topic}, attributes, %{entity_id: id, reporters: reporters}) do
-      reporters = reporters |> Map.delete(topic)
-      {:ok, attributes, %{entity_id: id, reporters: reporters}}
+      new_reporters = reporters |> Map.delete(topic)
+      {:ok, attributes, %{entity_id: id, reporters: new_reporters}}
     end
 
 
@@ -86,13 +85,19 @@ defmodule Entice.Web.Observer do
 
 
     defp report(entity_id, reporters, attributes, message \\ "observed") do
-      for (topic <- reporters |> Map.keys) do
-        if (reporters[topic] |> Enum.all?(fn attr -> attributes |> Map.has_key?(attr) end)) do
-          reporters[topic]
-          |> Enum.reduce(%{}, fn (attr, acc) -> acc |> Map.put(attr, attributes[attr]) end)
-          |> (&(if not Enum.empty?(&1),
-                do: Entice.Web.Endpoint.broadcast(topic, message, %{entity_id: entity_id, attributes: &1}))).()
-        end
+      for (topic <- reporters |> Map.keys),
+      do: report_internal(entity_id, topic, reporters[topic], attributes, message)
+    end
+
+    defp report_internal(entity_id, topic, [], _attributes, message),
+    do: Entice.Web.Endpoint.broadcast(topic, message, %{entity_id: entity_id, attributes: %{}})
+
+    defp report_internal(entity_id, topic, reported_attributes, attributes, message) do
+      if (reported_attributes |> Enum.all?(fn attr -> attributes |> Map.has_key?(attr) end)) do
+        reported_attributes
+        |> Enum.reduce(%{}, fn (attr, acc) -> acc |> Map.put(attr, attributes[attr]) end)
+        |> (&(if not Enum.empty?(&1),
+              do: Entice.Web.Endpoint.broadcast(topic, message, %{entity_id: entity_id, attributes: &1}))).()
       end
     end
 

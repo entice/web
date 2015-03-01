@@ -6,6 +6,7 @@ defmodule Entice.Web.SkillChannel do
   alias Entice.Skills
   alias Entice.Logic.Area
   alias Entice.Web.Token
+  alias Entice.Web.Observer
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
@@ -13,6 +14,9 @@ defmodule Entice.Web.SkillChannel do
   def join("skill:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
     {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
+
+    Observer.init(entity_id)
+    Observer.notify_active(entity_id, "skill:" <> map, [])
 
     socket = socket
       |> set_map(map_mod)
@@ -56,7 +60,19 @@ defmodule Entice.Web.SkillChannel do
   end
 
 
+  def handle_out("terminated", %{entity_id: entity_id}, socket) do
+    case (entity_id == socket |> entity_id) do
+      true  -> {:leave, socket}
+      false -> {:ok, socket}
+    end
+  end
+
+
+  def handle_out(_event, _message, socket), do: {:ok, socket}
+
+
   def leave(_msg, socket) do
+    Observer.notify_inactive(socket |> entity_id, socket.topic)
     Entity.remove_attribute(socket |> entity_id, SkillBar)
     {:ok, socket}
   end

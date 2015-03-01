@@ -6,6 +6,7 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Web.Token
   alias Entice.Web.Player
   alias Entice.Web.Discovery
+  alias Entice.Web.Observer
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
@@ -22,6 +23,9 @@ defmodule Entice.Web.EntityChannel do
     # fetch a dump of the state of other entities
     Discovery.init(entity_id, map_mod)
     Discovery.notify_active(entity_id, "entity:" <> map, [Name, Position, Appearance])
+
+    Observer.init(entity_id)
+    Observer.notify_active(entity_id, "entity:" <> map, [])
 
     attrs = Player.attributes(entity_id)
 
@@ -84,14 +88,22 @@ defmodule Entice.Web.EntityChannel do
   end
 
 
+  def handle_out("terminated", %{entity_id: entity_id}, socket) do
+    case (entity_id == socket |> entity_id) do
+      true  -> {:leave, socket}
+      false -> {:ok, socket}
+    end
+  end
+
+
   def handle_out(_event, _message, socket), do: {:ok, socket}
 
 
   # Socket leave
 
-
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Name, Position, Appearance])
+    Observer.notify_inactive(socket |> entity_id, socket.topic)
     Entity.stop(socket |> entity_id)
     {:ok, socket}
   end

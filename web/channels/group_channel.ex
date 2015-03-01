@@ -57,6 +57,27 @@ defmodule Entice.Web.GroupChannel do
   # Outgoing events
 
 
+  def handle_out("mapchange", %{
+      entity_id: _id,
+      map: map_mod,
+      attributes: %{Leader => %Leader{members: mems}}}, socket) do
+
+    # if we are part of the members we need to leave the map as well
+    if (socket |> entity_id) in mems do
+      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
+        entity_id: socket |> entity_id,
+        map: map_mod,
+        char: socket |> character})
+
+      Player.notify_mapchange(socket |> entity_id, map_mod)
+
+      socket |> reply("map:change", %{map: map_mod.underscore_name})
+    end
+
+    {:ok, socket}
+  end
+
+
   def handle_out("observed", %{entity_id: entity_id, attributes: %{Leader => %Leader{members: mems, invited: invs}}}, socket) do
     socket |> reply("update", %{
       leader: entity_id,
@@ -76,30 +97,17 @@ defmodule Entice.Web.GroupChannel do
   end
 
 
-  def handle_out("missed", %{entity_id: entity_id, attributes: attrs}, socket) do
-    if Leader in attrs, do: socket |> reply("remove", %{entity: entity_id})
+  def handle_out("missed", %{entity_id: entity_id, attributes: %{Leader => _}}, socket) do
+    socket |> reply("remove", %{entity: entity_id})
     {:ok, socket}
   end
 
 
-  def handle_out("mapchange", %{
-      entity_id: _id,
-      map: map_mod,
-      attributes: %{Leader => %Leader{members: mems}}}, socket) do
-
-    # if we are part of the members we need to leave the map as well
-    if (socket |> entity_id) in mems do
-      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
-        entity_id: socket |> entity_id,
-        map: map_mod,
-        char: socket |> character})
-
-      Player.notify_mapchange(socket |> entity_id, map_mod)
-
-      socket |> reply("map:change", %{map: map_mod.underscore_name})
+  def handle_out("terminated", %{entity_id: entity_id}, socket) do
+    case (entity_id == socket |> entity_id) do
+      true  -> {:leave, socket}
+      false -> {:ok, socket}
     end
-
-    {:ok, socket}
   end
 
 
