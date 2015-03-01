@@ -24,7 +24,7 @@
   function init(map, client_id, entity_id, entity_token) {
     var socket = new Phoenix.Socket("/ws");
 
-    socket.join("entity:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
+    socket.join("entity:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
         puts("[entity] Joined", "Blue", JSON.stringify(payload))
@@ -40,7 +40,15 @@
     });
 
 
-    socket.join("skill:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
+    socket.join("group:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
+
+      channel.on("join:ok", function(payload) {
+        puts("[group] Joined", "Blue", JSON.stringify(payload))
+      });
+    });
+
+
+    socket.join("skill:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
         puts("[skill] Joined", "Blue", JSON.stringify(payload))
@@ -49,6 +57,14 @@
 
       channel.on("skillbar:ok", function(payload) {
         puts("[skill] Got", "Red", JSON.stringify(payload))
+      });
+    });
+
+
+    socket.join("social:" + map + ":group:" + entity_id, {client_id: client_id, entity_token: entity_token}, function(channel) {
+
+      channel.on("join:ok", function(payload) {
+        puts("[social] Joined", "Blue", JSON.stringify(payload))
       });
     });
   };

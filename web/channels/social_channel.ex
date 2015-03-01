@@ -1,25 +1,56 @@
 defmodule Entice.Web.SocialChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
+  alias Entice.Logic.Group
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
 
-  def join("social:" <> map, %{"client_id" => id, "entity_token" => token}, socket) do
+  def join("social:" <> map_rooms, %{"client_id" => id, "entity_token" => token}, socket) do
+    [map | rooms] = Regex.split(~r/:/, map_rooms)
     {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
-    Observer.init(entity_id)
-    Observer.notify_active(entity_id, "social:" <> map, [])
-
     socket = socket
+      |> set_map(map_mod)
+      |> set_entity_id(entity_id)
+      |> set_client_id(id)
       |> set_name(char.name)
+      |> set_character(char)
+
+    join_internal(entity_id, rooms, "social:" <> map_rooms, socket)
+  end
+
+
+  # free for all mapwide channel
+  defp join_internal(entity_id, [], topic, socket) do
+    Observer.init(entity_id)
+    Observer.notify_active(entity_id, topic, [])
 
     socket |> reply("join:ok", %{})
     {:ok, socket}
   end
+
+
+  # group only channel, restricted to group usage
+  defp join_internal(entity_id, ["group", leader_id], topic, socket) do
+    case Group.is_my_leader?(entity_id, leader_id) do
+      false ->
+        socket |> reply("join:error", %{})
+        :ignore
+      true ->
+        Observer.init(entity_id)
+        Observer.notify_active(entity_id, topic, [])
+
+        socket |> reply("join:ok", %{})
+        {:ok, socket}
+    end
+  end
+
+
+  # Incoming messages
 
 
   def handle_in("message", %{"text" => t}, socket) do
@@ -30,6 +61,9 @@ defmodule Entice.Web.SocialChannel do
   def handle_in("emote", %{"action" => a}, socket) do
     broadcast(socket, "emote", %{action: a, sender: socket |> name})
   end
+
+
+  # Outgoing messages
 
 
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
