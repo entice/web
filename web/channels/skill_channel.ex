@@ -21,7 +21,8 @@ defmodule Entice.Web.SkillChannel do
       |> set_character(char)
 
     # retrieve skill bar here
-    skillbar = %SkillBar{slots: %{1 => 1}} # set first slot to be HealingSignet
+    {:ok, skill} = Skills.get_skill(1)
+    skillbar = %SkillBar{slots: %{"1" => skill}} # set first slot to be HealingSignet
     Entity.put_attribute(entity_id, skillbar)
 
     socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: format_slots(skillbar.slots)})
@@ -34,7 +35,7 @@ defmodule Entice.Web.SkillChannel do
     {:ok, skill} = Skills.get_skill(id)
 
     new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> Map.put(skillbar.slots, slot, skill)
+      {:ok, skillbar} -> Map.put(skillbar.slots, to_string(slot), skill)
       _               -> %{}
     end
 
@@ -46,7 +47,7 @@ defmodule Entice.Web.SkillChannel do
 
   def handle_in("skillbar:set", %{"slot" => slot, "id" => 0}, socket) when slot in 0..10 do
     new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> Map.delete(skillbar.slots, slot)
+      {:ok, skillbar} -> Map.delete(skillbar.slots, to_string(slot))
       _               -> %{}
     end
     Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
@@ -68,7 +69,7 @@ defmodule Entice.Web.SkillChannel do
     slots
     |> Map.keys
     |> Enum.reduce(%{}, fn (slot, acc) ->
-        Map.put(acc, to_string(slot), slots[slot])
+        Map.put(acc, to_string(slot), slots[slot].id)
       end)
   end
 end
