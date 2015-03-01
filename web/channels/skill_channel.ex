@@ -37,16 +37,22 @@ defmodule Entice.Web.SkillChannel do
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     # replace with a sophisticated check of the client's skills
     {:ok, skill} = Skills.get_skill(id)
+    map_mod = socket |> map
 
-    new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot - 1), skill)
-      _               -> %{}
+    case map_mod.is_outpost? do
+      false -> socket |> reply("skillbar:error", %{})
+      true  ->
+        new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
+          {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot - 1), skill)
+          _               -> %{}
+        end
+
+        Entice.Web.Repo.update(%{(socket |> character) | skillbar: to_skill_ids(new_slots)})
+        Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
+
+        socket |> reply("skillbar:ok", %{skillbar: to_skill_ids(new_slots)})
     end
 
-    Entice.Web.Repo.update(%{(socket |> character) | skillbar: to_skill_ids(new_slots)})
-    Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
-
-    socket |> reply("skillbar:ok", %{skillbar: to_skill_ids(new_slots)})
     {:ok, socket}
   end
 
