@@ -86,10 +86,20 @@ defmodule Entice.Web.GroupChannel do
       entity_id: _id,
       map: map_mod,
       attributes: %{Leader => %Leader{members: mems}}}, socket) do
+
     # if we are part of the members we need to leave the map as well
-    if (socket |> entity_id) in mems,
-    do: socket |> reply("map:change", %{map: map_mod.underscore_name})
-    {:leave, socket}
+    if (socket |> entity_id) in mems do
+      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
+        entity_id: socket |> entity_id,
+        map: map_mod,
+        char: socket |> character})
+
+      Player.notify_mapchange(socket |> entity_id, map_mod)
+
+      socket |> reply("map:change", %{map: map_mod.underscore_name})
+    end
+
+    {:ok, socket}
   end
 
 

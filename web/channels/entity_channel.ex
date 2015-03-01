@@ -44,8 +44,8 @@ defmodule Entice.Web.EntityChannel do
 
 
   def handle_in("map:change", %{"map" => map}, socket) do
-    {:ok, map_mod}   = Area.get_map(camelize(map))
-    {:ok, _token}    = Token.create_mapchange_token(socket |> client_id, %{
+    {:ok, map_mod} = Area.get_map(camelize(map))
+    {:ok, _token}  = Token.create_mapchange_token(socket |> client_id, %{
       entity_id: socket |> entity_id,
       map: map_mod,
       char: socket |> character})
