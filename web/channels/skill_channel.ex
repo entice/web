@@ -3,6 +3,7 @@ defmodule Entice.Web.SkillChannel do
   use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Entity
+  alias Entice.Skills
   alias Entice.Logic.Area
   alias Entice.Web.Token
   import Phoenix.Naming
