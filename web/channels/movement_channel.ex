@@ -2,9 +2,9 @@ defmodule Entice.Web.MovementChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
+  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Movement, as: Move
-  alias Entice.Web.Client
   alias Entice.Web.Token
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
