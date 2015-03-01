@@ -104,7 +104,22 @@ defmodule Entice.Logic.ObserverTest do
   test "disable", %{entity_id: eid} do
     Entity.put_attribute(eid, %Position{})
 
+    Observer.notify_active(eid, "test:observer", [Name, Position])
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "observed",
+      payload: %{
+        entity_id: ^eid,
+        attributes: %{
+          Name => %Name{name: "Test1"},
+          Position => %Position{}}}}}
+
     Observer.notify_inactive(eid, "test:observer")
+
+    assert_receive %{sender: ^eid, event: {
+      :observer_inactive,
+      "test:observer"}}
 
     Entity.update_attribute(eid, Position, fn pos -> %Position{pos | pos: %Coord{x: 1337}} end)
 
@@ -112,5 +127,32 @@ defmodule Entice.Logic.ObserverTest do
       topic: "test:observer",
       event: "observed",
       payload: _}}
+  end
+
+
+  test "entity terminated", %{entity_id: eid} do
+    Entity.put_attribute(eid, %Position{})
+
+    Observer.notify_active(eid, "test:observer", [Name, Position])
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "observed",
+      payload: %{
+        entity_id: ^eid,
+        attributes: %{
+          Name => %Name{name: "Test1"},
+          Position => %Position{}}}}}
+
+    Entity.stop(eid)
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "terminated",
+      payload: %{
+        entity_id: ^eid,
+        attributes: %{
+          Name => %Name{name: "Test1"},
+          Position => %Position{}}}}}
   end
 end
