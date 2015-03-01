@@ -27,16 +27,24 @@
     socket.join("entity:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
 
       channel.on("join:ok", function(payload) {
-        puts("Joined", "Blue", JSON.stringify(payload))
+        puts("[entity] Joined", "Blue", JSON.stringify(payload))
       });
 
 
       channel.on("entity:add", function(payload) {
-        puts("Got", "Red", JSON.stringify(payload))
+        puts("[entity] Got", "Red", JSON.stringify(payload))
       });
 
       channel.on("entity:remove", function(payload) {
-        puts("Got", "Red", JSON.stringify(payload))
+        puts("[entity] Got", "Red", JSON.stringify(payload))
+      });
+    });
+
+
+    socket.join("skill:"+map, {client_id: client_id, entity_token: entity_token}, function(channel) {
+
+      channel.on("join:ok", function(payload) {
+        puts("[skill] Joined", "Blue", JSON.stringify(payload))
       });
     });
   };

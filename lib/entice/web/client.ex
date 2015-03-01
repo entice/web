@@ -49,7 +49,7 @@ defmodule Entice.Web.Client do
       _ ->
     end
 
-    Client.Server.remove_client(email, id)
+    Client.Server.remove_client(email)
     Entity.stop(id)
   end
 
@@ -103,6 +103,6 @@ defmodule Entice.Web.Client.Server do
   def get_client(email) when is_bitstring(email),
   do: Agent.get(__MODULE__, &Map.get(&1, email))
 
-  def remove_client(email, client_id) when is_bitstring(email),
+  def remove_client(email) when is_bitstring(email),
   do: Agent.update(__MODULE__, &Map.delete(&1, email))
 end

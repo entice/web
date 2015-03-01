@@ -4,7 +4,6 @@ defmodule Entice.Web.EntityChannelTest do
   use Entice.Logic.Attributes
   alias Entice.Test.Spy
   alias Entice.Test.Factories
-  alias Entice.Web.EntityChannel
   alias Phoenix.Socket.Message
   alias Phoenix.Channel.Transport
 
@@ -26,7 +25,7 @@ defmodule Entice.Web.EntityChannelTest do
   end
 
 
-  test "join", %{e1: e1, e2: e2} do
+  test "join", %{e1: e1} do
     assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
       topic: "entity:heroes_ascent",
       event: "join:ok",

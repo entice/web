@@ -11,7 +11,7 @@ defmodule Entice.Web.MovementChannelTest do
     p1 = Factories.create_player("movement", HeroesAscent, true)
     Spy.inject_into(p1[:entity_id], self)
 
-    assert {:ok, sock1} = Transport.dispatch(p1[:socket], "movement:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
+    assert {:ok, _sock} = Transport.dispatch(p1[:socket], "movement:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
 
     {:ok, [e1: p1[:entity_id]]}
   end
