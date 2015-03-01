@@ -1,6 +1,18 @@
 defmodule Entice.Web.Observer do
   @moduledoc """
   Report changes to certain attributes of an entity back to a certain topic.
+
+  If the attributes you subscribed for changed, you will receive:
+
+      {:socket_broadcast, topic: "your:topic", event: "observed", payload: %{entity_id: "your-entity-id", attributes: %{...}}}
+
+  If an attribute you subscribed for got removed, you will receive:
+
+      {:socket_broadcast, topic: "your:topic", event: "missed", payload: %{entity_id: "your-entity-id", attributes: [YourMissedAttribute1, YourMissedAttribute2]}}
+
+  If the entity terminates you will receive:
+
+      {:socket_broadcast, topic: "your:topic", event: "terminated", payload: %{entity_id: "your-entity-id", attributes: %{...}}}
   """
   alias Entice.Entity
   alias Entice.Web.Observer
@@ -38,6 +50,17 @@ defmodule Entice.Web.Observer do
     def init(id, attributes, _args), do: {:ok, attributes, %{entity_id: id, reporters: %{}}}
 
 
+    def terminate(:shutdown, attributes, %{entity_id: id, reporters: reporters}) do
+      report(id, reporters, attributes, "terminated")
+      {:ok, attributes}
+    end
+
+    def terminate(_reason, attributes, _state), do: {:ok, attributes}
+
+
+    # Event API
+
+
     def handle_event({:observer_active, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
       reporters = reporters |> Map.put(topic, attribute_types)
       report(id, reporters, attributes)
@@ -52,7 +75,7 @@ defmodule Entice.Web.Observer do
     end
 
 
-    def handle_attributes_changed(old, attributes, %{entity_id: id, reporters: reporters} = state) do
+    def handle_change(old, attributes, %{entity_id: id, reporters: reporters} = state) do
       report(id, reporters, attributes)
       report_missing(id, reporters, old, attributes)
       {:ok, attributes, state}
@@ -62,13 +85,13 @@ defmodule Entice.Web.Observer do
     # Internal
 
 
-    defp report(entity_id, reporters, attributes) do
+    defp report(entity_id, reporters, attributes, message \\ "observed") do
       for (topic <- reporters |> Map.keys) do
         if (reporters[topic] |> Enum.all?(fn attr -> attributes |> Map.has_key?(attr) end)) do
           reporters[topic]
           |> Enum.reduce(%{}, fn (attr, acc) -> acc |> Map.put(attr, attributes[attr]) end)
           |> (&(if not Enum.empty?(&1),
-                do: Entice.Web.Endpoint.broadcast(topic, "observed", %{entity_id: entity_id, attributes: &1}))).()
+                do: Entice.Web.Endpoint.broadcast(topic, message, %{entity_id: entity_id, attributes: &1}))).()
         end
       end
     end

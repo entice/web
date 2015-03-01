@@ -11,8 +11,7 @@ defmodule Entice.Web do
       # worker(Entice.Web.Worker, [arg1, arg2, arg3])
       worker(Entice.Web.Repo, []),
       worker(Entice.Web.Endpoint, []),
-      worker(Entice.Web.Client.Server, []),
-      supervisor(Entice.Entity.Supervisor, [])
+      worker(Entice.Web.Client.Server, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

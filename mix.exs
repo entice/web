@@ -15,15 +15,15 @@ defmodule Entice.Web.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Entice.Web, []},
-     applications: [:phoenix, :cowboy, :logger, :postgrex, :ecto]]
+     applications: [:phoenix, :cowboy, :logger, :postgrex, :ecto, :entice_entity]]
   end
 
   # Specifies your project dependencies
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:entice_logic, github: "entice/logic", ref: "5fa439a50c3a3d96c28f988b3940333774831751"},
-     {:entice_entity, github: "entice/entity", ref: "db080ad74408471f1c71b55c5d61d3cf00b28040"},
+    [{:entice_logic, github: "entice/logic", ref: "7a9aca3c9fea65cddc4e9e87ec1cf01808043c03"},
+     {:entice_entity, github: "entice/entity", ref: "88ca59ed636b321796f508273414358e9aa2a8a6"},
      {:entice_skill, github: "entice/skill", ref: "c4edbfcb0e0fc69431c921274259e4423afbd00c"},
      {:entice_utils, github: "entice/utils", ref: "4b743c4fe22eb4934221e69da2f50800347bcf32"},
      {:phoenix, "~> 0.9"},
