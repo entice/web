@@ -30,7 +30,6 @@
         puts("[entity] Joined", "Blue", JSON.stringify(payload))
       });
 
-
       channel.on("entity:add", function(payload) {
         puts("[entity] Got", "Red", JSON.stringify(payload))
       });
@@ -45,6 +44,11 @@
 
       channel.on("join:ok", function(payload) {
         puts("[skill] Joined", "Blue", JSON.stringify(payload))
+        channel.send("skillbar:set", {slot: 1, id: 0});
+      });
+
+      channel.on("skillbar:ok", function(payload) {
+        puts("[skill] Got", "Red", JSON.stringify(payload))
       });
     });
   };

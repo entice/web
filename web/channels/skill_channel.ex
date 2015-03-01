@@ -30,6 +30,17 @@ defmodule Entice.Web.SkillChannel do
   end
 
 
+  def handle_in("skillbar:set", %{"slot" => slot, "id" => 0}, socket) when slot in 0..10 do
+    new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
+      {:ok, skillbar} -> Map.delete(skillbar.slots, to_string(slot))
+      _               -> %{}
+    end
+    Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
+    socket |> reply("skillbar:ok", %{skillbar: format_slots(new_slots)})
+    {:ok, socket}
+  end
+
+
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > 0 do
     # replace with a sophisticated check of the client's skills
     {:ok, skill} = Skills.get_skill(id)
@@ -39,17 +50,6 @@ defmodule Entice.Web.SkillChannel do
       _               -> %{}
     end
 
-    Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
-    socket |> reply("skillbar:ok", %{skillbar: format_slots(new_slots)})
-    {:ok, socket}
-  end
-
-
-  def handle_in("skillbar:set", %{"slot" => slot, "id" => 0}, socket) when slot in 0..10 do
-    new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-      {:ok, skillbar} -> Map.delete(skillbar.slots, to_string(slot))
-      _               -> %{}
-    end
     Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
     socket |> reply("skillbar:ok", %{skillbar: format_slots(new_slots)})
     {:ok, socket}
