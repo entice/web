@@ -1,5 +1,6 @@
 defmodule Entice.Web.TokenController do
   use Phoenix.Controller
+  alias Entice.Web.Character
   alias Entice.Web.Client
   alias Entice.Web.Player
   alias Entice.Web.Token
@@ -24,10 +25,11 @@ defmodule Entice.Web.TokenController do
     {:ok, map_mod}   = Area.get_map(camelize(conn.params["map"]))
     {:ok, char}      = Client.get_char(id, conn.params["char_name"])
     {:ok, eid, _pid} = Entity.start()
+    name = char.name
 
     # create the token (or use the mapchange token)
     :ok = case Token.get_token(id) do
-      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: ^char}} -> :ok
+      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: %Character{name: ^name}}}-> :ok
       {:ok, _token, :entity, _data} -> :ok
       {:error, :token_not_found} -> :ok
       token ->

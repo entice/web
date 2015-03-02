@@ -57,7 +57,12 @@ defmodule Entice.Web.Client do
   # Account api
 
 
-  def get_account(id), do: Entity.fetch_attribute(id, Account)
+  def get_account(id) do
+    acc = Entity.fetch_attribute!(id, Account)
+    acc = Entice.Web.Repo.get(Account, acc.id)
+    set_account(id, acc)
+    acc
+  end
 
 
   def set_account(id, %Account{} = acc), do: Entity.put_attribute(id, acc)
