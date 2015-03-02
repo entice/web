@@ -44,6 +44,8 @@ defmodule Entice.Web.TokenController do
       message: "Transferring...",
       client_id: id,
       entity_id: eid,
-      entity_token: token})
+      entity_token: token,
+      map: map_mod.underscore_name,
+      is_outpost: map_mod.is_outpost?})
   end
 end
