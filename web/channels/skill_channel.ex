@@ -43,7 +43,7 @@ defmodule Entice.Web.SkillChannel do
       false -> socket |> reply("skillbar:error", %{})
       true  ->
         new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-          {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot - 1), skill)
+          {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot), skill)
           _               -> %{}
         end
 
