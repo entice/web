@@ -61,7 +61,7 @@ defmodule Entice.Web.Client do
     acc = Entity.fetch_attribute!(id, Account)
     acc = Entice.Web.Repo.get(Account, acc.id)
     set_account(id, acc)
-    acc
+    {:ok, acc}
   end
 
 
