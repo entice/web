@@ -59,6 +59,30 @@ defmodule Entice.Logic.ObserverTest do
   end
 
 
+  test "change an attribute that we are not interested in", %{entity_id: eid} do
+    Entity.put_attribute(eid, %Position{})
+
+    Observer.notify_active(eid, "test:observer", [Name])
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "observed",
+      payload: %{
+        entity_id: ^eid,
+        attributes: %{
+          Name => %Name{name: "Test1"}}}}}
+
+    Entity.update_attribute(eid, Position, fn pos -> %Position{pos | pos: %Coord{x: 1337}} end)
+
+    refute_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "observed",
+      payload: %{
+        entity_id: ^eid,
+        attributes: _}}}
+  end
+
+
   test "change insufficient to sufficient", %{entity_id: eid} do
     Observer.notify_active(eid, "test:observer", [Name, Position])
 

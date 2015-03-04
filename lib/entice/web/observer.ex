@@ -51,7 +51,7 @@ defmodule Entice.Web.Observer do
 
 
     def terminate(:shutdown, attributes, %{entity_id: id, reporters: reporters}) do
-      report(id, reporters, attributes, "terminated")
+      report(id, reporters, %{}, attributes, "terminated")
       {:ok, attributes}
     end
 
@@ -63,7 +63,7 @@ defmodule Entice.Web.Observer do
 
     def handle_event({:observer_active, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
       new_reporters = reporters |> Map.put(topic, attribute_types)
-      report(id, new_reporters, attributes)
+      report(id, new_reporters, %{}, attributes)
       {:ok, attributes, %{entity_id: id, reporters: new_reporters}}
     end
 
@@ -75,7 +75,7 @@ defmodule Entice.Web.Observer do
 
 
     def handle_change(old, attributes, %{entity_id: id, reporters: reporters} = state) do
-      report(id, reporters, attributes)
+      report(id, reporters, old, attributes)
       report_missing(id, reporters, old, attributes)
       {:ok, attributes, state}
     end
@@ -84,16 +84,18 @@ defmodule Entice.Web.Observer do
     # Internal
 
 
-    defp report(entity_id, reporters, attributes, message \\ "observed") do
+    defp report(entity_id, reporters, old, attributes, message \\ "observed") do
       for (topic <- reporters |> Map.keys),
-      do: report_internal(entity_id, topic, reporters[topic], attributes, message)
+      do: report_internal(entity_id, topic, reporters[topic], old, attributes, message)
     end
 
-    defp report_internal(entity_id, topic, [], _attributes, message),
+    defp report_internal(entity_id, topic, [], _old, _attributes, message),
     do: Entice.Web.Endpoint.broadcast(topic, message, %{entity_id: entity_id, attributes: %{}})
 
-    defp report_internal(entity_id, topic, reported_attributes, attributes, message) do
-      if (reported_attributes |> Enum.all?(fn attr -> attributes |> Map.has_key?(attr) end)) do
+    defp report_internal(entity_id, topic, reported_attributes, old, attributes, message) do
+      # report only if all requested attrs are available and any of them changed
+      if (reported_attributes |> Enum.all?(fn attr -> attributes |> Map.has_key?(attr) end)) and
+         (reported_attributes |> Enum.any?(fn attr -> attributes |> Map.get(attr) != (old |> Map.get(attr)) end)) do
         reported_attributes
         |> Enum.reduce(%{}, fn (attr, acc) -> acc |> Map.put(attr, attributes[attr]) end)
         |> (&(if not Enum.empty?(&1),

@@ -64,6 +64,13 @@ defmodule Entice.Web.MovementChannel do
   end
 
 
+  def handle_out("update:" <> value, %{} = msg, socket)
+  when value in ["pos", "goal", "movetype", "speed"] do
+    socket |> reply("update:" <> value, msg)
+    {:ok, socket}
+  end
+
+
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
     case (entity_id == socket |> entity_id) do
       true  -> {:leave, socket}
