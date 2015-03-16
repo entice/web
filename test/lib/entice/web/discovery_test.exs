@@ -42,6 +42,11 @@ defmodule Entice.Logic.DiscoveryTest do
   test "going active", %{e1: e1, e2: e2} do
     Discovery.notify_active(e1, "test:discovery", [Name])
 
+    assert_receive %{sender: ^e1, event: {
+      :discovery_active,
+      "test:discovery",
+      [Name]}}
+
     assert_receive %{sender: ^e2, event: {
       :discovery_activated,
       ^e1,
