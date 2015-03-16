@@ -45,6 +45,25 @@ defmodule Entice.Web.SkillChannel do
   end
 
 
+  def handle_in("cast", %{"slot" => slot}, socket) when slot in 0..10 do
+    callback = fn skill ->
+      Entice.Web.Endpoint.broadcast(socket.topic, "cast:done", %{
+        entity: socket |> entity_id,
+        skill: skill.id})
+    end
+    case socket |> entity_id |> SkillBar.cast_skill(slot, callback) do
+      {:error, :still_casting} -> socket |> reply("cast:error", %{})
+      {:ok, skill} ->
+        socket |> broadcast("cast:start", %{entity: socket |> entity_id, skill: skill.id})
+        socket |> reply("cast:ok", %{})
+    end
+  end
+
+
+  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: _skill_id} = msg, socket),
+  do: socket |> reply("cast:" <> evt, msg)
+
+
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
     case (entity_id == socket |> entity_id) do
       true  -> {:leave, socket}
