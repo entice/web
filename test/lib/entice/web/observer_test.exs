@@ -11,8 +11,9 @@ defmodule Entice.Logic.ObserverTest do
     {:ok, eid, _pid} = Entity.start
 
     Entity.put_attribute(eid, %Name{name: "Test1"})
-    Observer.init(eid)
-    Spy.inject_into(eid, self)
+    Entity.put_attribute(eid, %MapInstance{map: HeroesAscent})
+    Observer.register(eid)
+    Spy.register(eid, self)
 
     Entice.Web.Endpoint.subscribe(self, "test:observer")
 
@@ -219,5 +220,34 @@ defmodule Entice.Logic.ObserverTest do
       payload: %{
         entity_id: ^eid,
         attributes: %{}}}}
+  end
+
+
+  test "notify mapchange if subscribed", %{entity_id: eid} do
+    Observer.notify_active(eid, "test:observer", [])
+
+    Observer.notify_mapchange(eid, RandomArenas)
+
+    assert_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "mapchange",
+      payload: %{
+        entity_id: ^eid,
+        map: RandomArenas,
+        attributes: _}}}
+  end
+
+
+  test "dont notify mapchange if unsubscribed", %{entity_id: eid} do
+    Observer.notify_active(eid, "test:observer", [])
+
+    Observer.notify_inactive(eid, "test:observer")
+
+    Observer.notify_mapchange(eid, RandomArenas)
+
+    refute_receive {:socket_broadcast, %{
+      topic: "test:observer",
+      event: "mapchange",
+      payload: _}}
   end
 end

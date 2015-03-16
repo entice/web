@@ -1,11 +1,13 @@
 defmodule Entice.Web.TokenController do
   use Phoenix.Controller
+  alias Entice.Entity
+  alias Entice.Logic.Area
+  alias Entice.Logic.Player
+  alias Entice.Logic.Player.Appearance
   alias Entice.Web.Character
   alias Entice.Web.Client
-  alias Entice.Web.Player
   alias Entice.Web.Token
-  alias Entice.Logic.Area
-  alias Entice.Entity
+  import Entice.Utils.StructOps
   import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
@@ -40,7 +42,7 @@ defmodule Entice.Web.TokenController do
 
     # init the entity and update the client
     Client.set_entity(id, eid)
-    Player.init(eid, map_mod, char)
+    Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
 
     conn |> json ok(%{
       message: "Transferring...",

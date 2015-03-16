@@ -16,10 +16,10 @@ defmodule Entice.Web.MovementChannel do
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
 
-    Observer.init(entity_id)
+    Observer.register(entity_id)
     Observer.notify_active(entity_id, "movement:" <> map, [])
 
-    :ok = Move.init(entity_id)
+    :ok = Move.register(entity_id)
 
     socket = socket
       |> set_map(map_mod)
@@ -84,7 +84,7 @@ defmodule Entice.Web.MovementChannel do
 
   def leave(_msg, socket) do
     Observer.notify_inactive(socket |> entity_id, socket.topic)
-    Move.remove(socket |> entity_id)
+    Move.unregister(socket |> entity_id)
     {:ok, socket}
   end
 end

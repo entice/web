@@ -4,13 +4,14 @@ defmodule Entice.Test.Factories do
   """
   use Entice.Logic.Attributes
   alias Entice.Entity
+  alias Entice.Logic.Player
   alias Entice.Web.Account
   alias Entice.Web.Character
   alias Entice.Web.Client
-  alias Entice.Web.Player
   alias Entice.Web.Token
   alias Entice.Test.Factories.Counter
   alias Phoenix.Socket
+  import Entice.Utils.StructOps
 
 
   def create_character(name \\ "Some Char #{Counter.get_num(:character_name)}"),
@@ -73,7 +74,7 @@ defmodule Entice.Test.Factories do
         create_socket(topic <> ":" <> map.underscore_name)
       end
 
-    Player.init(eid, map, char)
+    Player.register(eid, map, char.name, copy_into(%Appearance{}, char))
 
     %{character: char, account: acc, client_id: cid, entity_id: eid, entity: pid, token: tid, socket: socket}
   end

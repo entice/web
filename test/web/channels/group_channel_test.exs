@@ -9,7 +9,7 @@ defmodule Entice.Web.GroupChannelTest do
 
   setup do
     p1 = Factories.create_player("group", HeroesAscent, true)
-    Spy.inject_into(p1[:entity_id], self)
+    Spy.register(p1[:entity_id], self)
 
     assert {:ok, _sock} = Transport.dispatch(p1[:socket], "group:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
 

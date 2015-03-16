@@ -3,8 +3,8 @@ defmodule Entice.Web.EntityChannel do
   use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Entity
+  alias Entice.Logic.Player
   alias Entice.Web.Token
-  alias Entice.Web.Player
   alias Entice.Web.Discovery
   alias Entice.Web.Observer
   import Phoenix.Naming
@@ -21,10 +21,10 @@ defmodule Entice.Web.EntityChannel do
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "entity:" <> map, link: true)
 
     # fetch a dump of the state of other entities
-    Discovery.init(entity_id, map_mod)
+    Discovery.register(entity_id, map_mod)
     Discovery.notify_active(entity_id, "entity:" <> map, [Name, Position, Appearance])
 
-    Observer.init(entity_id)
+    Observer.register(entity_id)
     Observer.notify_active(entity_id, "entity:" <> map, [])
 
     attrs = Player.attributes(entity_id)
@@ -54,7 +54,7 @@ defmodule Entice.Web.EntityChannel do
       map: map_mod,
       char: socket |> character})
 
-    Player.notify_mapchange(socket |> entity_id, map_mod)
+    Observer.notify_mapchange(socket |> entity_id, map_mod)
 
     socket |> reply("map:change:ok", %{map: map})
     {:ok, socket}

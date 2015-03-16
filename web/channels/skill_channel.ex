@@ -1,11 +1,10 @@
 defmodule Entice.Web.SkillChannel do
   use Phoenix.Channel
   use Entice.Logic.Area
-  use Entice.Logic.Attributes
   alias Entice.Entity
   alias Entice.Skills
   alias Entice.Logic.Area
-  alias Entice.Web.Character
+  alias Entice.Logic.SkillBar
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
@@ -16,8 +15,10 @@ defmodule Entice.Web.SkillChannel do
     {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
 
-    Observer.init(entity_id)
+    Observer.register(entity_id)
     Observer.notify_active(entity_id, "skill:" <> map, [])
+
+    :ok = SkillBar.register(entity_id, char.skillbar)
 
     socket = socket
       |> set_map(map_mod)
@@ -25,35 +26,22 @@ defmodule Entice.Web.SkillChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    # retrieve skill bar here
-    skillbar = %SkillBar{slots: to_skills(char)}
-    Entity.put_attribute(entity_id, skillbar)
-
-    socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: to_skill_ids(skillbar.slots)})
+    socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
     {:ok, socket}
   end
 
 
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     # replace with a sophisticated check of the client's skills
-    {:ok, skill} = Skills.get_skill(id)
-    map_mod = socket |> map
+    {:ok, _skill} = Skills.get_skill(id)
 
-    case map_mod.is_outpost? do
+    case (socket |> map).is_outpost? do
       false -> socket |> reply("skillbar:error", %{})
       true  ->
-        new_slots = case Entity.fetch_attribute(socket |> entity_id, SkillBar) do
-          {:ok, skillbar} -> skillbar.slots |> List.replace_at((slot), skill)
-          _               -> %{}
-        end
-
-        Entice.Web.Repo.update(%{(socket |> character) | skillbar: to_skill_ids(new_slots)})
-        Entity.put_attribute(socket |> entity_id, %SkillBar{slots: new_slots})
-
-        socket |> reply("skillbar:ok", %{skillbar: to_skill_ids(new_slots)})
+        new_slots = socket |> entity_id |> SkillBar.set_skill(slot, id)
+        Entice.Web.Repo.update(%{(socket |> character) | skillbar: new_slots})
+        socket |> reply("skillbar:ok", %{skillbar: new_slots})
     end
-
-    {:ok, socket}
   end
 
 
@@ -72,23 +60,5 @@ defmodule Entice.Web.SkillChannel do
     Observer.notify_inactive(socket |> entity_id, socket.topic)
     Entity.remove_attribute(socket |> entity_id, SkillBar)
     {:ok, socket}
-  end
-
-
-  # Internal
-
-
-  defp to_skills(%Character{skillbar: skillbar}), do: to_skills(skillbar)
-  defp to_skills(skillbar) when is_list(skillbar) do
-    skillbar
-    |> Enum.map(fn skill_id ->
-        {:ok, skill} = Skills.get_skill(skill_id)
-        skill
-      end)
-  end
-
-  defp to_skill_ids(skillbar) when is_list(skillbar) do
-    skillbar
-    |> Enum.map(fn skill -> skill.id end)
   end
 end

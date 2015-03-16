@@ -11,13 +11,13 @@ defmodule Entice.Web.EntityChannelTest do
   setup do
     # player 1
     p1 = Factories.create_player("entity", HeroesAscent, true)
-    Spy.inject_into(p1[:entity_id], self)
+    Spy.register(p1[:entity_id], self)
 
     assert {:ok, sock1} = Transport.dispatch(p1[:socket], "entity:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
 
     # player 2
     p2 = Factories.create_player("entity", HeroesAscent, true)
-    Spy.inject_into(p2[:entity_id], self)
+    Spy.register(p2[:entity_id], self)
 
     assert {:ok, _sock} = Transport.dispatch(p2[:socket], "entity:heroes_ascent", "join", %{"client_id" => p2[:client_id], "entity_token" => p2[:token]})
 

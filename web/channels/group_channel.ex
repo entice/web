@@ -7,7 +7,6 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Web.Token
   alias Entice.Web.Discovery
   alias Entice.Web.Observer
-  alias Entice.Web.Player
   import Phoenix.Naming
   import Entice.Web.ChannelHelper
 
@@ -18,15 +17,13 @@ defmodule Entice.Web.GroupChannel do
 
     Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "group:" <> map, link: true)
 
-    Discovery.init(entity_id, map_mod)
+    Discovery.register(entity_id, map_mod)
     Discovery.notify_active(entity_id, "group:" <> map, [Leader])
 
-    Observer.init(entity_id)
+    Observer.register(entity_id)
     Observer.notify_active(entity_id, "group:" <> map, [Leader])
 
-    Player.add_listener(entity_id, "group:" <> map)
-
-    :ok = Group.init(entity_id)
+    :ok = Group.register(entity_id)
 
     socket = socket
       |> set_map(map_mod)
@@ -69,7 +66,7 @@ defmodule Entice.Web.GroupChannel do
         map: map_mod,
         char: socket |> character})
 
-      Player.notify_mapchange(socket |> entity_id, map_mod)
+      Observer.notify_mapchange(socket |> entity_id, map_mod)
 
       socket |> reply("map:change", %{map: map_mod.underscore_name})
     end
@@ -117,8 +114,7 @@ defmodule Entice.Web.GroupChannel do
   def leave(_msg, socket) do
     Discovery.notify_inactive(socket |> entity_id, socket.topic, [Leader])
     Observer.notify_inactive(socket |> entity_id, socket.topic)
-    Player.remove_listener(socket |> entity_id, socket.topic)
-    Group.remove(socket |> entity_id)
+    Group.unregister(socket |> entity_id)
     {:ok, socket}
   end
 end

@@ -26,7 +26,7 @@ defmodule Entice.Web.SocialChannel do
 
   # free for all mapwide channel
   defp join_internal(entity_id, [], topic, socket) do
-    Observer.init(entity_id)
+    Observer.register(entity_id)
     Observer.notify_active(entity_id, topic, [])
 
     socket |> reply("join:ok", %{})
@@ -41,7 +41,7 @@ defmodule Entice.Web.SocialChannel do
         socket |> reply("join:error", %{})
         :ignore
       true ->
-        Observer.init(entity_id)
+        Observer.register(entity_id)
         Observer.notify_active(entity_id, topic, [])
 
         socket |> reply("join:ok", %{})

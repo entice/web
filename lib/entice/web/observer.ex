@@ -14,17 +14,25 @@ defmodule Entice.Web.Observer do
 
       {:socket_broadcast, topic: "your:topic", event: "terminated", payload: %{entity_id: "your-entity-id", attributes: %{...}}}
   """
+  use Entice.Logic.Attributes
   alias Entice.Entity
   alias Entice.Web.Observer
 
 
-  # Outside API
+  defstruct observers: %{}
 
 
-  def init(entity_id) do
+  # External API
+
+
+  def register(entity_id) do
     if not (entity_id |> Entity.has_behaviour?(Observer.Behaviour)),
     do: Entity.put_behaviour(entity_id, Observer.Behaviour, [])
   end
+
+
+  def unregister(entity_id),
+  do: Entity.remove_behaviour(entity_id, Observer.Behaviour)
 
 
   def notify_active(entity_id, topic, attribute_types),
@@ -35,11 +43,8 @@ defmodule Entice.Web.Observer do
   do: Entity.notify(entity_id, {:observer_inactive, topic})
 
 
-  def remove(entity_id),
-  do: Entity.remove_behaviour(entity_id, Observer.Behaviour)
-
-
-  # Behaviour internals
+  def notify_mapchange(entity_id, map),
+  do: Entity.notify(entity_id, {:observer_mapchange, map})
 
 
   defmodule Behaviour do
@@ -47,46 +52,58 @@ defmodule Entice.Web.Observer do
     use Entice.Logic.Attributes
 
 
-    def init(id, attributes, _args), do: {:ok, attributes, %{entity_id: id, reporters: %{}}}
-
-
-    def terminate(:shutdown, attributes, %{entity_id: id, reporters: reporters}) do
-      report(id, reporters, %{}, attributes, "terminated")
-      {:ok, attributes}
-    end
-
-    def terminate(_reason, attributes, _state), do: {:ok, attributes}
-
-
-    # Event API
-
-
-    def handle_event({:observer_active, topic, attribute_types}, attributes, %{entity_id: id, reporters: reporters}) do
-      new_reporters = reporters |> Map.put(topic, attribute_types)
-      report(id, new_reporters, %{}, attributes)
-      {:ok, attributes, %{entity_id: id, reporters: new_reporters}}
+    def init(%Entity{attributes: %{MapInstance => %MapInstance{map: map}}} = entity, _args) do
+      Entice.Web.Endpoint.subscribe(self, "observer:" <> map.underscore_name)
+      {:ok, entity |> put_attribute(%Observer{})}
     end
 
 
-    def handle_event({:observer_inactive, topic}, attributes, %{entity_id: id, reporters: reporters}) do
-      new_reporters = reporters |> Map.delete(topic)
-      {:ok, attributes, %{entity_id: id, reporters: new_reporters}}
+    def handle_event({:observer_active, topic, attribute_types}, %Entity{id: id, attributes: %{Observer => %Observer{observers: observers}}} = entity) do
+      new_observers = observers |> Map.put(topic, attribute_types)
+      report(id, new_observers, %{}, entity.attributes)
+      {:ok, entity |> put_attribute(%Observer{observers: new_observers})}
     end
 
 
-    def handle_change(old, attributes, %{entity_id: id, reporters: reporters} = state) do
-      report(id, reporters, old, attributes)
-      report_missing(id, reporters, old, attributes)
-      {:ok, attributes, state}
+    def handle_event({:observer_inactive, topic}, %Entity{attributes: %{Observer => %Observer{observers: observers}}} = entity) do
+      new_observers = observers |> Map.delete(topic)
+      {:ok, entity |> put_attribute(%Observer{observers: new_observers})}
+    end
+
+
+    def handle_event({:observer_mapchange, map}, %Entity{id: id, attributes: %{Observer => %Observer{observers: observers}}} = entity) do
+      report_mapchange(id, observers, map, entity.attributes)
+      {:ok, entity}
+    end
+
+
+    def handle_change(old, %Entity{id: id, attributes: %{Observer => %Observer{observers: observers}}} = entity) do
+      report(id, observers, old.attributes, entity.attributes)
+      report_missing(id, observers, old.attributes, entity.attributes)
+      {:ok, entity}
+    end
+
+
+    def terminate(:shutdown, %Entity{id: id, attributes: %{
+        MapInstance => %MapInstance{map: map},
+        Observer => %Observer{observers: observers}}} = entity) do
+      report(id, observers, %{}, entity.attributes, "terminated")
+      Entice.Web.Endpoint.unsubscribe(self, "observer:" <> map.underscore_name)
+      {:ok, entity}
+    end
+
+    def terminate(_reason, %Entity{attributes: %{MapInstance => %MapInstance{map: map}}} = entity) do
+      Entice.Web.Endpoint.unsubscribe(self, "observer:" <> map.underscore_name)
+      {:ok, entity}
     end
 
 
     # Internal
 
 
-    defp report(entity_id, reporters, old, attributes, message \\ "observed") do
-      for (topic <- reporters |> Map.keys),
-      do: report_internal(entity_id, topic, reporters[topic], old, attributes, message)
+    defp report(entity_id, observers, old, attributes, message \\ "observed") do
+      for (topic <- observers |> Map.keys),
+      do: report_internal(entity_id, topic, observers[topic], old, attributes, message)
     end
 
     defp report_internal(entity_id, topic, [], _old, _attributes, message),
@@ -103,13 +120,20 @@ defmodule Entice.Web.Observer do
       end
     end
 
-    defp report_missing(entity_id, reporters, attrs_before, attrs_after) do
-      for (topic <- reporters |> Map.keys) do
-        reporters[topic]
+
+    defp report_missing(entity_id, observers, attrs_before, attrs_after) do
+      for (topic <- observers |> Map.keys) do
+        observers[topic]
         |> Enum.filter(fn attr -> (attrs_before |> Map.has_key?(attr)) and not (attrs_after |> Map.has_key?(attr)) end)
         |> (&(if not Enum.empty?(&1),
               do: Entice.Web.Endpoint.broadcast(topic, "missed", %{entity_id: entity_id, attributes: &1}))).()
       end
+    end
+
+
+    defp report_mapchange(entity_id, observers, map, attributes) do
+      for (topic <-  observers |> Map.keys),
+      do: Entice.Web.Endpoint.broadcast(topic, "mapchange", %{entity_id: entity_id, map: map, attributes: attributes})
     end
   end
 end
