@@ -22,7 +22,7 @@ defmodule Entice.Web.Mixfile do
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:entice_logic, github: "entice/logic", ref: "21f236272b9cd79fa392ae8ca5127757286af686"},
+    [{:entice_logic, github: "entice/logic", ref: "467854ba95ebb3a971fd5f40b4d67a79f9641d71"},
      {:entice_entity, github: "entice/entity", ref: "05846160142df4d8c20b19b5aca55b9ba748d973"},
      {:entice_skill, github: "entice/skill", ref: "952c8f8ea2a36fb566f2813ffdd1813325142af8"},
      {:entice_utils, github: "entice/utils", ref: "6fc57359f452589b2ea1326f1343d6f8935f4245"},
