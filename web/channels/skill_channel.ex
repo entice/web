@@ -52,7 +52,7 @@ defmodule Entice.Web.SkillChannel do
         slot: slot,
         recharge_time: skill.recharge_time})
     end
-    recharge_callback = fn skill ->
+    recharge_callback = fn _skill ->
       Entice.Web.Endpoint.broadcast(socket.topic, "recharge:end", %{
         entity: socket |> entity_id,
         slot: slot})

@@ -1,5 +1,8 @@
 defmodule Entice.Web.Character do
   use Ecto.Model
+  use Ecto.Model.Callbacks
+  alias Entice.Skills
+  alias Entice.Web.Character
 
   schema "characters" do
     field :name,             :string
@@ -15,5 +18,10 @@ defmodule Entice.Web.Character do
     field :face,             :integer, default: 30
     belongs_to :account, Entice.Web.Account
   end
+
+  after_load :set_skills
+
+  def set_skills(character),
+  do: %Character{character | available_skills: :erlang.integer_to_list(Skills.max_unlocked_skills, 16) |> to_string}
 end
 
