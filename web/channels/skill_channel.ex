@@ -60,8 +60,8 @@ defmodule Entice.Web.SkillChannel do
   end
 
 
-  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: _skill_id} = msg, socket),
-  do: socket |> reply("cast:" <> evt, msg)
+  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: skill_id} = msg, socket),
+  do: socket |> reply("cast:" <> evt, Map.put(msg, :cast_time, Skills.get_skill(skill_id).cast_time))
 
 
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
