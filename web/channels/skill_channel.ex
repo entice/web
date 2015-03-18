@@ -58,7 +58,7 @@ defmodule Entice.Web.SkillChannel do
         slot: slot})
     end
     case socket |> entity_id |> SkillBar.cast_skill(slot, cast_callback, recharge_callback) do
-      {:error, :still_casting} -> socket |> reply("cast:error", %{})
+      {:error, reason} -> socket |> reply("cast:error", %{reason: reason})
       {:ok, :normal, skill} ->
         socket |> broadcast("cast:start", %{
           entity: socket |> entity_id,
