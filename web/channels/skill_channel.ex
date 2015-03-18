@@ -46,28 +46,41 @@ defmodule Entice.Web.SkillChannel do
 
 
   def handle_in("cast", %{"slot" => slot}, socket) when slot in 0..10 do
-    callback = fn skill ->
-      Entice.Web.Endpoint.broadcast(socket.topic, "cast:done", %{
+    cast_callback = fn skill ->
+      Entice.Web.Endpoint.broadcast(socket.topic, "cast:end", %{
         entity: socket |> entity_id,
-        skill: skill.id})
+        slot: slot,
+        recharge_time: skill.recharge_time})
     end
-    case socket |> entity_id |> SkillBar.cast_skill(slot, callback) do
+    recharge_callback = fn skill ->
+      Entice.Web.Endpoint.broadcast(socket.topic, "recharge:end", %{
+        entity: socket |> entity_id,
+        slot: slot})
+    end
+    case socket |> entity_id |> SkillBar.cast_skill(slot, cast_callback, recharge_callback) do
       {:error, :still_casting} -> socket |> reply("cast:error", %{})
       {:ok, :normal, skill} ->
         socket |> broadcast("cast:start", %{
           entity: socket |> entity_id,
-          skill: skill.id,
+          slot: slot,
           cast_time: skill.cast_time})
         socket |> reply("cast:ok", %{})
       {:ok, :instant, skill} ->
-        socket |> broadcast("cast:instantly", %{entity: socket |> entity_id, skill: skill.id})
+        socket |> broadcast("cast:instantly", %{
+          entity: socket |> entity_id,
+          slot: slot,
+          recharge_time: skill.recharge_time})
         socket |> reply("cast:ok", %{})
     end
   end
 
 
-  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: _skill_id} = msg, socket),
+  def handle_out("cast:" <> evt, %{entity: _entity_id, slot: _slot} = msg, socket),
   do: socket |> reply("cast:" <> evt, msg)
+
+
+  def handle_out("recharge:end", %{entity: _entity_id, slot: _slot} = msg, socket),
+  do: socket |> reply("recharge:end", msg)
 
 
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
