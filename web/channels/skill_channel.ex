@@ -53,15 +53,21 @@ defmodule Entice.Web.SkillChannel do
     end
     case socket |> entity_id |> SkillBar.cast_skill(slot, callback) do
       {:error, :still_casting} -> socket |> reply("cast:error", %{})
-      {:ok, skill} ->
-        socket |> broadcast("cast:start", %{entity: socket |> entity_id, skill: skill.id})
+      {:ok, :normal, skill} ->
+        socket |> broadcast("cast:start", %{
+          entity: socket |> entity_id,
+          skill: skill.id,
+          cast_time: skill.cast_time})
+        socket |> reply("cast:ok", %{})
+      {:ok, :instant, skill} ->
+        socket |> broadcast("cast:instantly", %{entity: socket |> entity_id, skill: skill.id})
         socket |> reply("cast:ok", %{})
     end
   end
 
 
-  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: skill_id} = msg, socket),
-  do: socket |> reply("cast:" <> evt, Map.put(msg, :cast_time, Skills.get_skill(skill_id).cast_time))
+  def handle_out("cast:" <> evt, %{entity: _entity_id, skill: _skill_id} = msg, socket),
+  do: socket |> reply("cast:" <> evt, msg)
 
 
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
