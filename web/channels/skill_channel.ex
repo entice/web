@@ -50,12 +50,14 @@ defmodule Entice.Web.SkillChannel do
       Entice.Web.Endpoint.broadcast(socket.topic, "cast:end", %{
         entity: socket |> entity_id,
         slot: slot,
+        skill: skill.id,
         recharge_time: skill.recharge_time})
     end
-    recharge_callback = fn _skill ->
+    recharge_callback = fn skill ->
       Entice.Web.Endpoint.broadcast(socket.topic, "recharge:end", %{
         entity: socket |> entity_id,
-        slot: slot})
+        slot: slot,
+        skill: skill.id})
     end
     case socket |> entity_id |> SkillBar.cast_skill(slot, cast_callback, recharge_callback) do
       {:error, reason} -> socket |> reply("cast:error", %{slot: slot, reason: reason})
@@ -63,12 +65,14 @@ defmodule Entice.Web.SkillChannel do
         socket |> broadcast("cast:start", %{
           entity: socket |> entity_id,
           slot: slot,
+          skill: skill.id,
           cast_time: skill.cast_time})
         socket |> reply("cast:ok", %{})
       {:ok, :instant, skill} ->
         socket |> broadcast("cast:instantly", %{
           entity: socket |> entity_id,
           slot: slot,
+          skill: skill.id,
           recharge_time: skill.recharge_time})
         socket |> reply("cast:ok", %{})
     end
