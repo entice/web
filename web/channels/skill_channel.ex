@@ -32,9 +32,7 @@ defmodule Entice.Web.SkillChannel do
 
 
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
-    # replace with a sophisticated check of the client's skills
-    {:ok, _skill} = Skills.get_skill(id)
-
+    # TODO add a more sophisticated check of the client's available skills
     case (socket |> map).is_outpost? do
       false -> socket |> reply("skillbar:error", %{})
       true  ->
