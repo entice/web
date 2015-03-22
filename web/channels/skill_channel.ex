@@ -36,7 +36,7 @@ defmodule Entice.Web.SkillChannel do
     case (socket |> map).is_outpost? do
       false -> socket |> reply("skillbar:error", %{})
       true  ->
-        new_slots = socket |> entity_id |> SkillBar.set_skill(slot, id)
+        new_slots = socket |> entity_id |> SkillBar.change_skill(slot, id)
         Entice.Web.Repo.update(%{(socket |> character) | skillbar: new_slots})
         socket |> reply("skillbar:ok", %{skillbar: new_slots})
     end
