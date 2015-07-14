@@ -22,4 +22,4 @@ To start:
 
 1. Install dependencies with `mix deps.get`
 2. Seed the database with `mix ecto.migrate Entice.Web.Repo`
-3. Start server with `mix phoenix.start`
+3. Start server with `mix phoenix.server`
