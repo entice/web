@@ -7,29 +7,26 @@ defmodule Entice.Web.Mixfile do
      elixir: "~> 1.0",
      elixirc_paths: ["lib", "web"],
      compilers: [:phoenix] ++ Mix.compilers,
+     build_embedded: Mix.env == :prod,
+     start_permanent: Mix.env == :prod,
      deps: deps]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
   def application do
     [mod: {Entice.Web, []},
      applications: [:phoenix, :cowboy, :logger, :postgrex, :ecto, :entice_entity]]
   end
 
-  # Specifies your project dependencies
-  #
-  # Type `mix help deps` for examples and options
   defp deps do
-    [{:entice_logic, github: "entice/logic", ref: "4fee23ca10c3b784e970d30f2610cd1afb0361f0"},
-     {:entice_entity, github: "entice/entity", ref: "05846160142df4d8c20b19b5aca55b9ba748d973"},
-     {:entice_skill, github: "entice/skill", ref: "894687cb4e5d08494084621745841243296caaf6"},
-     {:entice_utils, github: "entice/utils", ref: "6fc57359f452589b2ea1326f1343d6f8935f4245"},
-     {:phoenix, "~> 0.9"},
+    [{:entice_logic, github: "entice/logic", ref: "fbd1f1f97959c587b002cc8d4d09a079588f737f"},
+     {:entice_entity, github: "entice/entity", ref: "f733dc15a16d68d95f5463499c619030872c7ff8"},
+     {:entice_skill, github: "entice/skill", ref: "df66becfdfa24dad4b7f09f03954328bb4d12ccc"},
+     {:entice_utils, github: "entice/utils", ref: "739a10e6a328582a438c42d01dac9c87af914730"},
+     {:phoenix, github: "phoenixframework/phoenix", ref: "c422c41890a74186e008fd9939e679c4ffee03d7"},
      {:cowboy, "~> 1.0"},
      {:postgrex, ">= 0.0.0"},
+     #TODO {:phoenix_live_reload, "~> 0.2"},
      {:ecto, "~> 0.4"},
-     {:uuid, "~> 0.1.5"}] # https://github.com/zyro/elixir-uuid
+     {:uuid, "~> 1.0"}] # https://github.com/zyro/elixir-uuid
   end
 end

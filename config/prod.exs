@@ -12,9 +12,12 @@ use Mix.Config
 # disk for the key and cert.
 
 config :entice_web, Entice.Web.Endpoint,
-  url: [host: "entice-server-elixir.herokuapp.com"],
+  url: [host: "to.entice.so"],
   http: [port: System.get_env("PORT")],
-  secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO"
 
 config :logger,
   level: :info
+
+# Finally import the config/prod.secret.exs
+# which should be versioned separately.
+import_config "prod.secret.exs"

@@ -1,14 +1,12 @@
 defmodule Entice.Web.TokenController do
-  use Phoenix.Controller
+  use Entice.Web.Web, :controller
   alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
   alias Entice.Web.Character
-  alias Entice.Web.Client
   alias Entice.Web.Token
   import Entice.Utils.StructOps
-  import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
   plug :ensure_login

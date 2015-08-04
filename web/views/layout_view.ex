@@ -1,3 +1,3 @@
 defmodule Entice.Web.LayoutView do
-  use Entice.Web.View
+  use Entice.Web.Web, :view
 end

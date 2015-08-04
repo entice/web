@@ -1,11 +1,10 @@
 defmodule Entice.Web.SocialChannel do
-  use Phoenix.Channel
+  use Entice.Web.Web, :channel
   use Entice.Logic.Area
   alias Entice.Logic.Group
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
-  import Entice.Web.ChannelHelper
 
 
   def join("social:" <> map_rooms, %{"client_id" => id, "entity_token" => token}, socket) do
@@ -29,7 +28,7 @@ defmodule Entice.Web.SocialChannel do
     Observer.register(entity_id)
     Observer.notify_active(entity_id, topic, [])
 
-    socket |> reply("join:ok", %{})
+    socket |> push("join:ok", %{})
     {:ok, socket}
   end
 
@@ -38,13 +37,13 @@ defmodule Entice.Web.SocialChannel do
   defp join_internal(entity_id, ["group", leader_id], topic, socket) do
     case Group.is_my_leader?(entity_id, leader_id) do
       false ->
-        socket |> reply("join:error", %{})
+        socket |> push("join:error", %{})
         :ignore
       true ->
         Observer.register(entity_id)
         Observer.notify_active(entity_id, topic, [])
 
-        socket |> reply("join:ok", %{})
+        socket |> push("join:ok", %{})
         {:ok, socket}
     end
   end

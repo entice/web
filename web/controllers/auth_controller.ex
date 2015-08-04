@@ -1,8 +1,5 @@
 defmodule Entice.Web.AuthController do
-  use Phoenix.Controller
-  alias Entice.Web.Client
-  import Entice.Web.ControllerHelper
-
+  use Entice.Web.Web, :controller
 
   plug :action
 

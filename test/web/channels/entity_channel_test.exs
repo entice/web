@@ -1,37 +1,33 @@
 defmodule Entice.Web.EntityChannelTest do
   use ExUnit.Case
   use Entice.Logic.Area
-  use Entice.Logic.Attributes
-  alias Entice.Test.Spy
   alias Entice.Test.Factories
+  alias Entice.Test.Factories.Transport
   alias Phoenix.Socket.Message
-  alias Phoenix.Channel.Transport
 
 
   setup do
-    # player 1
-    p1 = Factories.create_player("entity", HeroesAscent, true)
-    Spy.register(p1[:entity_id], self)
+    p = Factories.create_player("entity", HeroesAscent)
+    t = Factories.create_transport
+    :ok = Transport.dispatch_join(t, p[:socket], %{"client_id" => p[:client_id], "entity_token" => p[:token]})
 
-    assert {:ok, sock1} = Transport.dispatch(p1[:socket], "entity:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
-
-    # player 2
-    p2 = Factories.create_player("entity", HeroesAscent, true)
-    Spy.register(p2[:entity_id], self)
-
-    assert {:ok, _sock} = Transport.dispatch(p2[:socket], "entity:heroes_ascent", "join", %{"client_id" => p2[:client_id], "entity_token" => p2[:token]})
-
-    {:ok, [e1: p1[:entity_id], e2: p2[:entity_id], s1: sock1]}
+    {:ok, [e: p[:entity_id]]}
   end
 
 
-  test "join", %{e1: e1} do
-    assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
+  test "join", %{e: e} do
+    assert_receive {:socket_push, %Message{
+      topic: "entity:heroes_ascent",
+      event: "phx_reply",
+      ref: nil,
+      payload: %{
+        status: "ok",
+        ref: "1",
+        response: %{}}}}
+    assert_receive {:socket_push, %Message{
       topic: "entity:heroes_ascent",
       event: "join:ok",
-      payload: %{
-        name: _,
-        position: _,
-        appearance: _}}}}
+      ref: nil,
+      payload: %{attributes: _}}}
   end
 end

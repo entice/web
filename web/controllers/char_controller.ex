@@ -1,8 +1,6 @@
 defmodule Entice.Web.CharController do
-  use Phoenix.Controller
+  use Entice.Web.Web, :controller
   alias Entice.Web.Character
-  alias Entice.Web.Client
-  import Entice.Web.ControllerHelper
 
   plug :ensure_login
   plug :action

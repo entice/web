@@ -1,5 +1,5 @@
 defmodule Entice.Web.SkillChannel do
-  use Phoenix.Channel
+  use Entice.Web.Web, :channel
   use Entice.Logic.Area
   alias Entice.Entity
   alias Entice.Skills
@@ -8,7 +8,6 @@ defmodule Entice.Web.SkillChannel do
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
-  import Entice.Web.ChannelHelper
 
 
   def join("skill:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
@@ -26,7 +25,7 @@ defmodule Entice.Web.SkillChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    socket |> reply("join:ok", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
+    socket |> push("join:ok", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
     {:ok, socket}
   end
 
@@ -34,11 +33,11 @@ defmodule Entice.Web.SkillChannel do
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     # TODO add a more sophisticated check of the client's available skills
     case (socket |> map).is_outpost? do
-      false -> socket |> reply("skillbar:error", %{})
+      false -> socket |> push("skillbar:error", %{})
       true  ->
         new_slots = socket |> entity_id |> SkillBar.change_skill(slot, id)
         Entice.Web.Repo.update(%{(socket |> character) | skillbar: new_slots})
-        socket |> reply("skillbar:ok", %{skillbar: new_slots})
+        socket |> push("skillbar:ok", %{skillbar: new_slots})
     end
   end
 
@@ -58,31 +57,31 @@ defmodule Entice.Web.SkillChannel do
         skill: skill.id})
     end
     case socket |> entity_id |> SkillBar.cast_skill(slot, cast_callback, recharge_callback) do
-      {:error, reason} -> socket |> reply("cast:error", %{slot: slot, reason: reason})
+      {:error, reason} -> socket |> push("cast:error", %{slot: slot, reason: reason})
       {:ok, :normal, skill} ->
         socket |> broadcast("cast:start", %{
           entity: socket |> entity_id,
           slot: slot,
           skill: skill.id,
           cast_time: skill.cast_time})
-        socket |> reply("cast:ok", %{})
+        socket |> push("cast:ok", %{})
       {:ok, :instant, skill} ->
         socket |> broadcast("cast:instantly", %{
           entity: socket |> entity_id,
           slot: slot,
           skill: skill.id,
           recharge_time: skill.recharge_time})
-        socket |> reply("cast:ok", %{})
+        socket |> push("cast:ok", %{})
     end
   end
 
 
   def handle_out("cast:" <> evt, %{entity: _entity_id, slot: _slot} = msg, socket),
-  do: socket |> reply("cast:" <> evt, msg)
+  do: socket |> push("cast:" <> evt, msg)
 
 
   def handle_out("recharge:end", %{entity: _entity_id, slot: _slot} = msg, socket),
-  do: socket |> reply("recharge:end", msg)
+  do: socket |> push("recharge:end", msg)
 
 
   def handle_out("terminated", %{entity_id: entity_id}, socket) do
