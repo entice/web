@@ -23,6 +23,7 @@
         <span>| <a href="<%= page_path(@conn, :auth) %>">Logout... </a></span>
       <% else %>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Login... </a></span>
+        <span>| <a href="<%= page_path(@conn, :account) %>">Register... </a></span>
       <% end %>
     </div>
     <div class="center">
