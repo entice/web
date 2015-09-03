@@ -24,9 +24,8 @@
 
     	$('#submit').click(function(){
 
-    		var $form = $(this),
-    			email = $form.find("input[name='email']").val(),
-    			passw = $form.find("input[name='password']").val();
+    		email = $("#email").val();
+    		passw = $("#password").val();
 
     		$.ajax("<%= account_path(@conn, :create) %>", {
     			type: 'POST',
