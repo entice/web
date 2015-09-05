@@ -5,15 +5,14 @@ defmodule Entice.Web.AccountController do
 
   plug :action
 
-
   def create(conn, _params) do
     email = conn.params["email"]
-	  password = conn.params["password"]
+    password = conn.params["password"]
 
-	  account = %Account{email: email, password: password}
-		|> Entice.Web.Repo.insert
+    account = %Account{email: email, password: password}
+    |> Entice.Web.Repo.insert
 
-	  conn |> json ok(%{
-		message: "Account created!"})
+    conn |> json ok(%{
+    message: "Account created!"})
   end
 end
