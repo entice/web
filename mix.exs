@@ -22,14 +22,14 @@ defmodule Entice.Web.Mixfile do
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:entice_logic, github: "entice/logic", ref: "4fee23ca10c3b784e970d30f2610cd1afb0361f0"},
-     {:entice_entity, github: "entice/entity", ref: "05846160142df4d8c20b19b5aca55b9ba748d973"},
-     {:entice_skill, github: "entice/skill", ref: "894687cb4e5d08494084621745841243296caaf6"},
-     {:entice_utils, github: "entice/utils", ref: "6fc57359f452589b2ea1326f1343d6f8935f4245"},
-     {:phoenix, "~> 0.9"},
+    [{:entice_logic, github: "entice/logic", ref: "f2f56eee6326cdde1344fcfc089a997f1e88ac20"},
+     {:entice_entity, github: "entice/entity", ref: "ae1686cdfc819e18d6f7fcd741096d60bd906fe0"},
+     {:entice_skill, github: "entice/skill", ref: "5b083e0f1f9c91b803aaa651a71a48a42989dace"},
+     {:entice_utils, github: "entice/utils", ref: "f8188ac7211994f192e336844b686d96a349ad61"},
+     {:phoenix, "~> 1.0"},
      {:cowboy, "~> 1.0"},
      {:postgrex, ">= 0.0.0"},
-     {:ecto, "~> 0.4"},
-     {:uuid, "~> 0.1.5"}] # https://github.com/zyro/elixir-uuid
+     {:ecto, "~> 1.0"},
+     {:uuid, "~> 1.0"}] # https://github.com/zyro/elixir-uuid
   end
 end
