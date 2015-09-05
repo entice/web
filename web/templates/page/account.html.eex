@@ -1,46 +1,46 @@
 <div>
-	<form id="createAccountForm" name="createAccountForm">    
-	    <fieldset><legend>Account</legend>
-	    	<p>
-	    		<label>Create a new Account</label>
-	      	<p>
-	        <label for="email" class="inputLabel">Email:</label>
-	        <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
-	      </p>
-	      <p>
-	        <label for="password" class="inputLabel">Password:</label>
-	        <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
-	      </p>
-	    </fieldset>
+  <form id="createAccountForm" name="createAccountForm">    
+    <fieldset>
+      <legend>Account</legend>
+      <p>
+        <label>Create a new Account</label>
+      </p>
+      <p>
+        <label for="email" class="inputLabel">Email:</label>
+        <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
+      </p>
+      <p>
+        <label for="password" class="inputLabel">Password:</label>
+        <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
+      </p>
+    </fieldset>
+    <input type="submit" class="inputButton" id="submit" name="submit" value="... do it ..." />
+  </form>
+  <script>
+    $(".email").focus();
 
-	    <input type="submit" class="inputButton" id="submit" name="submit" value="... do it ..." />
-	</form>
-    <script>
-    	$(".email").focus();
+    $('#createAccountForm').submit(function(e){
+      e.preventDefault();
+    });
 
-    	$('#createAccountForm').submit(function(e){
-    		e.preventDefault();
-    	});
+    $('#submit').click(function(){
+      email = $("#email").val();
+      passw = $("#password").val();
 
-    	$('#submit').click(function(){
-
-    		email = $("#email").val();
-    		passw = $("#password").val();
-
-    		$.ajax("<%= account_path(@conn, :create) %>", {
-    			type: 'POST',
-    			contentType: 'application/json',
-    			dataType: 'json',
-    			data: JSON.stringify({"email": email,"password": passw}),
-    			cache: false
-    		})
-    		.done(function(data){
-    			$('.authMessage').append("<br/> Account created.");
-    		})
-    		.fail(function(data) {
-		        $('.authMessage').append(data.message);
-		        $('.authMessage').append("<br/>Please try again!");
-        	});
-    	});
-    </script>
+    $.ajax("<%= account_path(@conn, :create) %>", {
+      type: 'POST',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify({"email": email,"password": passw}),
+      cache: false
+      })
+      .done(function(data){
+        $('.authMessage').append("<br/> Account created.");
+      })
+      .fail(function(data) {
+        $('.authMessage').append(data.message);
+        $('.authMessage').append("<br/>Please try again!");
+      });
+    });
+  </script>
 </div>
