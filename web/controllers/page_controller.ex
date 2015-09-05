@@ -10,6 +10,7 @@ defmodule Entice.Web.PageController do
 
   def index(conn, _),     do: conn |> render "index.html"
   def auth(conn, _),      do: conn |> render "auth.html"
+  def account(conn, _),   do: conn |> render "account.html"
 
   def not_found(conn, _), do: conn |> render "not_found.html"
   def error(conn, _),     do: conn |> render "error.html"
