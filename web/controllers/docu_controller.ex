@@ -4,7 +4,6 @@ defmodule Entice.Web.DocuController do
   alias Entice.Skills
 
   plug :ensure_login
-  plug :action
 
 
   def maps(conn, _params) do

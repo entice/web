@@ -17,20 +17,14 @@ defmodule Entice.Web.EntityChannel do
     Energy]
 
 
-  def join("entity:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    case try_join(client_id, token, map, socket) do
-      :ignore        -> :ignore
-      {:ok, _} = res ->
-        send(self, :after_join)
-        res
-    end
+  def join("entity:" <> map, _message, %Socket{assigns: %{map: map}} = socket) do
+    Process.flag(:trap_exit, true)
+    send(self, :after_join)
+    {:ok, socket}
   end
 
 
   def handle_info(:after_join, socket) do
-    Process.flag(:trap_exit, true)
-
-    # monitor the entity
     {:ok, entity_pid} = Entity.fetch(socket |> entity_id)
     Process.monitor(entity_pid)
 
@@ -48,7 +42,6 @@ defmodule Entice.Web.EntityChannel do
     Entity.add_attribute_listener(socket |> entity_id, self, false)
 
     # listen for events for this entity
-    EntityTopic.subscribe(socket |> entity_id, self)
     MapTopic.subscribe(socket |> map, self)
 
     socket |> push("join:ok", %{attributes: process_attributes(attrs)})

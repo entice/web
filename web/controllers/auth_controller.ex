@@ -1,9 +1,6 @@
 defmodule Entice.Web.AuthController do
   use Entice.Web.Web, :controller
 
-  plug :action
-
-
   def login(conn, params), do: login(conn, params, Client.logged_out?(conn))
 
   defp login(conn, _params, false), do: conn |> json error(%{message: "Already logged in."})

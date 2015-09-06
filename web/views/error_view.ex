@@ -10,7 +10,7 @@ defmodule Entice.Web.ErrorView do
   end
 
   # Render all other templates as 500
-  def render(_, assigns) do
+  def template_not_found(_template, assigns) do
     render "500.html", assigns
   end
 end

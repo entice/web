@@ -15,6 +15,20 @@ defmodule Entice.Web.Web do
   end
 
 
+  def router do
+    quote do
+      use Phoenix.Router
+    end
+  end
+
+
+  def model do
+    quote do
+      use Ecto.Model
+    end
+  end
+
+
   def view do
     quote do
       use Phoenix.View, namespace: Entice.Web, root: "web/templates"
@@ -38,6 +52,8 @@ defmodule Entice.Web.Web do
     quote do
       use Phoenix.Controller
       alias Entice.Web.Client
+      alias Entice.Web.Repo
+      import Entice.Web.Router.Helpers
 
       @doc "Use as plug to filter for logged in clients"
       def ensure_login(conn, _opts) do
@@ -103,12 +119,6 @@ defmodule Entice.Web.Web do
 
       def set_name(socket, name),           do: socket |> assign(:name, name)
       def name(socket),                     do: socket.assigns[:name]
-    end
-  end
-
-
-  def model do
-    quote do
     end
   end
 end

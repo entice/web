@@ -7,19 +7,17 @@ defmodule Entice.Web do
     import Supervisor.Spec, warn: false
 
     children = [
-      # Define workers and child supervisors to be supervised
-      # worker(Entice.Web.Worker, [arg1, arg2, arg3])
+      # Start the endpoint when the application starts
+      supervisor(Entice.Web.Endpoint, []),
+      # Start the Ecto repository
       worker(Entice.Web.Repo, []),
-      worker(Entice.Web.Endpoint, []),
       worker(Entice.Web.Client.Server, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Entice.Web.Supervisor]
-    {:ok, sup} = Supervisor.start_link(children, opts)
-
-    {:ok, sup}
+    Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration

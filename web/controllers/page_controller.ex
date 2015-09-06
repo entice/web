@@ -2,7 +2,6 @@ defmodule Entice.Web.PageController do
   use Entice.Web.Web, :controller
 
   plug :ensure_login when action in [:client]
-  plug :action
   plug :put_view, Entice.Web.PageView
 
 
