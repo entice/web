@@ -7,6 +7,7 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Logic.Player
   alias Entice.Web.EntityTopic
   alias Entice.Web.MapTopic
+  alias Phoenix.Socket
 
 
   @reported_attributes [

@@ -32,7 +32,7 @@ defmodule Entice.Web.GroupChannel do
 
     Discovery.register(socket |> entity_id)
     Discovery.discovery_request(
-      socket |> map
+      socket |> map,
       socket |> entity_id,
       attrs,
       [Leader])
@@ -55,7 +55,7 @@ defmodule Entice.Web.GroupChannel do
   do: {:stop, :normal, socket}
 
 
-  def handle_info({:discovered, %{entity_id: entity_id, attributes: %{Leader => leader}}, socket) do
+  def handle_info({:discovered, %{entity_id: entity_id, attributes: %{Leader => leader}}}, socket) do
     socket |> push("update", %{
       leader: entity_id,
       members: leader.members,
@@ -64,14 +64,14 @@ defmodule Entice.Web.GroupChannel do
   end
 
 
-  def handle_info({:undiscovered, %{entity_id: entity_id, attributes: %{Leader => _}}, socket) do
+  def handle_info({:undiscovered, %{entity_id: entity_id, attributes: %{Leader => _}}}, socket) do
     socket |> push("remove", %{entity: entity_id})
     {:noreply, socket}
   end
 
 
   def handle_info({:attribute_notify, %{
-      entity_id: id,
+      entity_id: entity_id,
       added: added,
       changed: changed,
       removed: removed}}, socket) do

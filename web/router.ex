@@ -8,7 +8,7 @@ defmodule Entice.Web.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     # Manually inject the layout here due to non standard namespaces...
-    plug :put_layout, {Entice.Web.LayoutView, "application.html"}
+    plug :put_layout, {Entice.Web.LayoutView, "app.html"}
   end
 
   # Web routes

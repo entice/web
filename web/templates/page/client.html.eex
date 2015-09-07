@@ -8,7 +8,8 @@
     $('#output').append(pre);
   };
 
-  $.get("<%= safe token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
+  <%= # escape the html... formerly used "safe token_path(" here %>
+  $.get("<%= token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
    .then(function(data) {
     if (data.status === "ok") {
       puts("Message", "Green", JSON.stringify(data.message));
