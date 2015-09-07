@@ -1,18 +1,15 @@
 defmodule Entice.Web.TokenController do
-  use Phoenix.Controller
+  use Entice.Web.Web, :controller
   alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
   alias Entice.Web.Character
-  alias Entice.Web.Client
   alias Entice.Web.Token
   import Entice.Utils.StructOps
-  import Entice.Web.ControllerHelper
   import Phoenix.Naming
 
   plug :ensure_login
-  plug :action
 
 
   def entity_token(conn, _params) do
@@ -29,15 +26,16 @@ defmodule Entice.Web.TokenController do
     {:ok, eid, _pid} = Entity.start()
     name = char.name
 
-    # create the token (or use the mapchange token)
+    # check if the player already has a mapchange token set
     :ok = case Token.get_token(id) do
-      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: %Character{name: ^name}}}-> :ok
+      {:ok, _token, :mapchange, %{entity_id: _old_entity_id, map: ^map_mod, char: %Character{name: ^name}}} -> :ok
       {:ok, _token, :entity, _data} -> :ok
       {:error, :token_not_found} -> :ok
       token ->
         raise "Token did not match expectations. Map: #{inspect map_mod}, Char: #{inspect char}, Actual: #{inspect token}"
     end
 
+    # create the token (or use the mapchange token)
     {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
 
     # init the entity and update the client

@@ -50,14 +50,14 @@ defmodule Entice.Test.Factories do
   end
 
 
-  def create_socket(topic, pid \\ self),
-  do: %Socket{
-    pid: pid,
-    router: Entice.Web.Router,
-    topic: topic,
-    assigns: [],
-    transport: Phoenix.Transports.WebSocket,
-    pubsub_server: Entice.Web.PubSub}
+  def create_socket(topic, pid \\ self) do
+    %Socket{
+      transport_pid: pid,
+      router: Entice.Web.Router,
+      topic: topic,
+      assigns: [],
+      pubsub_server: Entice.Web.PubSub}
+  end
 
 
   def create_player(topic, map, entity_as_socket_pid \\ false) when is_bitstring(topic) and is_atom(map) do
@@ -77,6 +77,54 @@ defmodule Entice.Test.Factories do
     Player.register(eid, map, char.name, copy_into(%Appearance{}, char))
 
     %{character: char, account: acc, client_id: cid, entity_id: eid, entity: pid, token: tid, socket: socket}
+  end
+
+
+  def create_transport do
+    {:ok, pid} = Entice.Test.Factories.Transport.start_link
+    pid
+  end
+end
+
+
+defmodule Entice.Test.Factories.Transport do
+  use GenServer
+  alias Phoenix.Socket.Message
+  alias Phoenix.Channel.Transport
+  alias Phoenix.Transports.WebSocket
+
+  def start_link,
+  do: GenServer.start_link(__MODULE__, HashDict.new)
+
+  def dispatch_join(transport, socket, payload),
+  do: GenServer.call(transport, {:dispatch_join, socket, payload})
+
+  def dispatch_message(transport, socket, event, payload),
+  do: GenServer.call(transport, {:dispatch_msg, socket, event, payload})
+
+  # internal...
+
+  def handle_call({:dispatch_join, socket, payload}, _sender, state) do
+    message = %Message{
+      topic: socket.topic,
+      event: "phx_join",
+      ref: "1",
+      payload: payload}
+    {:ok, socket_pid} = 
+      Transport.dispatch(
+        message, state, socket.transport_pid, Entice.Web.Router, Entice.Web.Endpoint, WebSocket)
+    {:reply, :ok, state |> Map.put(socket.topic, socket_pid)}
+  end
+
+  def handle_call({:dispatch_msg, socket, event, payload}, _sender, state) do
+    message = %Message{
+      topic: socket.topic,
+      event: event,
+      payload: payload}
+    res = 
+      Transport.dispatch(
+        message, state, socket.transport_pid, Entice.Web.Router, Entice.Web.Endpoint, WebSocket)
+    {:reply, res, state}
   end
 end
 

@@ -1,14 +1,14 @@
 defmodule Entice.Web.Router do
-  use Phoenix.Router
-
+  use Entice.Web.Web, :router
 
   pipeline :browser do
-    plug :accepts, ~w(html)
+    plug :accepts, ["html"]
     plug :fetch_session
-    plug :protect_from_forgery
     plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
     # Manually inject the layout here due to non standard namespaces...
-    plug :put_layout, {Entice.Web.LayoutView, "application.html"}
+    plug :put_layout, {Entice.Web.LayoutView, "app.html"}
   end
 
   # Web routes
@@ -23,7 +23,7 @@ defmodule Entice.Web.Router do
 
 
   pipeline :api do
-    plug :accepts, ~w(json)
+    plug :accepts, ["json"]
     plug :fetch_session
     plug :fetch_flash
   end
@@ -45,15 +45,5 @@ defmodule Entice.Web.Router do
     get  "/token/entity", TokenController, :entity_token
 
     post "/account",      AccountController, :create
-  end
-
-
-  # Websocket channels
-  socket "/ws", Entice.Web do
-    channel "entity:*",   EntityChannel
-    channel "group:*",    GroupChannel
-    channel "movement:*", MovementChannel
-    channel "skill:*",    SkillChannel
-    channel "social:*",   SocialChannel
   end
 end

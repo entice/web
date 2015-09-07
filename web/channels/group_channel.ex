@@ -1,5 +1,5 @@
 defmodule Entice.Web.GroupChannel do
-  use Phoenix.Channel
+  use Entice.Web.Web, :channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Logic.Area
@@ -8,30 +8,104 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Web.Discovery
   alias Entice.Web.Observer
   import Phoenix.Naming
-  import Entice.Web.ChannelHelper
+
+
+  @reported_attributes [
+    Leader,
+    Member]
 
 
   def join("group:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
+    case try_join(client_id, token, map, socket) do
+      :ignore        -> :ignore
+      {:ok, _} = res ->
+        send(self, :after_join)
+        res
+    end
+  end
 
-    Phoenix.PubSub.subscribe(socket.pubsub_server, socket.pid, "group:" <> map, link: true)
 
-    Discovery.register(entity_id, map_mod)
-    Discovery.notify_active(entity_id, "group:" <> map, [Leader])
+  def handle_info(:after_join, socket) do
+    :ok = Group.register(socket |> entity_id)
 
-    Observer.register(entity_id)
-    Observer.notify_active(entity_id, "group:" <> map, [Leader])
+    attrs = Entity.take_attributes(socket |> entity_id, @reported_attributes)
 
-    :ok = Group.register(entity_id)
+    Discovery.register(socket |> entity_id)
+    Discovery.discovery_request(
+      socket |> map,
+      socket |> entity_id,
+      attrs,
+      [Leader])
 
-    socket = socket
-      |> set_map(map_mod)
-      |> set_entity_id(entity_id)
-      |> set_client_id(client_id)
-      |> set_character(char)
+    # listen for attribute changes from this entity
+    Entity.add_attribute_listener(socket |> entity_id, self, false)
 
-    socket |> reply("join:ok", %{})
+    # listen for events for this entity
+    EntityTopic.subscribe(socket |> entity_id, self)
+    MapTopic.subscribe(socket |> map, self)
+
+    socket |> push("join:ok", %{})
+    {:ok, socket}
+  end
+
+
+  # Internal events
+
+  def handle_info({:DOWN, _ref, _type, _entity_pid, _info}, socket),
+  do: {:stop, :normal, socket}
+
+
+  def handle_info({:discovered, %{entity_id: entity_id, attributes: %{Leader => leader}}}, socket) do
+    socket |> push("update", %{
+      leader: entity_id,
+      members: leader.members,
+      invited: leader.invited})
+    {:noreply, socket}
+  end
+
+
+  def handle_info({:undiscovered, %{entity_id: entity_id, attributes: %{Leader => _}}}, socket) do
+    socket |> push("remove", %{entity: entity_id})
+    {:noreply, socket}
+  end
+
+
+  def handle_info({:attribute_notify, %{
+      entity_id: entity_id,
+      added: added,
+      changed: changed,
+      removed: removed}}, socket) do
+    case Map.merge(added, changed) |> Map.get(Leader) do
+      nil    -> :ok
+      leader ->
+        socket |> push("update", %{
+          leader: entity_id,
+          members: leader.members,
+          invited: leader.invited})
+    end
+    {:noreply, socket}
+  end
+
+
+  def handle_info(_msg, socket), do: {:noreply, socket}
+
+  def handle_info("mapchange", %{
+      entity_id: _id,
+      map: map_mod,
+      attributes: %{Leader => %Leader{members: mems}}}, socket) do
+
+    # if we are part of the members we need to leave the map as well
+    if (socket |> entity_id) in mems do
+      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
+        entity_id: socket |> entity_id,
+        map: map_mod,
+        char: socket |> character})
+
+      Observer.notify_mapchange(socket |> entity_id, map_mod)
+
+      socket |> push("map:change", %{map: map_mod.underscore_name})
+    end
+
     {:ok, socket}
   end
 
@@ -54,61 +128,9 @@ defmodule Entice.Web.GroupChannel do
   # Outgoing events
 
 
-  def handle_out("mapchange", %{
-      entity_id: _id,
-      map: map_mod,
-      attributes: %{Leader => %Leader{members: mems}}}, socket) do
-
-    # if we are part of the members we need to leave the map as well
-    if (socket |> entity_id) in mems do
-      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
-        entity_id: socket |> entity_id,
-        map: map_mod,
-        char: socket |> character})
-
-      Observer.notify_mapchange(socket |> entity_id, map_mod)
-
-      socket |> reply("map:change", %{map: map_mod.underscore_name})
-    end
-
-    {:ok, socket}
-  end
 
 
-  def handle_out("observed", %{entity_id: entity_id, attributes: %{Leader => %Leader{members: mems, invited: invs}}}, socket) do
-    socket |> reply("update", %{
-      leader: entity_id,
-      members: mems,
-      invited: invs})
-    {:ok, socket}
-  end
-
-
-  def handle_out("discovered", %{recipient: rec_id, entity_id: entity_id, attributes: %{Leader => leader}}, socket) do
-    if (rec_id == socket |> entity_id),
-    do: socket |> reply("update", %{
-      leader: entity_id,
-      members: leader.members,
-      invited: leader.invited})
-    {:ok, socket}
-  end
-
-
-  def handle_out("missed", %{entity_id: entity_id, attributes: %{Leader => _}}, socket) do
-    socket |> reply("remove", %{entity: entity_id})
-    {:ok, socket}
-  end
-
-
-  def handle_out("terminated", %{entity_id: entity_id}, socket) do
-    case (entity_id == socket |> entity_id) do
-      true  -> {:leave, socket}
-      false -> {:ok, socket}
-    end
-  end
-
-
-  def handle_out(_event, _message, socket), do: {:ok, socket}
+  def handle_info(_event, _message, socket), do: {:ok, socket}
 
 
   def leave(_msg, socket) do

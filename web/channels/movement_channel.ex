@@ -1,5 +1,5 @@
 defmodule Entice.Web.MovementChannel do
-  use Phoenix.Channel
+  use Entice.Web.Web, :channel
   use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Entity
@@ -8,7 +8,6 @@ defmodule Entice.Web.MovementChannel do
   alias Entice.Web.Token
   alias Entice.Web.Observer
   import Phoenix.Naming
-  import Entice.Web.ChannelHelper
 
 
   def join("movement:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
@@ -27,7 +26,7 @@ defmodule Entice.Web.MovementChannel do
       |> set_client_id(client_id)
       |> set_character(char)
 
-    socket |> reply("join:ok", %{})
+    socket |> push("join:ok", %{})
     {:ok, socket}
   end
 
@@ -59,7 +58,7 @@ defmodule Entice.Web.MovementChannel do
 
   def handle_out("update:" <> value, %{} = msg, socket)
   when value in ["pos", "goal", "movetype"] do
-    socket |> reply("update:" <> value, msg)
+    socket |> push("update:" <> value, msg)
     {:ok, socket}
   end
 

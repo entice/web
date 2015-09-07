@@ -11,14 +11,16 @@ config :entice_web,
 # Configures the endpoint
 config :entice_web, Entice.Web.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO",
-  debug_errors: false,
-  pubsub: [name: Entice.Web.PubSub, adapter: Phoenix.PubSub.PG2],
-  render_errors: Entice.Web.ErrorView,
-  transports: [websocket_timeout: 60000]
+  root: Path.dirname(__DIR__),
+  secret_key_base: "2chowpvvTbXuS+loaCzcTU2RXQY1wQtCn22qrcE51+kcqSCenmMIRE7IrhC2Cwax",
+  render_errors: [accepts: ~w(html json)],
+  transports: [websocket_timeout: 60000],
+  pubsub: [name: Entice.Web.PubSub,
+           adapter: Phoenix.PubSub.PG2]
 
 # Configure the database module
 config :entice_web, Entice.Web.Repo,
+  adapter: Ecto.Adapters.Postgres,
   url: System.get_env("DATABASE_URL"),
   priv: "priv/repo"
 

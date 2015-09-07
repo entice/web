@@ -3,15 +3,13 @@ defmodule Entice.Web.Discovery do
   Discover entities with certain attributes, and let them know you're there!
   """
   alias Entice.Entity
+  alias Entice.Web.MapTopic
   alias Entice.Web.Discovery
 
 
-  # Outside API
-
-
-  def register(entity_id, map) when is_atom(map) do
+  def register(entity_id) do
     if not (entity_id |> Entity.has_behaviour?(Discovery.Behaviour)),
-    do: Entity.put_behaviour(entity_id, Discovery.Behaviour, %{map: map})
+    do: Entity.put_behaviour(entity_id, Discovery.Behaviour, [])
   end
 
 
@@ -19,12 +17,27 @@ defmodule Entice.Web.Discovery do
   do: Entity.remove_behaviour(entity_id, Discovery.Behaviour)
 
 
-  def notify_active(entity_id, topic, attribute_types),
-  do: Entity.notify(entity_id, {:discovery_active, topic, attribute_types})
+  @doc """
+  Request a reply from all entities that satisfy (have) the listed
+  attribute types.
+  Needs the sender's entity id and it's attributes.
+  The recipients are required to reply (via the EntityTopic) with a
+
+      {:discovered, %{entity_id: ..., attributes: ...}}
+
+  (This will also be broadcastet on the EntityTopic of the entity
+  that received the request)
+  """
+  def discovery_request(map, sender_id, attributes, attribute_types),
+  do: MapTopic.broadcast_from(sender_id, map, {:discovery_request, sender_id, attributes, attribute_types})
 
 
-  def notify_inactive(entity_id, topic, attribute_types),
-  do: Entity.notify(entity_id, {:discovery_inactive, topic, attribute_types})
+  @doc """
+  Notify entities in a map that the entity given by sender_id is
+  leaving the map which they might want to propagate to their clients.
+  """
+  def undiscover_notify(map, sender_id, attributes),
+  do: MapTopic.broadcast_from(sender_id, map, {:undiscover_notify, sender_id, attributes})
 
 
   defmodule Behaviour do
@@ -32,68 +45,29 @@ defmodule Entice.Web.Discovery do
     use Entice.Logic.Attributes
 
 
-    def init(%Entity{attributes: %{MapInstance => %MapInstance{map: map}}} = entity, _args) do
-      Entice.Web.Endpoint.subscribe(self, "discovery:" <> map.underscore_name)
-      {:ok, entity}
-    end
-
-
-    # setting your own status
-
-
-    def handle_event({:discovery_active, topic, attribute_types}, %Entity{id: id, attributes: %{MapInstance => %MapInstance{map: map}}} = entity) do
-      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> map.underscore_name, {
-        :discovery_activated, id, topic, attribute_types, Map.take(entity.attributes, attribute_types)})
-      {:ok, entity}
-    end
-
-
-    def handle_event({:discovery_inactive, topic, attribute_types}, %Entity{id: id, attributes: %{MapInstance => %MapInstance{map: map}}} = entity) do
-      Entice.Web.Endpoint.entity_broadcast_from("discovery:" <> map.underscore_name, {
-        :discovery_deactivated, id, topic, attribute_types})
-      {:ok, entity}
-    end
-
-
-    # react to broadcasts
-
-
     def handle_event(
-        {:discovery_activated, sender_id, topic, attribute_types, attrs},
+        {:discovery_request, sender_id, sender_attributes, attribute_types},
         %Entity{id: id, attributes: attributes} = entity) do
-
-      if Enum.any?(attribute_types, fn t -> Map.has_key?(attributes, t) end) do
-        Entice.Web.Endpoint.broadcast(topic, "discovered", %{
-          recipient: id,
-          entity_id: sender_id,
-          attributes: attrs})
-
-        Entice.Web.Endpoint.broadcast(topic, "discovered", %{
-          recipient: sender_id,
+      # notify me
+      EntityTopic.broadcast(id, {:discovered, %{
+        entity_id: sender_id,
+        attributes: sender_attributes}})
+      # reply if we satisfy the attribute requirements
+      if attribute_types |> Enum.any?(&Map.has_key?(attributes, &1)) do
+        EntityTopic.broadcast(sender_id, {:discovered, %{
           entity_id: id,
-          attributes: Map.take(attributes, attribute_types)})
+          attributes: Map.take(attributes, attribute_types)}})
       end
-
       {:ok, entity}
     end
 
 
     def handle_event(
-        {:discovery_deactivated, sender_id, topic, attribute_types},
-        %Entity{id: id, attributes: attributes} = entity) do
-
-      if Enum.any?(attribute_types, fn t -> Map.has_key?(attributes, t) end) do
-        Entice.Web.Endpoint.broadcast(topic, "undiscovered", %{
-          recipient: id,
-          entity_id: sender_id})
-      end
-
-      {:ok, entity}
-    end
-
-
-    def terminate(_reason, %Entity{attributes: %{MapInstance => %MapInstance{map: map}}} = entity) do
-      Entice.Web.Endpoint.unsubscribe(self, "discovery:" <> map.underscore_name)
+        {:undiscover_notify, sender_id, sender_attributes},
+        %Entity{id: id} = entity) do
+      EntityTopic.broadcast(id, {:undiscovered, %{
+        entity_id: sender_id,
+        attributes: sender_attributes}})
       {:ok, entity}
     end
   end

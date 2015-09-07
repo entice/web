@@ -1,11 +1,5 @@
 defmodule Entice.Web.AuthController do
-  use Phoenix.Controller
-  alias Entice.Web.Client
-  import Entice.Web.ControllerHelper
-
-
-  plug :action
-
+  use Entice.Web.Web, :controller
 
   def login(conn, params), do: login(conn, params, Client.logged_out?(conn))
 
