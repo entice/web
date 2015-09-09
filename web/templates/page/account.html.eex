@@ -13,6 +13,9 @@
         <label for="password" class="inputLabel">Password:</label>
         <input type="password" class="inputField" id="password" name="password" value="" size="20" maxlength="32" />
       </p>
+      <p>
+        <label class="inputLabel">Key:</label>
+        <input type="text" class="inputField" id="key" name="key" value="" size="20" maxlength="36">
     </fieldset>
     <input type="submit" class="inputButton" id="submit" name="submit" value="... do it ..." />
   </form>
@@ -26,12 +29,14 @@
     $('#submit').click(function(){
       email = $("#email").val();
       passw = $("#password").val();
+      key = $("#key").val();
 
     $.ajax("<%= account_path(@conn, :create) %>", {
       type: 'POST',
       contentType: 'application/json',
       dataType: 'json',
-      data: JSON.stringify({"email": email,"password": passw}),
+      data: JSON.stringify({"email": email,"password": passw,
+        "key": key}),
       cache: false
       })
       .done(function(data){
