@@ -56,14 +56,5 @@ defmodule Entice.Web.Queries do
       _         -> {:ok, :account_not_found}
     end
   end
-
-  def check_existing_invite(email) do
-    query = from a in Entice.Web.Invitation,
-          where: a.email == ^email,
-          select: a
-    case Entice.Web.Repo.all(query) do
-      [invite] -> {:ok, invite}
-      _       -> {:error, :invite_not_found}
-    end
-  end
+  
 end
