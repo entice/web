@@ -50,20 +50,20 @@ defmodule Entice.Web.Queries do
   def check_existing_account(email) do
     query = from a in Entice.Web.Account,
           where: a.email == ^email,
-          select: count(a.email)
+          select: a
     case Entice.Web.Repo.all(query) do
-      [count]   -> {:ok, count}
-      _         -> {:error, :database_inconsistent}
+      [account]   -> {:ok, account}
+      _         -> {:ok, :account_not_found}
     end
   end
 
   def check_existing_invite(email) do
     query = from a in Entice.Web.Invitation,
           where: a.email == ^email,
-          select: count(a.email)
+          select: a
     case Entice.Web.Repo.all(query) do
-      [count] -> {:ok, count}
-      _       -> {:error, :database_inconsistent}
+      [invite] -> {:ok, invite}
+      _       -> {:error, :invite_not_found}
     end
   end
 end
