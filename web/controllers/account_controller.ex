@@ -37,26 +37,22 @@ defmodule Entice.Web.AccountController do
 
   def request_invite(conn, _params) do
     email = conn.params["email"]
-    Logger.info email
-
+    # Check if a Account with this Email already exists
     case Queries.check_existing_account(email) do
-        {:ok, count} ->
-          if count > 0 do
-            conn |> json error(%{message: "This Email address is already in use"})
-          else
-            case Queries.check_existing_invite(email) do
-              {:ok, count}->
-                if count > 0 do
-                  conn |> json error(%{message: "A invite to this Email is already sent."})
-                else
-                  key = UUID.uuid4()
-                  invite = %Invitation{email: email, key: key}
-                    |> Entice.Web.Repo.insert
+        {:ok, :account_not_found} ->
+          # Check if a invite is already sent to this email
+          case Queries.get_invite(email) do
+            {:error, :no_matching_invite} ->
+              key = UUID.uuid4()
+              invite = %Invitation{email: email, key: key}
+                |> Entice.Web.Repo.insert
+              conn |> json ok(%{message: "Invite Created", email: email, key: key})
 
-                  conn |> json ok(%{message: "Invite Created", email: email, key: key})
-                end
+              {:ok, count}->
+                conn |> json error(%{message: "A invite is already sent to this Email."})
             end
-          end  
+        {:ok, count} ->
+          conn |> json error(%{message: "This Email address is already in use"})  
     end
   end
 end
