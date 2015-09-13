@@ -56,5 +56,4 @@ defmodule Entice.Web.Queries do
       _         -> {:ok, :account_not_found}
     end
   end
-  
 end

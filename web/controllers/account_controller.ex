@@ -16,9 +16,10 @@ defmodule Entice.Web.AccountController do
       
       {:error, :no_matching_invite} ->
         conn |> json error(%{message: "No Invitation found for this Email"})
-
+        
       {:ok, invite} ->
-
+        Logger.info invite.key
+        Logger.info invite_key
         if invite.key != invite_key do
           conn |> json error(%{message: "Invalid Key!"})
         else
@@ -26,9 +27,8 @@ defmodule Entice.Web.AccountController do
           %Account{email: email, password: password}
             |> Entice.Web.Repo.insert
 
-          # Delete the invite, it´s used now.
+          # Delte the used invite (no need to store them)
           Repo.delete(invite)
-
           conn |> json ok(%{message: "Account created!"})
         end
 
@@ -39,21 +39,13 @@ defmodule Entice.Web.AccountController do
 
   def request_invite(conn, _params) do
     email = conn.params["email"]
-    case Queries.check_existing_account(email) do
-        {:ok, :account_not_found} ->
-          # Check if a invite is already sent to this email
-          case Queries.get_invite(email) do
-            {:error, :no_matching_invite} ->
-              key = UUID.uuid4()
-              invite = %Invitation{email: email, key: key}
-                |> Entice.Web.Repo.insert
-              conn |> json ok(%{message: "Invite Created", email: email, key: key})
-
-            {:ok, count}->
-              conn |> json error(%{message: "A invite is already sent to this Email."})
-            end
-        {:ok, count} ->
-          conn |> json error(%{message: "This Email address is already in use"})  
+    result = case {Queries.get_account(email), Queries.get_invite(email)} do
+      {{:ok, _account}, _} -> error(%{message: "This Email address is already in use"})
+      {_, {:ok, invite}}   -> ok(%{message: "Invite exists already", email: invite.email, key: invite.key})
+      {_, {:error, :no_matching_invite}} ->
+        {:ok, invite} = %Invitation{email: email, key: UUID.uuid4()} |> Entice.Web.Repo.insert
+        ok(%{message: "Invite Created", email: invite.email, key: invite.key})
     end
+    conn |> json result
   end
 end

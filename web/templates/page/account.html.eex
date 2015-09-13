@@ -36,11 +36,11 @@
       contentType: 'application/json',
       dataType: 'json',
       data: JSON.stringify({"email": email,"password": passw,
-        "key": key}),
+        "inviteKey": key}),
       cache: false
       })
       .done(function(data){
-        $('.authMessage').append("<br/> Account created.");
+        $('.authMessage').append("<br/>").append(data.message);
       })
       .fail(function(data) {
         $('.authMessage').append(data.message);
@@ -49,3 +49,6 @@
     });
   </script>
 </div>
+
+<br>
+<div class="authMessage"></div>
