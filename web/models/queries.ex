@@ -21,6 +21,17 @@ defmodule Entice.Web.Queries do
     end
   end
 
+  def get_account(email) do
+    query = from a in Entice.Web.Account,
+          where: a.email == ^email,
+         select: a
+
+    case Entice.Web.Repo.all(query) do
+      [acc] -> {:ok, acc}
+      _     -> {:error, :no_matching_account}
+    end
+  end
+
   def update_account(%Account{id: id}) do
     query = from a in Entice.Web.Account,
           where: a.id == ^id,
