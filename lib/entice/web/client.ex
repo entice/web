@@ -1,10 +1,9 @@
 defmodule Entice.Web.Client do
   alias Entice.Web.Account
   alias Entice.Web.Client
+  alias Entice.Web.Queries
   alias Entice.Entity
   import Plug.Conn
-  alias Entice.Web.Queries
-
 
   @doc """
   Stores client related plain data
