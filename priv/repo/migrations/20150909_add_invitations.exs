@@ -6,8 +6,7 @@ defmodule Entice.Web.Repo.Migrations.AddInvitations do
       "CREATE TABLE invitations( \
           id serial PRIMARY KEY, \
           email varchar(60) UNIQUE, \
-          key varchar(36) UNIQUE, \
-          createdAt timestamp)")
+          key varchar(36) UNIQUE)")
   end
 
   def down do
