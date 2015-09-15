@@ -14,7 +14,7 @@ defmodule Entice.Web.AccountController do
     result = case Queries.get_invite(email) do    
       {:error, :no_matching_invite} ->
         error(%{message: "No Invitation found for this Email"})
-      {:ok, %Invitation{key: invite_key} = invite} ->
+      {:ok, %Invitation{key: ^invite_key} = invite} ->
         %Account{email: email, password: password}
           |> Entice.Web.Repo.insert
         # Delete the used invite (no need to store them)
