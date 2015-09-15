@@ -28,7 +28,7 @@ defmodule Entice.Web.Queries do
 
     case Entice.Web.Repo.all(query) do
       [acc] -> {:ok, acc}
-      _     -> {:error, :no_matching_account}
+      _     -> {:error, :account_not_found}
     end
   end
 
@@ -47,7 +47,6 @@ defmodule Entice.Web.Queries do
   def get_invite(email) do
     query = from a in Entice.Web.Invitation,
           limit: 1,
-          order_by: [desc: a.createdat],
           where: a.email == ^email,
           select: a
 
@@ -57,14 +56,5 @@ defmodule Entice.Web.Queries do
       _        -> {:error, :database_inconsistent}
     end
   end
-
-  def check_existing_account(email) do
-    query = from a in Entice.Web.Account,
-          where: a.email == ^email,
-          select: a
-    case Entice.Web.Repo.all(query) do
-      [account]   -> {:ok, account}
-      _         -> {:ok, :account_not_found}
-    end
-  end
+  
 end
