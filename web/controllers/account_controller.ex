@@ -16,14 +16,11 @@ defmodule Entice.Web.AccountController do
       
       {:error, :no_matching_invite} ->
         conn |> json error(%{message: "No Invitation found for this Email"})
-        
+
       {:ok, invite} ->
-        Logger.info invite.key
-        Logger.info invite_key
         if invite.key != invite_key do
           conn |> json error(%{message: "Invalid Key!"})
         else
-          Logger.info "Key Valid"
           %Account{email: email, password: password}
             |> Entice.Web.Repo.insert
 
