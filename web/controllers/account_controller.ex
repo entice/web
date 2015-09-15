@@ -14,8 +14,8 @@ defmodule Entice.Web.AccountController do
     result = case Queries.get_invite(email) do    
       {:error, :no_matching_invite} ->
         error(%{message: "No Invitation found for this Email"})
-      {:ok, invite} when invite.key != userKey ->
-        json error(%{message: "Invalid Key!"})
+      {:ok, %Invitation{key: key}} when key != userKey ->
+        error(%{message: "Invalid Key!"})
       {:ok, invite} ->
         %Account{email: email, password: password}
           |> Entice.Web.Repo.insert
