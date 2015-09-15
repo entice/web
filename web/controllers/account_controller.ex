@@ -19,7 +19,7 @@ defmodule Entice.Web.AccountController do
       {:ok, invite} ->
         %Account{email: email, password: password}
           |> Entice.Web.Repo.insert
-        # Delte the used invite (no need to store them)
+        # Delete the used invite (no need to store them)
         Repo.delete(invite)
         ok(%{message: "Account created!"})
       _ ->
