@@ -31,7 +31,7 @@
       passw = $("#password").val();
       key = $("#key").val();
 
-    $.ajax("<%= account_path(@conn, :create) %>", {
+    $.ajax("<%= account_path(@conn, :register) %>", {
       type: 'POST',
       contentType: 'application/json',
       dataType: 'json',
