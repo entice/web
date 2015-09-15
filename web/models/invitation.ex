@@ -4,6 +4,5 @@ defmodule Entice.Web.Invitation do
   schema "invitations" do
     field :email, :string
     field :key, :string
-    field :createdat, Ecto.DateTime, default: Ecto.DateTime.local
   end
 end
