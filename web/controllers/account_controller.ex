@@ -10,28 +10,23 @@ defmodule Entice.Web.AccountController do
   def create(conn, _params) do
     email = conn.params["email"]
     password = conn.params["password"]
-    invite_key = conn.params["inviteKey"]
+    userKey = conn.params["inviteKey"]
 
-    case Queries.get_invite(email) do
-      
+    result = case Queries.get_invite(email) do    
       {:error, :no_matching_invite} ->
-        conn |> json error(%{message: "No Invitation found for this Email"})
-
+        error(%{message: "No Invitation found for this Email"})
+      {:ok, invite} when invite.key != userKey ->
+        json error(%{message: "Invalid Key!"})
       {:ok, invite} ->
-        if invite.key != invite_key do
-          conn |> json error(%{message: "Invalid Key!"})
-        else
-          %Account{email: email, password: password}
-            |> Entice.Web.Repo.insert
-
-          # Delte the used invite (no need to store them)
-          Repo.delete(invite)
-          conn |> json ok(%{message: "Account created!"})
-        end
-
+        %Account{email: email, password: password}
+          |> Entice.Web.Repo.insert
+        # Delte the used invite (no need to store them)
+        Repo.delete(invite)
+        ok(%{message: "Account created!"})
       _ ->
-        conn |> json error(%{message: "Unknown Error occured"})
+        error(%{message: "Unknown Error occured"})
     end
+    conn |> json result
   end
 
   def request_invite(conn, _params) do
