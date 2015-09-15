@@ -3,7 +3,6 @@ defmodule Entice.Web.AccountController do
   alias Entice.Web.Account
   alias Entice.Web.Invitation
   alias Entice.Web.Queries
-  require Logger
 
   plug :ensure_login when action in [:request_invite]
 
