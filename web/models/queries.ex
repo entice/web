@@ -1,5 +1,6 @@
 defmodule Entice.Web.Queries do
   alias Entice.Web.Account
+  alias Entice.Web.Invitation
   import Ecto.Query
 
   def all_accounts do
@@ -20,6 +21,17 @@ defmodule Entice.Web.Queries do
     end
   end
 
+  def get_account(email) do
+    query = from a in Entice.Web.Account,
+          where: a.email == ^email,
+         select: a
+
+    case Entice.Web.Repo.all(query) do
+      [acc] -> {:ok, acc}
+      _     -> {:error, :account_not_found}
+    end
+  end
+
   def update_account(%Account{id: id}) do
     query = from a in Entice.Web.Account,
           where: a.id == ^id,
@@ -31,4 +43,18 @@ defmodule Entice.Web.Queries do
       _     -> {:error, :no_matching_account}
     end
   end
+
+  def get_invite(email) do
+    query = from a in Entice.Web.Invitation,
+          limit: 1,
+          where: a.email == ^email,
+          select: a
+
+    case Entice.Web.Repo.all(query) do
+      [invite] -> {:ok, invite}
+      []       -> {:error, :no_matching_invite}
+      _        -> {:error, :database_inconsistent}
+    end
+  end
+  
 end
