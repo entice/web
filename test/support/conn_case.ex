@@ -1,4 +1,4 @@
-defmodule HelloPhoenix.ConnCase do
+defmodule Entice.Web.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -12,7 +12,6 @@ defmodule HelloPhoenix.ConnCase do
   inside a transaction which is reset at the beginning
   of the test unless the test case is marked as async.
   """
-
   use ExUnit.CaseTemplate
 
   using do
@@ -20,20 +19,20 @@ defmodule HelloPhoenix.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
-      alias HelloPhoenix.Repo
+      alias Entice.Web.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
 
-      import HelloPhoenix.Router.Helpers
+      import Entice.Web.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint HelloPhoenix.Endpoint
+      @endpoint Entice.Web.Endpoint
     end
   end
 
   setup tags do
     unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(HelloPhoenix.Repo, [])
+      Ecto.Adapters.SQL.restart_test_transaction(Entice.Web.Repo, [])
     end
 
     :ok
