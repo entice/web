@@ -33,21 +33,24 @@ defmodule Entice.Web.Router do
   scope "/api", Entice.Web do
     pipe_through :api
 
-    post "/login",            AuthController, :login
-    post "/logout",           AuthController, :logout
+    post    "/login",             AuthController, :login
+    post    "/logout",            AuthController, :logout
 
-    get  "/char",             CharController, :list
-    post "/char",             CharController, :create
+    get     "/char",              CharController, :list
+    get     "/char/account/:name" CharController, :get_account
+    post    "/char",              CharController, :create
 
-    get  "/maps",             DocuController, :maps
-    get  "/skills",           DocuController, :skills
-    get  "/skills/:id",       DocuController, :skills
+    get     "/maps",              DocuController, :maps
+    get     "/skills",            DocuController, :skills
+    get     "/skills/:id",        DocuController, :skills
 
-    get  "/token/entity",     TokenController, :entity_token
+    get     "/token/entity",      TokenController, :entity_token
 
-    post "/account/register", AccountController, :register
-    post "/account/request",  AccountController, :request_invite
+    post    "/account/register",  AccountController, :register
+    post    "/account/request",   AccountController, :request_invite
 
-    resources "/friendlist",  FriendlistController, only: [:index, :show, :create, :delete]
+    get     "/friendlist",        FriendlistController, :index
+    post    "/friendlist/:id",    FriendlistController, :create
+    delete  "/friendlist/:id",    FriendlistController, :delete
   end
 end

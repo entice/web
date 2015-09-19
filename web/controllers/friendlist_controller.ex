@@ -6,7 +6,7 @@ defmodule Entice.Web.FriendlistController do
 
 
 	@doc "Returns all friends of connected account."
-	def index(conn, params) do
+	def index(conn, _params) do
 		id = get_session(conn, :client_id)
 
 		friendlist = Queries.get_friendlist(id)
@@ -14,31 +14,30 @@ defmodule Entice.Web.FriendlistController do
 		conn |> json friendlist
 	end
 
-	@doc "Adds friend :name to friendlist of connected account."
-	def create(conn, %{"name" => :name}) do
-		id = get_session(conn, :client_id)
 
-		result = case Queries.get_character(:name) do
-			{:error, :no_matching_character} -> error(%{message: "This character does not exist."})
-			{:ok, char} ->
-				%Friend{friend_character_name: :name,
-				 account_id: id,
-				 friend_account_id: char.friend_account_id}
-				 |> Entice.Web.Repo.insert
-				ok(%{message: "Friend added succesfully."})
-		end
-		conn |> json result
-	end
+	@doc "Adds friend :id to friendlist of connected account."
+	def create(conn, %{"id" => :id}) do
+		account_id = get_session(conn, :client_id)
 
-	def delete(conn, %{"name" => :name}) do
-		id = get_session(conn, :client_id)
+    result = case Queries.get_account(:friend_id) do
+      {:error, :no_matching_account} -> error(%{message: "This character does not exist."})
+      {:ok, account} ->
+        %Friend{friend_account_id: :id, account_id: :account_id}
+        |> Entice.Web.Repo.insert
+        ok(%{message: "Friend added."})
+    end
+    conn |> json result
+  end
+      
+  @doc "Deletes friend :id from friendlist of connected account."
+	def delete(conn, %{"id" => :id}) do
+		account_id = get_session(conn, :client_id)
 
-		result = case Queries.get_character(:name) do
-			{:error, :no_matching_character} -> error(%{message: "This character does not exist."})
-			{:ok, char} ->
-				result2 = case Queries.get_friend(id, char.account_id) do
-
-			ok(%{message: "Friend deleted succesfully."})
+		result = case Queries.get_friend(account_id, :id) do
+			{:error, :no_matching_friend} -> error(%{message: "This friend does not exist."})
+			{:ok, friend} ->
+				Entice.Web.Repo.delete(friend)
+        ok(%{message: "Friend deleted."})
 		end
 		conn |> json result
 	end

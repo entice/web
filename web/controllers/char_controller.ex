@@ -37,4 +37,15 @@ defmodule Entice.Web.CharController do
       message: "Char created.",
       character: char})
   end
+
+  @doc "Gets the account id of the character named :name ."
+  def get_account(conn, %{"name" => :name}) do
+    result = case Queries.get_account_id(:name) do
+      {:error, :no_matching_character} -> error(%{message: "Couldn't find character."})
+      {:ok, account_id} -> ok(%{account_id: account_id})
+    end
+
+    conn |> json result
+  end
+
 end
