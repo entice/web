@@ -57,5 +57,22 @@ defmodule Entice.Web.Queries do
       _        -> {:error, :database_inconsistent}
     end
   end
+
+  def get_friendlist(id) do
+    query = from friend in Entice.Web.Friend,
+          where: friend.account_id == ^id,
+          select: friend.friend_character_name #doesn't need to see the id here
+    Entice.Web.Repo.all(query) 
+  end
+
+  def add_friend(id, friend_id, friend_character_name) do
+    query =   
+
+
+
+
+
+
+
   
 end

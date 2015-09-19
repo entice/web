@@ -47,5 +47,7 @@ defmodule Entice.Web.Router do
 
     post "/account/register", AccountController, :register
     post "/account/request",  AccountController, :request_invite
+
+    resources "/friendlist",  FriendlistController, only: [:index, :show, :create, :delete]
   end
 end
