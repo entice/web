@@ -37,6 +37,7 @@ defmodule Entice.Web.Queries do
     query = from a in Account,
           where: a.email == ^email and a.password == ^password,
         preload: :characters,
+        preload: :friends,
          select: a
 
     case Repo.all(query) do
@@ -60,6 +61,7 @@ defmodule Entice.Web.Queries do
     query = from a in Account,
           where: a.id == ^id,
         preload: :characters,
+        preload: :friends,
          select: a
 
     case Repo.all(query) do
@@ -81,14 +83,6 @@ defmodule Entice.Web.Queries do
     end
   end
 
-  def get_friendlist(id) do
-    query = from friend in Entice.Web.Friend,
-          where: friend.account_id == ^id,
-          select: friend
-
-    Entice.Web.Repo.all(query) 
-  end
-
   def get_friend(account_id, friend_id) do
     query = from f in Entice.Web.Friend,
           where: f.account_id == ^account_id and f.friend_account_id == ^friend_id,
@@ -99,6 +93,4 @@ defmodule Entice.Web.Queries do
       _     -> {:error, :no_matching_friend}
     end
   end
-
-
 end
