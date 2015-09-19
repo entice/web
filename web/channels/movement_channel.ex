@@ -5,37 +5,38 @@ defmodule Entice.Web.MovementChannel do
   alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Movement, as: Move
+  alias Entice.Entity.Coordination
   alias Entice.Web.Token
-  alias Entice.Web.Observer
+  alias Phoenix.Socket
   import Phoenix.Naming
 
 
-  def join("movement:" <> map, %{"client_id" => client_id, "entity_token" => token}, socket) do
-    {:ok, ^token, :entity, %{map: map_mod, entity_id: entity_id, char: char}} = Token.get_token(client_id)
+  def join("movement:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
     {:ok, ^map_mod} = Area.get_map(camelize(map))
+    Process.flag(:trap_exit, true)
+    send(self, :after_join)
+    {:ok, socket}
+  end
 
 
-    Observer.register(entity_id)
-    Observer.notify_active(entity_id, "movement:" <> map, [])
-
-    :ok = Move.register(entity_id)
-
-    socket = socket
-      |> set_map(map_mod)
-      |> set_entity_id(entity_id)
-      |> set_client_id(client_id)
-      |> set_character(char)
-
+  def handle_info(:after_join, socket) do
+    Coordination.register_observer(self)
+    :ok = Move.register(socket |> entity_id)
     socket |> push("join:ok", %{})
     {:ok, socket}
   end
+
+  def handle_info(_msg, socket), do: {:ok, socket}
+
+
+  # Incoming
 
 
   def handle_in("update:pos", %{"pos" => %{"x" => x, "y" => y} = pos}, socket) do
     Entity.put_attribute(socket |> entity_id, %Position{pos: %Coord{x: x, y: y}})
     broadcast!(socket, "update:pos", %{entity: socket |> entity_id, pos: pos})
 
-    {:ok, socket}
+    {:noreply, socket}
   end
 
 
@@ -43,41 +44,25 @@ defmodule Entice.Web.MovementChannel do
     Move.change_goal(socket |> entity_id, %Coord{x: x, y: y}, plane)
     broadcast!(socket, "update:goal", %{entity: socket |> entity_id, goal: goal, plane: plane})
 
-    {:ok, socket}
+    {:noreply, socket}
   end
 
 
-   def handle_in("update:movetype", %{"movetype" => mtype, "velocity" => velo}, socket)
-   when mtype in 0..10 and velo in -1..2 do
+  def handle_in("update:movetype", %{"movetype" => mtype, "velocity" => velo}, socket)
+  when mtype in 0..10 and velo in -1..2 do
     Move.change_move_type(socket |> entity_id, mtype, velo)
     broadcast!(socket, "update:movetype", %{entity: socket |> entity_id, movetype: mtype, velocity: velo})
 
-    {:ok, socket}
+    {:noreply, socket}
   end
 
 
-  def handle_out("update:" <> value, %{} = msg, socket)
-  when value in ["pos", "goal", "movetype"] do
-    socket |> push("update:" <> value, msg)
-    {:ok, socket}
-  end
+  # Leaving the socket (voluntarily or forcefully)
 
 
-  def handle_out("terminated", %{entity_id: entity_id}, socket) do
-    case (entity_id == socket |> entity_id) do
-      true  -> {:leave, socket}
-      false -> {:ok, socket}
-    end
-  end
-
-
-  def handle_out(_event, _message, socket), do: {:ok, socket}
-
-
-  def leave(_msg, socket) do
-    Observer.notify_inactive(socket |> entity_id, socket.topic)
+  def terminate(_msg, socket) do
     Move.unregister(socket |> entity_id)
-    {:ok, socket}
+    :ok
   end
 end
 

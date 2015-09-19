@@ -1,12 +1,12 @@
 defmodule Entice.Web.EntityChannel do
   use Entice.Web.Web, :channel
+  use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Utils.StructOps
   alias Entice.Entity
-  alias Entice.Entity.Discovery
+  alias Entice.Entity.Coordination
   alias Entice.Logic.Player
-  alias Entice.Web.EntityTopic
-  alias Entice.Web.MapTopic
+  alias Entice.Web.Endpoint
   alias Phoenix.Socket
 
 
@@ -18,7 +18,8 @@ defmodule Entice.Web.EntityChannel do
     Energy]
 
 
-  def join("entity:" <> map, _message, %Socket{assigns: %{map: map}} = socket) do
+  def join("entity:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
+    {:ok, ^map_mod} = Area.get_map(camelize(map))
     Process.flag(:trap_exit, true)
     send(self, :after_join)
     {:ok, socket}
@@ -26,24 +27,10 @@ defmodule Entice.Web.EntityChannel do
 
 
   def handle_info(:after_join, socket) do
+    Coordination.register_observer(self)
     {:ok, entity_pid} = Entity.fetch(socket |> entity_id)
-    Process.monitor(entity_pid)
 
     attrs = Player.attributes(socket |> entity_id)
-
-    # try discover the state of other entities
-    Discovery.register(socket |> entity_id)
-    Discovery.discovery_request(
-      socket |> map,
-      socket |> entity_id,
-      attrs,
-      @reported_attributes)
-
-    # listen for attribute changes from this entity
-    Entity.add_attribute_listener(socket |> entity_id, self, false)
-
-    # listen for events for this entity
-    MapTopic.subscribe(socket |> map, self)
 
     socket |> push("join:ok", %{attributes: process_attributes(attrs)})
     {:noreply, socket}
@@ -53,11 +40,14 @@ defmodule Entice.Web.EntityChannel do
   # Internal events
 
 
-  def handle_info({:DOWN, _ref, _type, _entity_pid, _info}, socket),
-  do: {:stop, :normal, socket}
+  @doc "If this entity leaves, disconnect all sockets, and shut this down as well"
+  def handle_info({:entity_leave, %{entity_id: eid}}, %Socket{assigns: %{entity_id: eid}} = socket) do
+    Endpoint.broadcast(Entice.Web.Socket.id(socket), "disconnect")
+    {:stop, :normal, socket}
+  end
 
 
-  def handle_info({:discovered, %{entity_id: entity_id, attributes: attrs}}, socket) do
+  def handle_info({:entity_join, %{entity_id: entity_id, attributes: attrs}}, socket) do
     res = process_attributes(attrs)
     if not Enum.empty?(res) do
       Entity.add_attribute_listener(entity_id, self, false)
@@ -69,7 +59,7 @@ defmodule Entice.Web.EntityChannel do
   end
 
 
-  def handle_info({:undiscovered, %{entity_id: entity_id, attributes: attrs}}, socket) do
+  def handle_info({:entity_leave, %{entity_id: entity_id, attributes: attrs}}, socket) do
     res = process_attributes(attrs)
     if not Enum.empty?(res),
     do: socket |> push("remove", %{entity: entity_id})
@@ -77,7 +67,7 @@ defmodule Entice.Web.EntityChannel do
   end
 
 
-  def handle_info({:attribute_notify, %{
+  def handle_info({:entity_change, %{
       entity_id: id,
       added: added,
       changed: changed,
@@ -110,7 +100,8 @@ defmodule Entice.Web.EntityChannel do
       map: map_mod,
       char: socket |> character})
 
-    EntityTopic.broadcast_mapchange(socket |> entity_id, map_mod)
+    Endpoint.broadcast(Entice.Web.Socket.id(socket),
+      {:mapchange, %{entity_id: socket |> entity_id, map: map_mod}})
 
     {:reply, {:ok, %{map: map}}, socket}
   end
@@ -120,11 +111,6 @@ defmodule Entice.Web.EntityChannel do
 
 
   def terminate(_msg, socket) do
-    attrs = Player.attributes(socket |> entity_id)
-
-    MapTopic.unsubscribe(socket |> map, self)
-    EntityTopic.unsubscribe(socket |> entity_id, self)
-    Discovery.undiscover_notify(socket |> map, socket |> entity_id, attrs)
     Entity.stop(socket |> entity_id)
     :ok
   end
