@@ -78,6 +78,12 @@ defmodule Entice.Web.Client do
     end
   end
 
+  # Friends api
+
+  def get_friends(id) do
+    {:ok, %Account{friends: friends}} = get_account(id)
+    {:ok, friends}
+  end
 
   # Entity api
 

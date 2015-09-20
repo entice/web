@@ -37,7 +37,4 @@ defmodule Entice.Web.CharController do
       message: "Char created.",
       character: char})
   end
-
-  
-
 end

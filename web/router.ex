@@ -20,6 +20,7 @@ defmodule Entice.Web.Router do
     get "/client/:map",  PageController, :client
     get "/register",     PageController, :account
     get "/invitation",   PageController, :invitation
+    get "/friend",       PageController, :friend
   end
 
 
@@ -49,7 +50,8 @@ defmodule Entice.Web.Router do
     post    "/account/register",      AccountController,  :register
     post    "/account/request",       AccountController,  :request_invite
 
-    post    "/friend/:id",            FriendController,   :create
-    delete  "/friend/:id",            FriendController,   :delete
+    get     "/friend",                FriendsController,   :index
+    post    "/friend",                FriendsController,   :create
+    delete  "/friend",                FriendsController,   :delete
   end
 end
