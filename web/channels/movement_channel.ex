@@ -23,10 +23,10 @@ defmodule Entice.Web.MovementChannel do
     Coordination.register_observer(self)
     :ok = Move.register(socket |> entity_id)
     socket |> push("join:ok", %{})
-    {:ok, socket}
+    {:noreply, socket}
   end
 
-  def handle_info(_msg, socket), do: {:ok, socket}
+  def handle_info(_msg, socket), do: {:noreply, socket}
 
 
   # Incoming

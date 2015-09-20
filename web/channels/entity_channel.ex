@@ -28,10 +28,7 @@ defmodule Entice.Web.EntityChannel do
 
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
-    {:ok, entity_pid} = Entity.fetch(socket |> entity_id)
-
     attrs = Player.attributes(socket |> entity_id)
-
     socket |> push("join:ok", %{attributes: process_attributes(attrs)})
     {:noreply, socket}
   end
@@ -50,7 +47,6 @@ defmodule Entice.Web.EntityChannel do
   def handle_info({:entity_join, %{entity_id: entity_id, attributes: attrs}}, socket) do
     res = process_attributes(attrs)
     if not Enum.empty?(res) do
-      Entity.add_attribute_listener(entity_id, self, false)
       socket |> push("add", %{
         entity: entity_id,
         attributes: res})

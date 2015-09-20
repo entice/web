@@ -11,7 +11,6 @@ defmodule Entice.Test.Factories do
   alias Entice.Web.Client
   alias Entice.Web.Token
   alias Entice.Test.Factories.Counter
-  alias Phoenix.Socket
   import Entice.Utils.StructOps
 
 
@@ -51,6 +50,20 @@ defmodule Entice.Test.Factories do
   def create_entity(id) do
     {:ok, id, pid} = Entity.start(id)
     {id, pid}
+  end
+
+  def create_player(topic, map) when is_bitstring(topic) and is_atom(map) do
+    char       = create_character
+    acc        = create_account(char)
+    cid        = create_client(acc)
+    {eid, pid} = create_entity
+    {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, map: map, char: char})
+
+    Player.register(eid, map, char.name, copy_into(%Appearance{}, char))
+
+    {:ok, socket} = connect(Entice.Web.Socket, %{"client_id" => cid, "entity_token" => tid, "map" => map.underscore_name})
+
+    %{character: char, account: acc, client_id: cid, entity_id: eid, entity: pid, token: tid, socket: socket}
   end
 end
 

@@ -28,7 +28,7 @@ defmodule Entice.Web.GroupChannel do
     Coordination.register_observer(self)
     :ok = Group.register(socket |> entity_id)
     socket |> push("join:ok", %{})
-    {:ok, socket}
+    {:noreply, socket}
   end
 
 
@@ -78,7 +78,7 @@ defmodule Entice.Web.GroupChannel do
     {:ok, socket}
   end
 
-  def handle_info(_msg, socket), do: {:ok, socket}
+  def handle_info(_msg, socket), do: {:noreply, socket}
 
 
   # Incoming events

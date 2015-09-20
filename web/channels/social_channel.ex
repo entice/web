@@ -2,9 +2,7 @@ defmodule Entice.Web.SocialChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Area
   alias Entice.Logic.Group
-  alias Entice.Entity.Coordination
   alias Entice.Web.Token
-  alias Entice.Web.Observer
   alias Phoenix.Socket
   import Phoenix.Naming
 
@@ -12,26 +10,18 @@ defmodule Entice.Web.SocialChannel do
   def join("social:" <> map_rooms, _message, %Socket{assigns: %{map: map_mod}} = socket) do
     [map | rooms] = Regex.split(~r/:/, map_rooms)
     {:ok, ^map_mod} = Area.get_map(camelize(map))
-    join_internal(socket |> entity_id, rooms, "social:" <> map_rooms, socket)
+    join_internal(rooms, socket)
   end
 
 
   # free for all mapwide channel
-  defp join_internal(entity_id, [], topic, socket) do
-    socket |> push("join:ok", %{})
-    {:ok, socket}
-  end
-
+  defp join_internal([], socket), do: {:ok, socket}
 
   # group only channel, restricted to group usage
-  defp join_internal(entity_id, ["group", leader_id], topic, socket) do
-    case Group.is_my_leader?(entity_id, leader_id) do
-      false ->
-        socket |> push("join:error", %{})
-        {:error, "Access to this group chat denied"}
-      true ->
-        socket |> push("join:ok", %{})
-        {:ok, socket}
+  defp join_internal(["group", leader_id], socket) do
+    case Group.is_my_leader?(socket |> entity_id, leader_id) do
+      true  -> {:ok, socket}
+      false -> {:error, "Access to this group chat denied"}
     end
   end
 

@@ -1,7 +1,6 @@
 defmodule Entice.Web.SkillChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Area
-  alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Skills
   alias Entice.Logic.Area
@@ -23,10 +22,10 @@ defmodule Entice.Web.SkillChannel do
     Coordination.register_observer(self)
     :ok = SkillBar.register(entity_id, char.skillbar)
     socket |> push("join:ok", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
-    {:ok, socket}
+    {:noreply, socket}
   end
 
-  def handle_info(_msg, socket), do: {:ok, socket}
+  def handle_info(_msg, socket), do: {:noreply, socket}
 
 
   # Incoming
@@ -34,14 +33,13 @@ defmodule Entice.Web.SkillChannel do
 
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     # TODO add a more sophisticated check of the client's available skills
-    case (socket |> map).is_outpost? do
-      false -> {:reply, :error, socket}
-      true  ->
+    case {Skills.get_skill(id), (socket |> map).is_outpost?} do
+      {nil, _}  -> {:reply, :error, socket}
+      {_, true} ->
         new_slots = socket |> entity_id |> SkillBar.change_skill(slot, id)
         Entice.Web.Repo.update(%{(socket |> character) | skillbar: new_slots})
         {:reply, {:ok, %{skillbar: new_slots}}, socket}
     end
-
   end
 
 
