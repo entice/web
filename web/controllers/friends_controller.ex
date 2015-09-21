@@ -1,6 +1,7 @@
 defmodule Entice.Web.FriendsController do
   use Entice.Web.Web, :controller
   alias Entice.Web.Queries
+  alias Entice.Web.Account
 
   plug :ensure_login
 
@@ -25,20 +26,16 @@ defmodule Entice.Web.FriendsController do
 
     friend_account = Entice.Web.Repo.get(Entice.Web.Account, friend_account_id)
     
-    #Must refactor this
     result = case friend_account do
       nil -> error(%{message: "This account does not exist."})
+      %Account{id: ^account_id} -> error(%{message: "Can't add yourself."})
       _ ->
-        result = case friend_account.id do
-          ^account_id -> error(%{message: "Can't add yourself."})
-          _  ->
-            result = case Queries.get_friend(account_id, friend_account_id) do
-              {:error, :no_matching_friend} -> 
-                Queries.add_friend(acc, friend_account)
-                ok%{message: "Friend added."}              
-              {:ok, friend} -> error%{message: "Already in friends list."}
-            end 
-        end      
+        case Queries.get_friend(account_id, friend_account_id) do
+          {:error, :no_matching_friend} -> 
+            Queries.add_friend(acc, friend_account)
+            ok%{message: "Friend added."}              
+          {:ok, friend} -> error%{message: "Already in friends list."}
+        end  
     end    
     conn |> json result
   end
@@ -47,10 +44,9 @@ defmodule Entice.Web.FriendsController do
   def delete(conn, _params) do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
-    account_id = acc.id
     friend_account_id = conn.params["friend_account_id"]
 
-    result = case Queries.get_friend(account_id, friend_account_id) do
+    result = case Queries.get_friend(acc.id, friend_account_id) do
       {:error, :no_matching_friend} -> error(%{message: "This friend does not exist."})
       {:ok, friend} ->
         Entice.Web.Repo.delete(friend)
@@ -58,7 +54,4 @@ defmodule Entice.Web.FriendsController do
     end
     conn |> json result
   end
-
-
-
 end 
