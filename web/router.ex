@@ -50,8 +50,8 @@ defmodule Entice.Web.Router do
     post    "/account/register",      AccountController,  :register
     post    "/account/request",       AccountController,  :request_invite
 
-    get     "/friend",                FriendsController,   :index
-    post    "/friend",                FriendsController,   :create
-    delete  "/friend",                FriendsController,   :delete
+    get     "/friend",                FriendsController,  :index
+    post    "/friend",                FriendsController,  :create
+    delete  "/friend",                FriendsController,  :delete
   end
 end

@@ -22,20 +22,6 @@ defmodule Entice.Web.Queries do
     end
   end
 
-
-  def get_account(id) do
-    query = from a in Entice.Web.Account,
-          where:  a.id == ^id,
-          select: a
-
-    case Entice.Web.Repo.all(query) do
-      [acc] -> {:ok, acc}
-      _     -> {:error, :no_matching_account}
-    end
-  end
-
-
-
   def get_account(email, password) do
     query = from a in Account,
           where: a.email == ^email and a.password == ^password,
