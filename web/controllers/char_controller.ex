@@ -47,6 +47,6 @@ defmodule Entice.Web.CharController do
 
     conn |> json ok(%{
       message: "Char created.",
-      character: char})
+      character: char |> Map.from_struct |> Map.take(@field_whitelist)})
   end
 end

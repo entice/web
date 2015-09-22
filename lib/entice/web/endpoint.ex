@@ -1,6 +1,10 @@
 defmodule Entice.Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :entice_web
 
+
+  socket "/socket", Entice.Web.Socket
+
+
   plug Plug.Static,
     at: "/", from: :entice_web, gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
@@ -32,7 +36,6 @@ defmodule Entice.Web.Endpoint do
 
   plug Entice.Web.Router
 
-  socket "/socket", Entice.Web.Socket
 
   # Helpers that are not offered by phoenix by default
 
