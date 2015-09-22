@@ -13,7 +13,7 @@ config :entice_web, Entice.Web.Endpoint,
   url: [host: "localhost"],
   root: Path.dirname(__DIR__),
   secret_key_base: "2chowpvvTbXuS+loaCzcTU2RXQY1wQtCn22qrcE51+kcqSCenmMIRE7IrhC2Cwax",
-  render_errors: [accepts: ~w(html json)],
+  render_errors: [view: Entice.Web.ErrorView, accepts: ~w(html json)],
   transports: [websocket_timeout: 60000],
   pubsub: [name: Entice.Web.PubSub,
            adapter: Phoenix.PubSub.PG2]
