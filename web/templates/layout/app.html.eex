@@ -20,6 +20,7 @@
 
       <%= if logged_in?(@conn) do %>
         <span>| <a href="<%= page_path(@conn, :client, "heroes_ascent") %>">Client... </a></span>
+        <span>| <a href="<%= page_path(@conn, :friend) %>">Friends...</a></span>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Logout... </a></span>
         <span>| <a href="<%= page_path(@conn, :invitation) %>">Request Invite... </a></span>
       <% else %>
