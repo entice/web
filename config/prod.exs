@@ -2,7 +2,7 @@ use Mix.Config
 
 config :entice_web, Entice.Web.Endpoint,
   http: [port: {:system, "PORT"}],
-  url: [host: "to.entice.so", port: 80],
+  url: [host: {:system, "HOST_NAME"} || "to.entice.so", port: {:system, "HOST_PORT"} || 80],
   cache_static_manifest: "priv/static/manifest.json"
 
 # Do not print debug messages in production
