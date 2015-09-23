@@ -62,5 +62,4 @@
     });
   };
 
-  window.addEventListener("load", init(), false);
 </script>
