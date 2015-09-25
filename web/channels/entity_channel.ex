@@ -96,7 +96,7 @@ defmodule Entice.Web.EntityChannel do
       map: map_mod,
       char: socket |> character})
 
-    Endpoint.broadcast(Entice.Web.Socket.id(socket),
+    Endpoint.plain_broadcast(Entice.Web.Socket.id(socket),
       {:mapchange, %{entity_id: socket |> entity_id, map: map_mod}})
 
     {:reply, {:ok, %{map: map}}, socket}
