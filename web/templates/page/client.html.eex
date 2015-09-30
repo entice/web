@@ -8,8 +8,7 @@
     $('#output').append(pre);
   };
 
-  <%= # escape the html... formerly used "safe token_path(" here %>
-  $.get("<%= token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
+  $.get("<%= raw token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
    .then(function(data) {
     if (data.status === "ok") {
       puts("Message", "Green", JSON.stringify(data.message));
@@ -23,52 +22,43 @@
   });
 
   function init(map, client_id, entity_id, entity_token) {
-    var socket = new Phoenix.Socket("/ws");
+    var socket = new Phoenix.Socket("/socket");
+    socket.connect({client_id: client_id, entity_token: entity_token, map: map});
 
-    socket.join("entity:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
+    socket.channel("entity:" + map)
+    .join()
+    .receive("join:ok", function(payload) {
+      puts("[entity] Joined", "Blue", JSON.stringify(payload))
+    })
+    .receive("entity:add", function(payload) {
+      puts("[entity] Got", "Red", JSON.stringify(payload))
+    })
+    .receive("entity:remove", function(payload) {
+      puts("[entity] Got", "Red", JSON.stringify(payload))
+    });
 
-      channel.on("join:ok", function(payload) {
-        puts("[entity] Joined", "Blue", JSON.stringify(payload))
-      });
-
-      channel.on("entity:add", function(payload) {
-        puts("[entity] Got", "Red", JSON.stringify(payload))
-      });
-
-      channel.on("entity:remove", function(payload) {
-        puts("[entity] Got", "Red", JSON.stringify(payload))
-      });
+    socket.channel("group:" + map)
+    .join()
+    .receive("join:ok", function(payload) {
+      puts("[group] Joined", "Blue", JSON.stringify(payload))
     });
 
 
-    socket.join("group:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
-
-      channel.on("join:ok", function(payload) {
-        puts("[group] Joined", "Blue", JSON.stringify(payload))
-      });
+    socket.channel("skill:" + map)
+    .join()
+    .receive("join:ok", function(payload) {
+      puts("[skill] Joined", "Blue", JSON.stringify(payload))
+      //channel.send("skillbar:set", {slot: 1, id: 3});
+    })
+    .receive("skillbar:ok", function(payload) {
+      puts("[skill] Got", "Red", JSON.stringify(payload))
     });
 
-
-    socket.join("skill:" + map, {client_id: client_id, entity_token: entity_token}, function(channel) {
-
-      channel.on("join:ok", function(payload) {
-        puts("[skill] Joined", "Blue", JSON.stringify(payload))
-        //channel.send("skillbar:set", {slot: 1, id: 3});
-      });
-
-      channel.on("skillbar:ok", function(payload) {
-        puts("[skill] Got", "Red", JSON.stringify(payload))
-      });
-    });
-
-
-    socket.join("social:" + map + ":group:" + entity_id, {client_id: client_id, entity_token: entity_token}, function(channel) {
-
-      channel.on("join:ok", function(payload) {
-        puts("[social] Joined", "Blue", JSON.stringify(payload))
-      });
+    socket.channel("social:" + map + ":group:" + entity_id)
+    .join()
+    .receive("join:ok", function(payload) {
+      puts("[social] Joined", "Blue", JSON.stringify(payload))
     });
   };
 
-  /*window.addEventListener("load", init(), false);*/
 </script>

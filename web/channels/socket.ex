@@ -62,5 +62,6 @@ defmodule Entice.Web.Socket do
   do: :ignore
 
 
-  def id(socket), do: "socket:entity:#{socket |> entity_id}"
+  def id(socket), do: id_by_entity(socket |> entity_id)
+  def id_by_entity(entity_id), do: "socket:entity:#{entity_id}"
 end

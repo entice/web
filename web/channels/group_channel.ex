@@ -7,6 +7,7 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Web.Token
+  alias Entice.Web.Endpoint
   alias Phoenix.Socket
   import Phoenix.Naming
 
@@ -55,27 +56,37 @@ defmodule Entice.Web.GroupChannel do
     {:noreply, socket}
   end
 
-  def handle_info({:mapchange, %{entity_id: entity_id, map: map_mod}}, socket) do
+
+  def handle_info({:entity_mapchange, %{map: map_mod}}, socket) do
     mems =
-      case Entity.fetch_attribute(entity_id, Leader) do
+      case Entity.fetch_attribute(socket |> entity_id, Leader) do
         {:ok, %Leader{members: mems}} -> mems
         _                             -> []
       end
 
-    # if we are part of the members we need to leave the map as well
-    if (socket |> entity_id) in mems do
-      {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
-        entity_id: socket |> entity_id,
-        map: map_mod,
-        char: socket |> character})
+    mems |> Enum.map(
+      fn member ->
+        Endpoint.plain_broadcast(
+          Entice.Web.Socket.id_by_entity(member),
+          {:leader_mapchange, %{map: map_mod}})
+      end)
 
-      # TODO pls check if some this needs to be replaced?
-      #Observer.notify_mapchange(socket |> entity_id, map_mod)
+    {:noreply, socket}
+  end
 
-      socket |> push("map:change", %{map: map_mod.underscore_name})
-    end
 
-    {:ok, socket}
+  def handle_info({:leader_mapchange, %{map: map_mod}}, socket) do
+    {:ok, _token} = Token.create_mapchange_token(socket |> client_id, %{
+      entity_id: socket |> entity_id,
+      map: map_mod,
+      char: socket |> character})
+
+    # TODO pls check if some this needs to be replaced?
+    #Observer.notify_mapchange(socket |> entity_id, map_mod)
+
+    socket |> push("map:change", %{map: map_mod.underscore_name})
+
+    {:noreply, socket}
   end
 
   def handle_info(_msg, socket), do: {:noreply, socket}

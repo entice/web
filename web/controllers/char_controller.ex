@@ -5,6 +5,20 @@ defmodule Entice.Web.CharController do
   plug :ensure_login
 
 
+  @field_whitelist [
+    :name,
+    :available_skills,
+    :skillbar,
+    :profession,
+    :campaign,
+    :sex,
+    :height,
+    :skin_color,
+    :hair_color,
+    :hairstyle,
+    :face]
+
+
   def list(conn, _params) do
     id = conn |> get_session(:client_id)
     {:ok, acc} = Client.get_account(id)
@@ -13,9 +27,7 @@ defmodule Entice.Web.CharController do
     |> Enum.map(fn char ->
       char
       |> Map.from_struct
-      |> Map.delete(:id)
-      |> Map.delete(:account)
-      |> Map.delete(:account_id)
+      |> Map.take(@field_whitelist)
     end)
 
     conn |> json ok(%{
@@ -35,6 +47,6 @@ defmodule Entice.Web.CharController do
 
     conn |> json ok(%{
       message: "Char created.",
-      character: char})
+      character: char |> Map.from_struct |> Map.take(@field_whitelist)})
   end
 end
