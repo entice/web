@@ -3,6 +3,7 @@ defmodule Entice.Web.Client do
   alias Entice.Web.Client
   alias Entice.Web.Queries
   alias Entice.Entity
+  alias Entice.Logic.Player
   import Plug.Conn
 
   @doc """
@@ -28,7 +29,6 @@ defmodule Entice.Web.Client do
   defp log_in({:error, _msg}), do: :error
   defp log_in({:ok, acc}) do
     existing = Client.Server.get_client(acc.email)
-
     {:ok, id, _pid} = case existing do
       id when is_bitstring(id) -> {:ok, id, :no_pid}
       nil -> Entity.start(UUID.uuid4(), %{Account => acc})
@@ -83,6 +83,30 @@ defmodule Entice.Web.Client do
   def get_friends(id) do
     {:ok, %Account{friends: friends}} = get_account(id)
     {:ok, friends}
+  end
+
+  @doc ""
+  def get_status(account_id) do
+    case Entice.Web.Repo.get(Entice.Web.Account, account_id) do
+      nil -> {:error, :no_matching_account}
+      acc ->
+        acc = Entice.Web.Repo.preload(acc, :characters)
+        case Client.Server.get_client(acc.email) do
+          nil ->
+            #What do if empty list
+            if length(acc.characters) == 1 do #Can't access characters[0] if length == 1 for some reason
+              name = acc.characters.name
+            else
+              name = acc.characters[0].name
+            end
+            {:ok, :offline, name}
+          id ->
+            client = Entity.fetch_attribute(id, Client)
+            #This returns an error for some reason
+            IO.inspect client
+            {:ok, client.online_status, :none}
+        end
+    end
   end
 
   # Entity api
