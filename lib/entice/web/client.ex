@@ -3,12 +3,14 @@ defmodule Entice.Web.Client do
   alias Entice.Web.Client
   alias Entice.Web.Queries
   alias Entice.Entity
+  alias Entice.Logic.Player
   import Plug.Conn
+  import ExUnit.Assertions
 
   @doc """
   Stores client related plain data
   """
-  defstruct entity_id: nil
+  defstruct entity_id: nil, online_status: nil
 
 
   def exists?(id), do: Entity.exists?(id)
@@ -93,22 +95,18 @@ defmodule Entice.Web.Client do
         acc = Entice.Web.Repo.preload(acc, :characters)
         case Client.Server.get_client(acc.email) do
           nil ->
-            if length(acc.characters) == 0 do #Can't access characters[0] if length == 1 for some reason
+            if length(acc.characters) == 0 do
               name = "No Character"
             else
               name = hd(acc.characters).name
             end
             {:ok, :offline, name}
           id ->
-            client = Entity.fetch_attribute!(id, Client)
-            #assert client != :error #Player should always have request entity token before seeing his friend list
-            #gotta figure out where assert comes from
-            #IO.inspect client
+            attribute = Entity.fetch_attribute(id, Client)
+            assert attribute != :error, "Friend status should never be fetched before entity token."
+            {:ok, client} = attribute
             player = Player.attributes(client.entity_id)
-            #IO.inspect player
-            #IO.puts player.Name.name
-            #Still gotta figure out how to add online status to Client
-            {:ok, client.online_status, player.Name}
+            {:ok, client.online_status, player[Player.Name].name}
         end
     end
   end
@@ -117,7 +115,7 @@ defmodule Entice.Web.Client do
 
 
   def set_entity(id, entity_id),
-  do: Entity.put_attribute(id, %Client{entity_id: entity_id})
+  do: Entity.put_attribute(id, %Client{entity_id: entity_id, online_status: :online})
 
 
   def get_entity(id) do
