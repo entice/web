@@ -85,6 +85,34 @@ defmodule Entice.Web.Client do
     {:ok, friends}
   end
 
+  @doc "Returns a friend's online status and character name from his account id."
+  def get_status(account_id) do
+    case Entice.Web.Repo.get(Entice.Web.Account, account_id) do
+      nil -> {:error, :no_matching_account}
+      acc ->
+        acc = Entice.Web.Repo.preload(acc, :characters)
+        case Client.Server.get_client(acc.email) do
+          nil ->
+            if length(acc.characters) == 0 do #Can't access characters[0] if length == 1 for some reason
+              name = "No Character"
+            else
+              name = hd(acc.characters).name
+            end
+            {:ok, :offline, name}
+          id ->
+            client = Entity.fetch_attribute!(id, Client)
+            #assert client != :error #Player should always have request entity token before seeing his friend list
+            #gotta figure out where assert comes from
+            #IO.inspect client
+            player = Player.attributes(client.entity_id)
+            #IO.inspect player
+            #IO.puts player.Name.name
+            #Still gotta figure out how to add online status to Client
+            {:ok, client.online_status, player.Name}
+        end
+    end
+  end
+
   # Entity api
 
 
