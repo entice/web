@@ -1,0 +1,79 @@
+<%= if logged_in?(@conn) do %>
+
+  <fieldset>
+    <legend>Friends list</legend>
+    <p>Friends:</p>
+    <p id="friends"></p>
+    <p>
+      <label for="id" class="inputLabel">ID:</label>
+      <input type="text" class="inputField" id="id" name="id" value="" size="20" maxlength="50" />
+    </p>
+    <input type="submit" class="inputButton" id="submitAdd" name="submit" value="Add Friend" />
+    <input type="submit" class="inputButton" id="submitDel" name="submit" value="Delete Friend" />
+    <p id="message"></p>
+  </fieldset>
+
+  <script>
+    var $friends = $("#friends");
+    var $message = $("#message");
+
+    $.ajax("<%= friends_path(@conn, :index) %>", {
+        type: 'GET'
+      })
+      .done(function(data) {
+        if(data.status == "ok"){
+          $friends.append(data.friends);
+        }
+        else {
+        }
+      })
+      .fail(function(data) {});
+
+    $('#submitAdd').click(function() {
+      id = $("#id").val();
+
+      $.ajax("<%= friends_path(@conn, :create) %>", {
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({"friend_account_id": id}),
+        cache: false
+      })
+      .done(function(data) {
+        if(data.status == "ok"){
+        }
+        else {
+        }
+        $message.append("<br>" + data.message);
+      })
+      .fail(function(data) {
+      });
+    });
+
+    $('#submitDel').click(function() {
+      id = $("#id").val();
+
+      $.ajax("<%= friends_path(@conn, :delete) %>", {
+        type: 'DELETE',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({"friend_account_id": id}),
+        cache: false
+      })
+      .done(function(data) {
+        if(data.status == "ok"){
+        }
+        else {
+        }
+        $message.append("<br>" + data.message);
+      })
+      .fail(function(data) {
+      });
+    });
+
+
+
+  </script>
+<% else %>
+  <p>You need to be Logged in... </p>
+<% end %>

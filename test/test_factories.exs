@@ -3,6 +3,7 @@ defmodule Entice.Test.Factories do
   Stuff à la factory_girl, but with a bit more concrete flavour.
   """
   use Entice.Logic.Attributes
+  use Phoenix.ChannelTest
   alias Entice.Entity
   alias Entice.Logic.Player
   alias Entice.Web.Account
@@ -10,8 +11,10 @@ defmodule Entice.Test.Factories do
   alias Entice.Web.Client
   alias Entice.Web.Token
   alias Entice.Test.Factories.Counter
-  alias Phoenix.Socket
   import Entice.Utils.StructOps
+
+
+  @endpoint Entice.Web.Endpoint
 
 
   def create_character(name \\ "Some Char #{Counter.get_num(:character_name)}"),
@@ -49,32 +52,16 @@ defmodule Entice.Test.Factories do
     {id, pid}
   end
 
-
-  def create_socket(topic, pid \\ self),
-  do: %Socket{
-    pid: pid,
-    router: Entice.Web.Router,
-    topic: topic,
-    assigns: [],
-    transport: Phoenix.Transports.WebSocket,
-    pubsub_server: Entice.Web.PubSub}
-
-
-  def create_player(topic, map, entity_as_socket_pid \\ false) when is_bitstring(topic) and is_atom(map) do
+  def create_player(topic, map) when is_bitstring(topic) and is_atom(map) do
     char       = create_character
     acc        = create_account(char)
     cid        = create_client(acc)
     {eid, pid} = create_entity
     {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, map: map, char: char})
 
-    socket =
-      if entity_as_socket_pid do
-        create_socket(topic <> ":" <> map.underscore_name, pid)
-      else
-        create_socket(topic <> ":" <> map.underscore_name)
-      end
-
     Player.register(eid, map, char.name, copy_into(%Appearance{}, char))
+
+    {:ok, socket} = connect(Entice.Web.Socket, %{"client_id" => cid, "entity_token" => tid, "map" => map.underscore_name})
 
     %{character: char, account: acc, client_id: cid, entity_id: eid, entity: pid, token: tid, socket: socket}
   end

@@ -1,5 +1,16 @@
 use Mix.Config
 
+config :entice_web, Entice.Web.Endpoint,
+  http: [port: {:system, "PORT"}],
+  url: [
+    host: (System.get_env("HOST_NAME") || "to.entice.so"),
+    port: (System.get_env("HOST_PORT") || 80)],
+  cache_static_manifest: "priv/static/manifest.json"
+
+# Do not print debug messages in production
+config :logger,
+  level: :info
+
 # ## SSL Support
 #
 # To get SSL working, you will need to set:
@@ -9,12 +20,7 @@ use Mix.Config
 #             certfile: System.get_env("SOME_APP_SSL_CERT_PATH")]
 #
 # Where those two env variables point to a file on
-# disk for the key and cert.
 
-config :entice_web, Entice.Web.Endpoint,
-  url: [host: "entice-server-elixir.herokuapp.com"],
-  http: [port: System.get_env("PORT")],
-  secret_key_base: "Ja11ias2sS4WOrq0DBR3HctuznRaS9rdGdhqKy2dE1/Cd66X8u/p8YqJfu5mSNTO"
-
-config :logger,
-  level: :info
+# Finally import the config/prod.secret.exs
+# which should be versioned separately.
+import_config "prod.secret.exs"

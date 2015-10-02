@@ -1,26 +1,35 @@
 defmodule Entice.Web.GroupChannelTest do
-  use ExUnit.Case
+  use Entice.Web.ChannelCase
   use Entice.Logic.Area
+  use Entice.Logic.Attributes
+  alias Entice.Web.Endpoint
+  alias Entice.Entity
   alias Entice.Test.Factories
-  alias Entice.Test.Spy
-  alias Phoenix.Socket.Message
-  alias Phoenix.Channel.Transport
 
 
   setup do
-    p1 = Factories.create_player("group", HeroesAscent, true)
-    Spy.register(p1[:entity_id], self)
-
-    assert {:ok, _sock} = Transport.dispatch(p1[:socket], "group:heroes_ascent", "join", %{"client_id" => p1[:client_id], "entity_token" => p1[:token]})
-
-    {:ok, [e1: p1[:entity_id]]}
+    player = Factories.create_player("group", HeroesAscent)
+    {:ok, _, socket} = subscribe_and_join(player[:socket], "group:heroes_ascent", %{})
+    {:ok, [player: player, socket: socket]}
   end
 
 
-  test "join", %{e1: e1} do
-    assert_receive %{sender: ^e1, event: {:socket_reply, %Message{
-      topic: "group:heroes_ascent",
-      event: "join:ok",
-      payload: %{}}}}
+  test "join" do
+    assert_push "join:ok", %{}
+  end
+
+
+  # this should actually be tested together with the entity_channel reacting to a map change request
+  test "mapchange", %{player: player, socket: socket} do
+    new_map = TeamArenas.underscore_name
+    # we fake a uuid and subscribe ourselfs to its topic
+    eid = UUID.uuid4()
+    Endpoint.subscribe(self, Entice.Web.Socket.id_by_entity(eid))
+    # set the faked entity as a member
+    player[:entity_id] |> Entity.put_attribute(%Leader{members: [eid]})
+    # trigger the mapchange
+    send socket.channel_pid, {:entity_mapchange, %{map: new_map}}
+    # we expect to be notified
+    assert_receive {:leader_mapchange, %{map: ^new_map}}
   end
 end

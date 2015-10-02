@@ -1,10 +1,9 @@
 defmodule Entice.Web.Client do
   alias Entice.Web.Account
   alias Entice.Web.Client
+  alias Entice.Web.Queries
   alias Entice.Entity
   import Plug.Conn
-  import Entice.Web.Queries
-
 
   @doc """
   Stores client related plain data
@@ -25,7 +24,7 @@ defmodule Entice.Web.Client do
   def add(%Account{} = acc), do: log_in({:ok, acc})
 
 
-  def log_in(email, password), do: log_in(get_account(email, password))
+  def log_in(email, password), do: log_in(Queries.get_account(email, password))
   defp log_in({:error, _msg}), do: :error
   defp log_in({:ok, acc}) do
     existing = Client.Server.get_client(acc.email)
@@ -59,7 +58,7 @@ defmodule Entice.Web.Client do
 
   def get_account(id) do
     acc = Entity.fetch_attribute!(id, Account)
-    {:ok, acc} = update_account(acc)
+    {:ok, acc} = Queries.update_account(acc)
     set_account(id, acc)
     {:ok, acc}
   end
@@ -79,6 +78,12 @@ defmodule Entice.Web.Client do
     end
   end
 
+  # Friends api
+
+  def get_friends(id) do
+    {:ok, %Account{friends: friends}} = get_account(id)
+    {:ok, friends}
+  end
 
   # Entity api
 

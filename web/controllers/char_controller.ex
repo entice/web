@@ -1,11 +1,22 @@
 defmodule Entice.Web.CharController do
-  use Phoenix.Controller
+  use Entice.Web.Web, :controller
   alias Entice.Web.Character
-  alias Entice.Web.Client
-  import Entice.Web.ControllerHelper
 
   plug :ensure_login
-  plug :action
+
+
+  @field_whitelist [
+    :name,
+    :available_skills,
+    :skillbar,
+    :profession,
+    :campaign,
+    :sex,
+    :height,
+    :skin_color,
+    :hair_color,
+    :hairstyle,
+    :face]
 
 
   def list(conn, _params) do
@@ -13,10 +24,11 @@ defmodule Entice.Web.CharController do
     {:ok, acc} = Client.get_account(id)
 
     chars = acc.characters
-    |> Enum.map(&Map.from_struct/1)
-    |> Enum.map(&Map.delete(&1, :id))
-    |> Enum.map(&Map.delete(&1, :account))
-    |> Enum.map(&Map.delete(&1, :account_id))
+    |> Enum.map(fn char ->
+      char
+      |> Map.from_struct
+      |> Map.take(@field_whitelist)
+    end)
 
     conn |> json ok(%{
       message: "All chars...",
@@ -29,13 +41,12 @@ defmodule Entice.Web.CharController do
     {:ok, acc} = Client.get_account(id)
 
     name = conn.params["name"]
-    char = %Character{name: name, account: acc}
-      |> Entice.Web.Repo.insert
+    char = %Character{name: name, account: acc} |> Entice.Web.Repo.insert
 
     Client.add_char(id, char)
 
     conn |> json ok(%{
       message: "Char created.",
-      character: char})
+      character: char |> Map.from_struct |> Map.take(@field_whitelist)})
   end
 end

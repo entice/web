@@ -1,0 +1,48 @@
+<%= if logged_in?(@conn) do %>
+  <fieldset>
+    <legend>Request Invitation</legend>
+    <p>
+      <label>Invite a Friend...</label>
+    </p>
+    <p>
+      <label for="email" class="inputLabel">Email:</label>
+      <input type="text" class="inputField" id="email" name="email" value="" size="20" maxlength="50" />
+    </p>
+    <input type="submit" class="inputButton" id="submit" name="submit" value="Request key" />
+  </fieldset>
+  <script>
+    $('#submit').click(function() {
+      email = $('#email').val();
+
+      $.ajax("<%= account_path(@conn, :request_invite) %>", {
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({"email": email}),
+        cache: false
+      })
+      .done(function(data) {
+
+        if(data.status == "error"){
+          $('.authMessage').append("<br/> " + data.message);
+        }
+        else {
+          $('.authMessage').append("<br/> Invitation is created.");
+          $('.authMessage').append("<br/> Email: " + data.email);
+          $('.authMessage').append("<br/> InviteKey: " + data.key);
+          $('.authMessage').append("<br/><p>This is the link<br/><a href=\"mailto:" + data.email + "?subject=You%20are%20invited%20to%20play%20on%20a%20Guild%20Wars%20private%20Server&body=Hello,%20you%20are%20invited%20to%20play%20on%20the%20Entice%20GuildWars%20Server&body=Use%20your%20Email%20and%20the%20following%20Key%20to%20Register%20at%20<%=page_url(@conn, :account)%>%20InvitationKey:%20" + data.key + 
+            "target=\"top\">Send as Mail</p></a>");
+        }
+      })
+      .fail(function(data) {
+        $('.authMessage').append(data.message);
+        $('.authMessage').append("<br/>Please try again!");
+      });
+    });
+  </script>
+<% else %>
+  <p>You need to be Logged in... </p>
+<% end %>
+
+<br>
+<div class="authMessage"></div>
