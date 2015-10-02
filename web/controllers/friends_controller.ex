@@ -20,10 +20,10 @@ defmodule Entice.Web.FriendsController do
   def status(conn, _params) do
     id = get_session(conn, :client_id)
     account_id = conn.params["account_id"]
-
+    IO.puts account_id
     result = case Client.get_status(account_id) do
       {:error, :no_matching_account} -> error(%{message: "There is no account with that id."})
-      {:ok, status, name} -> ok(%{message: "Friend info recovery successful.", online_status: status, character_name: name})
+      {:ok, status, name} -> ok(%{message: "Friend info retrieval successful.", online_status: status, character_name: name})
     end
 
     conn |> json result
