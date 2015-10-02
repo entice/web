@@ -1,12 +1,13 @@
 defmodule Entice.Web.EntityChannel do
   use Entice.Web.Web, :channel
-  use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Utils.StructOps
   alias Entice.Entity
   alias Entice.Entity.Coordination
+  alias Entice.Logic.Area
   alias Entice.Logic.Player
   alias Entice.Web.Endpoint
+  alias Entice.Web.Token
   alias Phoenix.Socket
 
 

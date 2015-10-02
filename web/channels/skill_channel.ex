@@ -1,13 +1,10 @@
 defmodule Entice.Web.SkillChannel do
   use Entice.Web.Web, :channel
-  use Entice.Logic.Area
   alias Entice.Entity.Coordination
   alias Entice.Skills
   alias Entice.Logic.Area
   alias Entice.Logic.SkillBar
-  alias Entice.Web.Token
   alias Phoenix.Socket
-  import Phoenix.Naming
 
 
   def join("skill:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
