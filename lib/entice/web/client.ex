@@ -56,7 +56,6 @@ defmodule Entice.Web.Client do
   # Account api
 
 
-  @doc "Will always update the account data we have stored, in case the data in the db changed"
   def get_account(id) do
     acc = Entity.fetch_attribute!(id, Account)
     {:ok, acc} = Queries.update_account(acc)
@@ -79,15 +78,12 @@ defmodule Entice.Web.Client do
     end
   end
 
-
   # Friends api
-
 
   def get_friends(id) do
     {:ok, %Account{friends: friends}} = get_account(id)
     {:ok, friends}
   end
-
 
   # Entity api
 
