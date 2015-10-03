@@ -66,7 +66,8 @@ defmodule Entice.Web.CharController do
       case char do
         {:error, _reason} -> error(%{message: "Could not create char. Maybe the name is already taken?"})
         {:ok, char} ->
-          Client.add_char(id, char)
+          # make sure the account has the new char...
+          {:ok, _char} = Client.get_char(id, char.name)
           ok(%{message: "Char created.", character: char |> Map.from_struct |> Map.take(@field_whitelist)})
       end
 
