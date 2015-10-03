@@ -6,7 +6,7 @@ defmodule Entice.Web.Character do
 
   schema "characters" do
     field :name,             :string
-    field :available_skills, :string, default: "3FF"
+    field :available_skills, :string, default: (:erlang.integer_to_list(Skills.max_unlocked_skills, 16) |> to_string)
     field :skillbar,        {:array, :integer}, default: [0, 0, 0, 0, 0, 0, 0, 0]
     field :profession,       :integer, default: 1
     field :campaign,         :integer, default: 0

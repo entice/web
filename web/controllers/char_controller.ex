@@ -44,7 +44,7 @@ defmodule Entice.Web.CharController do
 
     result =
       case char do
-        {:error, %{errors: [email: "has already been taken"]}} -> error(%{message: "Could not create char. The name is already in use."})
+        {:error, %{errors: [name: "has already been taken"]}} -> error(%{message: "Could not create char. The name is already in use."})
         {:ok, char} ->
           # make sure the account has the new char...
           {:ok, _char} = Client.get_char(id, char.name)

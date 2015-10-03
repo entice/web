@@ -6,8 +6,8 @@ Serves a web frontend for entice. Use this to access the worlds.
 
 Needs:
 
-- Erlang version: 17.1
-- Elixir version: 1.0.2
+- Erlang version: 17.5
+- Elixir version: 1.0.4
 
 To config:
 
