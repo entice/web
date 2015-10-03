@@ -27,7 +27,7 @@ defmodule Entice.Test.Factories do
   do: %Account{
     email: "somemail#{Counter.get_num(:account_email)}@example.com",
     characters: characters,
-    id: 1} #Maybe add incremented id here?
+    id: Counter.get_num(:account_id)} #Maybe add incremented id here?
 
 
   def create_client do
