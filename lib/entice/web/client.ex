@@ -89,41 +89,23 @@ defmodule Entice.Web.Client do
     {:ok, friends}
   end
 
-  @doc "Returns the first character of an account."
-  def get_first_char(account_id) do
-    case Entice.Web.Repo.get(Entice.Web.Account, account_id) do
-      nil -> {:error, :no_matching_account}
-      acc ->
-        acc = Entice.Web.Repo.preload(acc, :characters)
-        case acc.characters do
-          chars when hd(chars) -> {:error, "No Character"}
-          chars -> {:ok, hd(chars).name}
-        end
-    end
-  end
-
+  #TODO: Add current map to status when map is server side
   @doc "Returns a friend's online status and character name from his account id."
-  def get_status(account_id) do
-    {account_id, _} = Integer.parse(account_id)
-
-    case Client.Server.get_client(account_id) do
-      nil ->
-        case get_first_char(account_id) do
-          {result, name} when is_bitstring(name) -> {:ok, :offline, name}
-          _ -> {:error, :no_matching_account}
+  def get_status(friend_name) do
+    case Queries.get_account_id(friend_name) do
+      {:ok, account_id} ->
+        case Client.Server.get_client(account_id) do
+          nil -> {:ok, :offline, friend_name}
+          id ->
+            case Entity.fetch_attribute(id, Client) do
+              :error -> {:ok, :offline, friend_name}
+              {:ok, client} ->
+                player = Player.attributes(client.entity_id)
+                {:ok, client.online_status, player[Player.Name].name}
+            end
         end
-      id ->
-        attribute = Entity.fetch_attribute(id, Client)
-        if attribute == :error do
-          case get_first_char(account_id) do
-            {result, name} when is_bitstring(name) ->{:ok, :offline, name}
-            _ -> {:error, :no_matching_account}
-          end
-        else
-          {:ok, client} = attribute
-          player = Player.attributes(client.entity_id)
-          {:ok, client.online_status, player[Player.Name].name}
-        end
+      #If char with that name has been deleted (If name is then taken by another account it will be a problem)
+      _ -> {:ok, :offline, friend_name}
     end
   end
 
