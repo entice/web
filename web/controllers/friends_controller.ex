@@ -18,15 +18,17 @@ defmodule Entice.Web.FriendsController do
 
   @doc "Returns a friend's online status and current playing character name."
   def status(conn, _params) do
-    id = get_session(conn, :client_id)
-    account_id = conn.params["account_id"]
-    IO.puts account_id
+    account_ids = conn.params["account_id"]
+    result = Enum.map(account_ids, fn(x) -> get_single_status(x) end)
+    conn |> json result
+  end
+
+  defp get_single_status(account_id) do
     result = case Client.get_status(account_id) do
       {:error, :no_matching_account} -> error(%{message: "There is no account with that id."})
       {:ok, status, name} -> ok(%{message: "Friend info retrieval successful.", online_status: status, character_name: name})
     end
-
-    conn |> json result
+    Map.put(%{}, account_id, result)
   end
 
   @doc "Adds friend :id to friends list of connected account."
