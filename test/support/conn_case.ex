@@ -27,6 +27,23 @@ defmodule Entice.Web.ConnCase do
 
       # The default endpoint for testing
       @endpoint Entice.Web.Endpoint
+
+      @opts Entice.Web.Router.init([])
+
+      def with_session(conn, context) do
+        session_opts = Plug.Session.init(store: :cookie,
+          key: "_app",
+          encryption_salt: "abc",
+          signing_salt: "abc")
+
+        {:ok, id} = Entice.Web.Client.log_in(context.email, context.password)
+        conn
+        |> Map.put(:secret_key_base, String.duplicate("abcdefgh", 8))
+        |> Plug.Session.call(session_opts)
+        |> Plug.Conn.fetch_session()
+        |> put_session(:email, context.email)
+        |> put_session(:client_id, id)
+      end
     end
   end
 
