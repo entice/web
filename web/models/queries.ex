@@ -97,7 +97,6 @@ defmodule Entice.Web.Queries do
           where: f.account_id == ^account_id and f.basename == ^basename,
           select: f
       friend_account_id ->
-        IO.puts "IT WORKS NO WORRIES"
         from f in Entice.Web.Friend,
           where: f.account_id == ^account_id and f.friend_account_id == ^friend_account_id,
           select: f

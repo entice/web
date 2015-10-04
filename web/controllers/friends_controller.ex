@@ -30,9 +30,9 @@ defmodule Entice.Web.FriendsController do
     end
 
     #TODO: Format so it's easy to parse for client
-    conn |> json ok%{
+    conn |> json ok(%{
       message: "All friends",
-      friends: friends}
+      friends: friends})
   end
 
   defp get_status(friend_name) do
@@ -54,8 +54,8 @@ defmodule Entice.Web.FriendsController do
         case Queries.get_friend(account_id, friend_account.id) do
           {:error, :no_matching_friend} ->
             Queries.add_friend(acc, friend_account, friend_name)
-            ok%{message: "Friend added."}
-          {:ok, _friend} -> error%{message: "Already in friends list."}
+            ok(%{message: "Friend added."})
+          {:ok, _friend} -> error(%{message: "Already in friends list."})
         end
     end
     conn |> json result

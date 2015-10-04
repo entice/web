@@ -27,6 +27,44 @@ defmodule Entice.Web.ConnCase do
 
       # The default endpoint for testing
       @endpoint Entice.Web.Endpoint
+
+      @opts Entice.Web.Router.init([])
+
+      def with_session(conn) do
+        session_opts = Plug.Session.init(store: :cookie,
+          key: "_app",
+          encryption_salt: "abc",
+          signing_salt: "abc")
+
+        conn
+        |> Map.put(:secret_key_base, String.duplicate("abcdefgh", 8))
+        |> Plug.Session.call(session_opts)
+        |> Plug.Conn.fetch_session()
+      end
+
+      def log_in(conn, context) do
+        {:ok, id} = Entice.Web.Client.log_in(context.email, context.password)
+        conn
+        |> put_session(:email, context.email)
+        |> put_session(:client_id, id)
+      end
+
+      def fetch_route(req, route, context), do: fetch_route(req, route, context, True)
+
+      def fetch_route(req, route, context, True) do
+        conn = conn(req, route, context.params)
+        |> with_session()
+        |> log_in(context)
+        conn = Entice.Web.Router.call(conn, @opts)
+        Poison.decode(conn.resp_body)
+      end
+
+      def fetch_route(req, route, context, False) do
+        conn = conn(req, route, context.params)
+        |> with_session()
+        conn = Entice.Web.Router.call(conn, @opts)
+        Poison.decode(conn.resp_body)
+      end
     end
   end
 
