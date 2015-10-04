@@ -28,7 +28,7 @@ defmodule Entice.Web.AccountControllerTest do
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
         Map.put(result, :params, %{email: email, password: password, inviteKey: key})
-      _ -> result
+      _ -> Map.put(result, :params, %{})
     end
     {:ok, result}
   end
