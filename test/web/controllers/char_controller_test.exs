@@ -1,7 +1,6 @@
 defmodule Entice.Web.CharControllerTest do
   use Entice.Web.ConnCase
 
-
   setup _context do
     {:ok, %{email: "root@entice.ps", password: "root"}}
   end
