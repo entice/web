@@ -4,7 +4,7 @@ defmodule Entice.Web.AccountControllerTest do
   setup context do
     #IO.puts "Setting up: #{context[:test]}"
     result = {:ok, %{email: "root@entice.ps", password: "root" }}
-    result = case context[:test] do
+    case context[:test] do
       "by_char_name wrong char name" -> Map.put(result, :char_name, "name does not exist")
       "by_char_name existing char name" -> Map.put(result, :char_name, "Test Char")
       _ -> result
