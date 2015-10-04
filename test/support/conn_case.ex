@@ -42,7 +42,7 @@ defmodule Entice.Web.ConnCase do
         |> Plug.Conn.fetch_session()
       end
 
-      def loggin(conn, context) do
+      def log_in(conn, context) do
         {:ok, id} = Entice.Web.Client.log_in(context.email, context.password)
         conn
         |> put_session(:email, context.email)
@@ -54,7 +54,7 @@ defmodule Entice.Web.ConnCase do
       def fetch_route(req, route, context, True) do
         conn = conn(req, route, context.params)
         |> with_session()
-        |> loggin(context)
+        |> log_in(context)
         conn = Entice.Web.Router.call(conn, @opts)
         Poison.decode(conn.resp_body)
       end
