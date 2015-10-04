@@ -6,7 +6,7 @@ defmodule Entice.Web.AccountControllerTest do
     result = {:ok, %{email: "root@entice.ps", password: "root" }}
     case context[:test] do
       "by_char_name wrong char name" -> Map.put(result, :char_name, "name does not exist")
-      "by_char_name existing char name" -> Map.put(result, :char_name, "Test Char")
+      "by_char_name existing char name" -> Map.put(result, :char_name, "root@entice.ps 1")
       _ -> result
     end
   end
@@ -22,7 +22,7 @@ defmodule Entice.Web.AccountControllerTest do
   end
 
   test "by_char_name existing char name", context do
-    conn = conn(:get, "/api/account/by_char_name", %{char_name: "Test Char"})
+    conn = conn(:get, "/api/account/by_char_name", %{char_name: "root@entice.ps 1"})
     |> with_session(context)
     conn = Entice.Web.Router.call(conn, @opts)
 
