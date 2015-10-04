@@ -13,11 +13,11 @@ defmodule Entice.Web.Queries do
   end
 
   def get_account_id(name) do
-    query = from char in Entice.Web.Character,
+    query = from char in Character,
           where: char.name == ^name,
          select: char.account_id
 
-    case Entice.Web.Repo.all(query) do
+    case Repo.all(query) do
       [account_id] -> {:ok, account_id}
       _            -> {:error, :no_matching_character}
     end
@@ -81,7 +81,7 @@ defmodule Entice.Web.Queries do
   end
 
   def get_friend(account_id, friend_account_id) do
-    query = from f in Entice.Web.Friend,
+    query = from f in Friend,
           where: f.account_id == ^account_id and f.friend_account_id == ^friend_account_id,
          select: f
 

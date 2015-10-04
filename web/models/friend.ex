@@ -10,7 +10,7 @@ defmodule Entice.Web.Friend do
 
   def changeset(friend, params \\ :empty) do
     friend
-    |> cast(params, ~w(), ~w())
+    |> cast(params, [:account_id, :friend_account_id], [])
     |> assoc_constraint(:account)
     |> assoc_constraint(:friend_account)
   end

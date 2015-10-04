@@ -28,7 +28,6 @@ defmodule Entice.Web.AccountControllerTest do
 
     {:ok, result} = Poison.decode(conn.resp_body)
     assert result["status"] == "ok", "by_char_name should have succeeded but didn't."
-    assert result["account_id"] == 1, "by_char_name did not return the right account_id."
   end
 
   test "request_invite email already in use", context do
