@@ -1,11 +1,14 @@
 defmodule Entice.Web.AccountControllerTest do
   use Entice.Web.ConnCase
 
-  @opts Entice.Web.Router.init([])
-
   setup context do
     #IO.puts "Setting up: #{context[:test]}"
-    {:ok, %{email: "root@entice.ps", password: "root" }}
+    result = {:ok, %{email: "root@entice.ps", password: "root" }}
+    result = case context[:test] do
+      "by_char_name wrong char name" -> Map.put(result, :char_name, "name does not exist")
+      "by_char_name existing char name" -> Map.put(result, :char_name, "Test Char")
+      _ -> result
+    end
   end
 
   test "by_char_name wrong char name", context do

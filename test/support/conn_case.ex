@@ -28,6 +28,7 @@ defmodule Entice.Web.ConnCase do
       # The default endpoint for testing
       @endpoint Entice.Web.Endpoint
 
+      @opts Entice.Web.Router.init([])
 
       def with_session(conn, context) do
         session_opts = Plug.Session.init(store: :cookie,
