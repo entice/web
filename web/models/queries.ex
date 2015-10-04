@@ -1,8 +1,9 @@
 defmodule Entice.Web.Queries do
   alias Entice.Web.Account
+  alias Entice.Web.Character
   alias Entice.Web.Invitation
+  alias Entice.Web.Friend
   alias Entice.Web.Repo
-  alias Entice.Web.Friend 
   import Ecto.Query
 
   def all_accounts do
@@ -12,11 +13,11 @@ defmodule Entice.Web.Queries do
   end
 
   def get_account_id(name) do
-    query = from char in Entice.Web.Character,
+    query = from char in Character,
           where: char.name == ^name,
-          select: char.account_id
+         select: char.account_id
 
-    case Entice.Web.Repo.all(query) do
+    case Repo.all(query) do
       [account_id] -> {:ok, account_id}
       _            -> {:error, :no_matching_character}
     end
@@ -25,12 +26,12 @@ defmodule Entice.Web.Queries do
   def get_account(email, password) do
     query = from a in Account,
           where: a.email == ^email and a.password == ^password,
-          preload: :characters,
-          select: a
+        preload: :characters,
+         select: a
 
     case Repo.all(query) do
       [acc] ->
-        friends = get_friends(acc.id)    
+        friends = get_friends(acc.id)
         {:ok, %Account{acc | friends: friends}}
       _     -> {:error, :no_matching_account}
     end
@@ -55,7 +56,7 @@ defmodule Entice.Web.Queries do
 
     case Repo.all(query) do
       [acc] ->
-        friends = get_friends(acc.id)    
+        friends = get_friends(acc.id)
         {:ok, %Account{acc | friends: friends}}
       _     -> {:error, :no_matching_account}
     end
@@ -65,7 +66,7 @@ defmodule Entice.Web.Queries do
     query = from a in Invitation,
           limit: 1,
           where: a.email == ^email,
-          select: a
+         select: a
 
     case Repo.all(query) do
       [invite] -> {:ok, invite}
@@ -80,9 +81,9 @@ defmodule Entice.Web.Queries do
   end
 
   def get_friend(account_id, friend_account_id) do
-    query = from f in Entice.Web.Friend,
+    query = from f in Friend,
           where: f.account_id == ^account_id and f.friend_account_id == ^friend_account_id,
-          select: f
+         select: f
 
     case Repo.all(query) do
       [friend] -> {:ok, friend}
@@ -90,11 +91,11 @@ defmodule Entice.Web.Queries do
     end
   end
 
-  def get_friends(account_id) do    
-    query = from f in Entice.Web.Friend,
+  def get_friends(account_id) do
+    query = from f in Friend,
           where: f.account_id == ^account_id,
-          preload: [:friend_account],
-          select: f
+        preload: [:friend_account],
+         select: f
 
     Repo.all(query)
   end

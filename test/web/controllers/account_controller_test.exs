@@ -4,9 +4,9 @@ defmodule Entice.Web.AccountControllerTest do
   setup context do
     #IO.puts "Setting up: #{context[:test]}"
     result = {:ok, %{email: "root@entice.ps", password: "root" }}
-    result = case context[:test] do
+    case context[:test] do
       "by_char_name wrong char name" -> Map.put(result, :char_name, "name does not exist")
-      "by_char_name existing char name" -> Map.put(result, :char_name, "Test Char")
+      "by_char_name existing char name" -> Map.put(result, :char_name, "root@entice.ps 1")
       _ -> result
     end
   end
@@ -22,13 +22,12 @@ defmodule Entice.Web.AccountControllerTest do
   end
 
   test "by_char_name existing char name", context do
-    conn = conn(:get, "/api/account/by_char_name", %{char_name: "Test Char"})
+    conn = conn(:get, "/api/account/by_char_name", %{char_name: "root@entice.ps 1"})
     |> with_session(context)
     conn = Entice.Web.Router.call(conn, @opts)
 
     {:ok, result} = Poison.decode(conn.resp_body)
     assert result["status"] == "ok", "by_char_name should have succeeded but didn't."
-    assert result["account_id"] == 1, "by_char_name did not return the right account_id."
   end
 
   test "request_invite email already in use", context do
