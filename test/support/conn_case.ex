@@ -44,6 +44,13 @@ defmodule Entice.Web.ConnCase do
         |> put_session(:email, context.email)
         |> put_session(:client_id, id)
       end
+
+      def fetch_route(req, route, context) do
+        conn = conn(req, route, context.params)
+        |> with_session(context)
+        conn = Entice.Web.Router.call(conn, @opts)
+        Poison.decode(conn.resp_body)
+      end
     end
   end
 
