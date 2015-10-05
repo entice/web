@@ -49,19 +49,12 @@ defmodule Entice.Web.ConnCase do
         |> put_session(:client_id, id)
       end
 
-      def fetch_route(req, route, context), do: fetch_route(req, route, context, True)
+      def fetch_route(req, route, context), do: fetch_route(req, route, context, true)
 
-      def fetch_route(req, route, context, True) do
+      def fetch_route(req, route, context, must_login) do
         conn = conn(req, route, context.params)
         |> with_session()
-        |> log_in(context)
-        conn = Entice.Web.Router.call(conn, @opts)
-        Poison.decode(conn.resp_body)
-      end
-
-      def fetch_route(req, route, context, False) do
-        conn = conn(req, route, context.params)
-        |> with_session()
+        if must_login == true, do: conn = log_in(conn, context)
         conn = Entice.Web.Router.call(conn, @opts)
         Poison.decode(conn.resp_body)
       end
