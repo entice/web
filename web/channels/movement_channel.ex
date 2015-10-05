@@ -1,7 +1,6 @@
 defmodule Entice.Web.MovementChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Attributes
-  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Movement, as: Move
   alias Entice.Entity.Coordination
@@ -29,26 +28,17 @@ defmodule Entice.Web.MovementChannel do
   # Incoming
 
 
-  def handle_in("update:pos", %{"pos" => %{"x" => x, "y" => y} = pos}, socket) do
-    Entity.put_attribute(socket |> entity_id, %Position{pos: %Coord{x: x, y: y}})
-    broadcast!(socket, "update:pos", %{entity: socket |> entity_id, pos: pos})
-
-    {:noreply, socket}
-  end
-
-
-  def handle_in("update:goal", %{"goal" => %{"x" => x, "y" => y} = goal, "plane" => plane}, socket) do
-    Move.change_goal(socket |> entity_id, %Coord{x: x, y: y}, plane)
-    broadcast!(socket, "update:goal", %{entity: socket |> entity_id, goal: goal, plane: plane})
-
-    {:noreply, socket}
-  end
-
-
-  def handle_in("update:movetype", %{"movetype" => mtype, "velocity" => velo}, socket)
+  def handle_in("update", %{
+      "pos" => %{"x" => pos_x, "y" => pos_y, "plane" => pos_plane} = pos,
+      "goal" => %{"x" => goal_x, "y" => goal_y, "plane" => goal_plane} = goal,
+      "move_type" => mtype,
+      "velocity" => velo}, socket)
   when mtype in 0..10 and velo in -1..2 do
-    Move.change_move_type(socket |> entity_id, mtype, velo)
-    broadcast!(socket, "update:movetype", %{entity: socket |> entity_id, movetype: mtype, velocity: velo})
+    Move.update(socket |> entity_id,
+      %Position{pos: %Coord{x: pos_x, y: pos_y}, plane: pos_plane},
+      %Movement{goal: %Coord{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})
+
+    broadcast!(socket, "update", %{entity: socket |> entity_id, pos: pos, goal: goal, move_type: mtype, velocity: velo})
 
     {:noreply, socket}
   end
