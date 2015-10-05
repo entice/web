@@ -23,7 +23,7 @@ defmodule Entice.Web.AuthControllerTest do
 
   @tag id: 1
   test "login correct parameters", context do
-    {:ok, result} = fetch_route(:post, "/api/login", context, False)
+    {:ok, result} = fetch_route(:post, "/api/login", context, false)
 
     assert result["status"] == "ok", "login should have succeeded but didn't."
     assert result["message"] ==  "Logged in.", "login returned unexpected value for key: message."
@@ -31,7 +31,7 @@ defmodule Entice.Web.AuthControllerTest do
 
   @tag id: 2
   test "login wrong pass", context do
-    {:ok, result} = fetch_route(:post, "/api/login", context, False)
+    {:ok, result} = fetch_route(:post, "/api/login", context, false)
 
     assert result["status"] == "error", "login should have failed but didn't."
     assert result["message"] ==  "Authentication failed.", "login returned unexpected value for key: message."
@@ -47,7 +47,7 @@ defmodule Entice.Web.AuthControllerTest do
 
   @tag id: 4
   test "logout already logged out", context do
-    {:ok, result} = fetch_route(:post, "/api/logout", context, False)
+    {:ok, result} = fetch_route(:post, "/api/logout", context, false)
 
     assert result["status"] == "error", "logout should have failed but didn't."
     assert result["message"] ==  "Already logged out.", "logout returned unexpected value for key: message."
