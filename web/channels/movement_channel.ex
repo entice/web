@@ -30,13 +30,13 @@ defmodule Entice.Web.MovementChannel do
 
 
   def handle_in("update", %{
-      "pos" => %{"x" => x, "y" => y, "plane" => pos_plane} = pos,
-      "goal" => %{"x" => x, "y" => y, "plane" => goal_plane} = goal,
+      "pos" => %{"x" => pos_x, "y" => pos_y, "plane" => _pos_plane} = pos,
+      "goal" => %{"x" => goal_x, "y" => goal_y, "plane" => goal_plane} = goal,
       "movetype" => mtype,
       "velocity" => velo}, socket)
   when mtype in 0..10 and velo in -1..2 do
-    Entity.put_attribute(socket |> entity_id, %Position{pos: %Coord{x: x, y: y}})
-    Move.change_goal(socket |> entity_id, %Coord{x: x, y: y}, plane)
+    Entity.put_attribute(socket |> entity_id, %Position{pos: %Coord{x: pos_x, y: pos_y}})
+    Move.change_goal(socket |> entity_id, %Coord{x: goal_x, y: goal_y}, goal_plane)
     Move.change_move_type(socket |> entity_id, mtype, velo)
 
     broadcast!(socket, "update", %{entity: socket |> entity_id, pos: pos, goal: goal, movetype: mtype, velocity: velo})
