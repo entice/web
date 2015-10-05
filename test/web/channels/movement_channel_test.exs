@@ -22,14 +22,14 @@ defmodule Entice.Web.MovementChannelTest do
     socket |> push("update", %{
       "pos" => %{"x" => 42, "y" => 1337, "plane" => 13},
       "goal" => %{"x" => 1337, "y" => 42, "plane" => 7},
-      "movetype" => 9,
+      "move_type" => 9,
       "velocity" => 0.1337})
 
     assert_broadcast "update", %{
       entity: ^eid,
       pos: _,
       goal: _,
-      movetype: _,
+      move_type: _,
       velocity: _}
 
     assert %Position{pos: %Coord{x: 42, y: 1337}} = Entity.get_attribute(eid, Position)
