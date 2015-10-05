@@ -48,7 +48,7 @@ defmodule Seeds do
 
 
   def import_friends(%{} = accounts) do
-    for {acc_id1, _acc1} <- accounts, {acc_id2, _acc2} <- accounts,
+    for {acc_id1, _acc1} <- accounts, {acc_id2, _acc2} <- accounts, acc_id1 != acc_id2,
     do: Friend.changeset(%Friend{}, %{account_id: acc_id1, friend_account_id: acc_id2}) |> Repo.insert!
   end
 end
