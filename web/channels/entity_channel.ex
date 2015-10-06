@@ -16,7 +16,8 @@ defmodule Entice.Web.EntityChannel do
     Name,
     Appearance,
     Health,
-    Energy]
+    Energy,
+    Level]
 
 
   def join("entity:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
@@ -148,4 +149,7 @@ defmodule Entice.Web.EntityChannel do
 
   defp attribute_to_tuple(%Energy{mana: mana} = attr),
   do: {attr |> StructOps.to_underscore_name, mana}
+
+  defp attribute_to_tuple(%Level{level: lvl} = attr),
+  do: {attr |> StructOps.to_underscore_name, lvl}
 end
