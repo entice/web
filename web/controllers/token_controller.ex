@@ -4,6 +4,7 @@ defmodule Entice.Web.TokenController do
   alias Entice.Logic.Area
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
+  alias Entice.Logic.Vitals
   alias Entice.Web.Character
   alias Entice.Web.Token
   import Entice.Utils.StructOps
@@ -41,6 +42,7 @@ defmodule Entice.Web.TokenController do
     # init the entity and update the client
     Client.set_entity(id, eid)
     Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
+    Vitals.register(eid)
 
     conn |> json ok(%{
       message: "Transferring...",
