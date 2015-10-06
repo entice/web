@@ -29,7 +29,7 @@ defmodule Entice.Web.MovementChannel do
 
 
   def handle_in("update", %{
-      "pos" => %{"x" => pos_x, "y" => pos_y, "plane" => pos_plane} = pos,
+      "position" => %{"x" => pos_x, "y" => pos_y, "plane" => pos_plane} = pos,
       "goal" => %{"x" => goal_x, "y" => goal_y, "plane" => goal_plane} = goal,
       "move_type" => mtype,
       "velocity" => velo}, socket)
@@ -38,7 +38,7 @@ defmodule Entice.Web.MovementChannel do
       %Position{pos: %Coord{x: pos_x, y: pos_y}, plane: pos_plane},
       %Movement{goal: %Coord{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})
 
-    broadcast!(socket, "update", %{entity: socket |> entity_id, pos: pos, goal: goal, move_type: mtype, velocity: velo})
+    broadcast!(socket, "update", %{entity: socket |> entity_id, position: pos, goal: goal, move_type: mtype, velocity: velo})
 
     {:noreply, socket}
   end
