@@ -16,7 +16,8 @@ defmodule Entice.Web.EntityChannel do
     Name,
     Appearance,
     Health,
-    Energy]
+    Energy,
+    Level]
 
 
   def join("entity:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
