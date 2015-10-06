@@ -17,7 +17,8 @@ defmodule Entice.Web.ClientTest do
   test "account updating while getting" do
     assert {:ok, id} = Client.log_in("root@entice.ps", "root")
     assert {:ok, acc} = Client.get_account(id)
-    assert {:ok, char} = Entice.Web.Repo.insert(%Character{name: "Blubb Test Blubb", account_id: acc.id})
+    char = Entice.Web.Repo.insert!(%Character{name: "Blubb Test Blubb", account_id: acc.id})
     assert {:ok, ^char} = Client.get_char(id, char.name)
+    Entice.Web.Repo.delete!(char)
   end
 end

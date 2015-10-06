@@ -20,14 +20,14 @@ defmodule Entice.Web.MovementChannelTest do
 
   test "update position etc.", %{socket: socket, entity_id: eid} do
     socket |> push("update", %{
-      "pos" => %{"x" => 42, "y" => 1337, "plane" => 13},
+      "position" => %{"x" => 42, "y" => 1337, "plane" => 13},
       "goal" => %{"x" => 1337, "y" => 42, "plane" => 7},
       "move_type" => 9,
       "velocity" => 0.1337})
 
     assert_broadcast "update", %{
       entity: ^eid,
-      pos: _,
+      position: _,
       goal: _,
       move_type: _,
       velocity: _}
