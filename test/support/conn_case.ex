@@ -30,19 +30,33 @@ defmodule Entice.Web.ConnCase do
 
       @opts Entice.Web.Router.init([])
 
-      def with_session(conn, context) do
+      def with_session(conn) do
         session_opts = Plug.Session.init(store: :cookie,
           key: "_app",
           encryption_salt: "abc",
           signing_salt: "abc")
 
-        {:ok, id} = Entice.Web.Client.log_in(context.email, context.password)
         conn
         |> Map.put(:secret_key_base, String.duplicate("abcdefgh", 8))
         |> Plug.Session.call(session_opts)
         |> Plug.Conn.fetch_session()
+      end
+
+      def log_in(conn, context) do
+        {:ok, id} = Entice.Web.Client.log_in(context.email, context.password)
+        conn
         |> put_session(:email, context.email)
         |> put_session(:client_id, id)
+      end
+
+      def fetch_route(req, route, context), do: fetch_route(req, route, context, true)
+
+      def fetch_route(req, route, context, must_login) do
+        conn = conn(req, route, context.params)
+        |> with_session()
+        if must_login == true, do: conn = log_in(conn, context)
+        conn = Entice.Web.Router.call(conn, @opts)
+        Poison.decode(conn.resp_body)
       end
     end
   end
