@@ -146,11 +146,11 @@ defmodule Entice.Web.EntityChannel do
   defp attribute_to_tuple(%Appearance{} = attr),
   do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
 
-  defp attribute_to_tuple(%Health{health: health} = attr),
-  do: {attr |> StructOps.to_underscore_name, health}
+  defp attribute_to_tuple(%Health{} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
 
-  defp attribute_to_tuple(%Energy{mana: mana} = attr),
-  do: {attr |> StructOps.to_underscore_name, mana}
+  defp attribute_to_tuple(%Energy{} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
 
   defp attribute_to_tuple(%Level{level: lvl} = attr),
   do: {attr |> StructOps.to_underscore_name, lvl}

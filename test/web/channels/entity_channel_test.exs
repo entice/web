@@ -32,13 +32,17 @@ defmodule Entice.Web.EntityChannelTest do
 
   test "entity attr add", %{other_entity_id: eid} do
     Entity.attribute_transaction(eid,
-      fn _ -> %{Position => %Position{}, Name => %Name{}} end)
+      fn _ -> %{
+        Position => %Position{},
+        Name => %Name{},
+        Health => %Health{}} end)
     empty_map = %{}
     assert_push "change", %{
       entity: ^eid,
       added: %{
         "position" => %{x: _, y: _, plane: _},
-        "name"     => _},
+        "name"     => _,
+        "health"   => %{health: _, max_health: _}},
       changed: ^empty_map,
       removed: ^empty_map}
   end
