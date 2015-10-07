@@ -1,7 +1,7 @@
 defmodule Entice.Web.AuthController do
   use Entice.Web.Web, :controller
 
-  def login(conn, %{"email" => email, "password" => password}), do: login(conn, params, Client.logged_out?(conn))
+  def login(conn, %{"email" => email, "password" => password}), do: login(conn, email, password, Client.logged_out?(conn))
   def login(conn, params), do: conn |> json error(%{message: "Expected param 'email, password', got: #{inspect params}"})
 
   defp login(conn, email, password, false), do: conn |> json error(%{message: "Already logged in."})
