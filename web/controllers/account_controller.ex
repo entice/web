@@ -7,12 +7,13 @@ defmodule Entice.Web.AccountController do
 
   plug :ensure_login when action in [:request_invite]
 
+  def register(conn, %{"client_version" => client_version, "email" => email, "password" => password, "ivniteKey" => invite_key}) do
+    if client_version != Application.get_env(:entice_web, :client_version),
+    do: conn |> json(error(%{message: "Invalid Client Version"})),
+    else: register_internal(conn, email, password, invite_key)
+  end
 
-  def register(conn, _params) do
-    email = conn.params["email"]
-    password = conn.params["password"]
-    invite_key = conn.params["inviteKey"]
-
+  defp register_internal(conn, email, password, invite_key) do
     result = case Queries.get_invite(email) do
       {:ok, %Invitation{key: ^invite_key} = invite} ->
         %Account{email: email, password: password} |> Entice.Web.Repo.insert
@@ -26,8 +27,13 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def request_invite(conn, %{"client_version" => client_version, "email" => email}) do
+      if client_version != Application.get_env(:entice_web, :client_version),
+    do: conn |> json(error(%{message: "Invalid Client Version"})),
+    else: request_invite_internal(conn, email)
+  end
 
-  def request_invite(conn, _params) do
+  defp request_invite_internal(conn, email) do
     email = conn.params["email"]
     result = case {Queries.get_account(email), Queries.get_invite(email)} do
       {{:ok, _account}, _} -> error(%{message: "This Email address is already in use"})
@@ -39,9 +45,15 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def by_char_name(conn, %{"client_version" => client_version, "char_name" => char_name}) do
+    if client_version != Application.get_env(:entice_web, :client_version),
+    do: conn |> json(error(%{message: "Invalid Client Version"})),
+    else: by_char_name_internal(conn, char_name)
+  end
+
   @doc "Gets the account id of a character by name (passed through conn) ."
-  def by_char_name(conn, _params) do
-    result = case Queries.get_account_id(conn.params["char_name"]) do
+  defp by_char_name_internal(conn, char_name) do
+    result = case Queries.get_account_id(char_name) do
       {:error, :no_matching_character} -> error(%{message: "Couldn't find character."})
       {:ok, account_id} -> ok(%{account_id: account_id})
     end
