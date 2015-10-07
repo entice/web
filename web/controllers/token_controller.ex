@@ -19,7 +19,7 @@ defmodule Entice.Web.TokenController do
   end
 
 
-  def entity_token_internal(conn, map, char_name) do
+  defp entity_token_internal(conn, map, char_name) do
     id = get_session(conn, :client_id)
 
     # make sure any old entities are killed before being able to play
