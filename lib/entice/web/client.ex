@@ -140,8 +140,12 @@ defmodule Entice.Web.Client.Server do
   defp set_client(map_key, key, client_id) do
     Agent.update(__MODULE__,
       fn state ->
-        new_entry = Map.put(%{},key, client_id)
-        Map.update(state, map_key, new_entry, fn map -> Map.merge(map, new_entry) end)
+        if state == nil do
+          nil
+        else
+          new_entry = Map.put(%{},key, client_id)
+          Map.update(state, map_key, new_entry, fn map -> Map.merge(map, new_entry) end)
+        end
       end)
   end
 
@@ -151,9 +155,12 @@ defmodule Entice.Web.Client.Server do
    def get_client(map_key, key) do
     Agent.get(__MODULE__,
       fn state ->
-        if state == nil, do: IO.puts "WHY IS IT NIL"
-        map = Map.get(state, map_key)
-        if map != nil, do: client_id = Map.get(map, key)
+        if state == nil do
+          nil
+        else
+          map = Map.get(state, map_key)
+          if map != nil, do: client_id = Map.get(map, key)
+        end
       end)
   end
 
