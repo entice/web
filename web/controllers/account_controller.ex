@@ -7,7 +7,7 @@ defmodule Entice.Web.AccountController do
 
   plug :ensure_login when action in [:request_invite]
 
-  def register(conn, %{"client_version" => client_version, "email" => email, "password" => password, "ivniteKey" => invite_key}) do
+  def register(conn, %{"client_version" => client_version, "email" => email, "password" => password, "inviteKey" => invite_key}) do
     if client_version != Application.get_env(:entice_web, :client_version),
     do: conn |> json(error(%{message: "Invalid Client Version"})),
     else: register_internal(conn, email, password, invite_key)
