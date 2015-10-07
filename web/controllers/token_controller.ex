@@ -12,8 +12,14 @@ defmodule Entice.Web.TokenController do
 
   plug :ensure_login
 
+  def entity_token(conn, %{"client_version" => client_version, "map" => map, "char_name" => char_name}) do
+    if client_version != Application.get_env(:entice_web, :client_version),
+    do: conn |> json(error(%{message: "Invalid Client Version"})),
+    else: entity_token_internal(conn, map, char_name)
+  end
 
-  def entity_token(conn, _params) do
+
+  def entity_token_internal(conn, map, char_name) do
     id = get_session(conn, :client_id)
 
     # make sure any old entities are killed before being able to play
@@ -22,8 +28,8 @@ defmodule Entice.Web.TokenController do
       _ ->
     end
 
-    {:ok, map_mod}   = Area.get_map(camelize(conn.params["map"]))
-    {:ok, char}      = Client.get_char(id, conn.params["char_name"])
+    {:ok, map_mod}   = Area.get_map(camelize(map))
+    {:ok, char}      = Client.get_char(id, char_name)
     {:ok, eid, _pid} = Entity.start()
     name = char.name
 
