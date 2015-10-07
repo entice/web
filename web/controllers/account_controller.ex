@@ -7,7 +7,7 @@ defmodule Entice.Web.AccountController do
 
   plug :ensure_login when action in [:request_invite]
 
-  def register(conn, %{"email" => email, "password" => password, "inviteKey" => invite_key}) do
+  def register(conn, %{"email" => email, "password" => password, "invite_key" => invite_key}) do
     result = case Queries.get_invite(email) do
       {:ok, %Invitation{key: ^invite_key} = invite} ->
         %Account{email: email, password: password} |> Entice.Web.Repo.insert

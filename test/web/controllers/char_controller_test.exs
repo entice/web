@@ -4,9 +4,9 @@ defmodule Entice.Web.CharControllerTest do
   setup context do
     result = %{email: "root@entice.ps", password: "root" }
     result = case context.id do
-      1 -> Map.put(result, :params, %{name: "Im sooooooo unique 1"})
-      2 -> Map.put(result, :params, %{name: "Im sooooooo unique 2", skin_color: 13, hair_color: 13})
-      3 -> Map.put(result, :params, %{name: "Im not so unique, meh"})
+      1 -> Map.put(result, :params, %{char_name: "Im sooooooo unique 1"})
+      2 -> Map.put(result, :params, %{char_name: "Im sooooooo unique 2", skin_color: 13, hair_color: 13})
+      3 -> Map.put(result, :params, %{char_name: "Im not so unique, meh"})
     end
     {:ok, result}
   end
