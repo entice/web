@@ -18,11 +18,10 @@ defmodule Entice.Web.FriendsController do
 
 
   @doc "Adds friend :id to friends list of connected account."
-  def create(conn, _params) do
+  def create(conn, %{friend_account_id: friend_account_id}) do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
     account_id = acc.id
-    friend_account_id = conn.params["friend_account_id"]
 
     friend_account = Entice.Web.Repo.get(Entice.Web.Account, friend_account_id)
 
@@ -40,11 +39,13 @@ defmodule Entice.Web.FriendsController do
     conn |> json result
   end
 
+  def create(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
+
+
   @doc "Deletes friend :id from friends list of connected account."
-  def delete(conn, _params) do
+  def delete(conn, %{friend_account_id: friend_account_id}) do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
-    friend_account_id = conn.params["friend_account_id"]
 
     result = case Queries.get_friend(acc.id, friend_account_id) do
       {:error, :no_matching_friend} -> error(%{message: "This friend does not exist."})
@@ -54,4 +55,6 @@ defmodule Entice.Web.FriendsController do
     end
     conn |> json result
   end
+
+  def delete(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
 end
