@@ -22,7 +22,15 @@
       })
       .done(function(data) {
         if(data.status == "ok"){
-          $friends.append(data.friends);
+          for (i = 0; i < data.friends[0].length; i++) {
+            friend = data.friends[0][i];
+            if (friend.basename != friend.current_name){
+              $friends.append(friend.basename + " (" + friend.current_name + ") [" + friend.status + "]<br>");
+            }
+            else {
+              $friends.append(friend.basename + " [" + friend.status + "]<br>");
+            }
+          }
         }
         else {
         }

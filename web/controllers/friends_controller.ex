@@ -15,24 +15,23 @@ defmodule Entice.Web.FriendsController do
   #Solutions:
   #Delete all friends with PlayerB.id in them
 
+
+  #TODO: add map once it's server sided, order by creation date
   @doc "Returns all friends of connected account."
   def index(conn, _params) do
     id = get_session(conn, :client_id)
     {:ok, friends} = Entice.Web.Client.get_friends(id)
 
-    friends = for friend <- friends do
+    results = []
+    results = for friend <- friends do
       {:ok, status, name} = get_status(friend.basename)
-      if name != friend.basename do
-        "#{friend.basename} (#{name}) [#{status}]"
-      else
-        "#{friend.basename} [#{status}]"
-      end
+      map = %{basename: friend.basename, current_name: name, status: status}
+      results = results ++ [map]
     end
 
-    #TODO: Format so it's easy to parse for client
     conn |> json ok(%{
       message: "All friends",
-      friends: friends})
+      friends: results})
   end
 
   defp get_status(friend_name) do
