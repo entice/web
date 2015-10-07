@@ -35,7 +35,7 @@ defmodule Entice.Web.EntityChannel do
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
     attrs = Player.attributes(socket |> entity_id)
-    socket |> push("join:ok", %{attributes: process_attributes(attrs, @all_reported_attributes)})
+    socket |> push("initial", %{attributes: process_attributes(attrs, @all_reported_attributes)})
     {:noreply, socket}
   end
 

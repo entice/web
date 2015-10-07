@@ -13,11 +13,6 @@ defmodule Entice.Web.MovementChannelTest do
   end
 
 
-  test "join" do
-    assert_push "join:ok", %{}
-  end
-
-
   test "update position etc.", %{socket: socket, entity_id: eid} do
     socket |> push("update", %{
       "position" => %{"x" => 42, "y" => 1337, "plane" => 13},

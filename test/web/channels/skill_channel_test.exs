@@ -12,6 +12,6 @@ defmodule Entice.Web.SkillChannelTest do
 
 
   test "join" do
-    assert_push "join:ok", %{unlocked_skills: _, skillbar: _}
+    assert_push "initial", %{unlocked_skills: _, skillbar: _}
   end
 end

@@ -16,7 +16,7 @@ defmodule Entice.Web.EntityChannelTest do
 
 
   test "join" do
-    assert_push "join:ok", %{attributes: _}
+    assert_push "initial", %{attributes: _}
   end
 
 

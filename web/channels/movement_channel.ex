@@ -18,7 +18,6 @@ defmodule Entice.Web.MovementChannel do
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
     :ok = Move.register(socket |> entity_id)
-    socket |> push("join:ok", %{})
     {:noreply, socket}
   end
 
