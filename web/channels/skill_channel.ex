@@ -1,13 +1,10 @@
 defmodule Entice.Web.SkillChannel do
   use Entice.Web.Web, :channel
-  use Entice.Logic.Area
   alias Entice.Entity.Coordination
   alias Entice.Skills
   alias Entice.Logic.Area
   alias Entice.Logic.SkillBar
-  alias Entice.Web.Token
   alias Phoenix.Socket
-  import Phoenix.Naming
 
 
   def join("skill:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
@@ -21,7 +18,7 @@ defmodule Entice.Web.SkillChannel do
   def handle_info(:after_join, %Socket{assigns: %{entity_id: entity_id, character: char}} = socket) do
     Coordination.register_observer(self)
     :ok = SkillBar.register(entity_id, char.skillbar)
-    socket |> push("join:ok", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
+    socket |> push("initial", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
     {:noreply, socket}
   end
 

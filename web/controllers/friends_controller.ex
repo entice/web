@@ -24,8 +24,8 @@ defmodule Entice.Web.FriendsController do
 
     results = []
     results = for friend <- friends do
-      {:ok, status, name} = get_status(friend.basename)
-      map = %{basename: friend.basename, current_name: name, status: status}
+      {:ok, status, name} = get_status(friend.base_name)
+      map = %{base_name: friend.base_name, current_name: name, status: status}
       results = results ++ [map]
     end
 
@@ -66,7 +66,7 @@ defmodule Entice.Web.FriendsController do
     {:ok, acc} = Client.get_account(session_id)
     friend_name = conn.params["friend_name"]
 
-    #friend_name will always be basename of friend model since query controller by client, so no need to get friend by id
+    #friend_name will always be base_name of friend model since query controller by client, so no need to get friend by id
     result = case Queries.get_friend(acc.id, friend_name) do
       {:error, :no_matching_friend} -> error(%{message: "This friend does not exist."})
       {:ok, friend} ->

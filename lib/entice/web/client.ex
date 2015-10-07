@@ -60,6 +60,7 @@ defmodule Entice.Web.Client do
   # Account api
 
 
+  @doc "Will always update the account data we have stored, in case the data in the db changed"
   def get_account(id) do
     acc = Entity.fetch_attribute!(id, Account)
     {:ok, acc} = Queries.update_account(acc)
@@ -82,7 +83,9 @@ defmodule Entice.Web.Client do
     end
   end
 
+
   # Friends api
+
 
   def get_friends(id) do
     {:ok, %Account{friends: friends}} = get_account(id)
@@ -148,6 +151,7 @@ defmodule Entice.Web.Client.Server do
    def get_client(map_key, key) do
     Agent.get(__MODULE__,
       fn state ->
+        if state == nil, do: IO.puts "WHY IS IT NIL"
         map = Map.get(state, map_key)
         if map != nil, do: client_id = Map.get(map, key)
       end)
@@ -160,7 +164,7 @@ defmodule Entice.Web.Client.Server do
     Agent.update(__MODULE__,
       fn state ->
         map = Map.get(state, map_key)
-        Map.delete(map, key)
+        if map != nil, do: Map.delete(map, key)
       end)
   end
 end

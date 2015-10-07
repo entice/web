@@ -1,10 +1,8 @@
 defmodule Entice.Web.SocialChannel do
   use Entice.Web.Web, :channel
-  use Entice.Logic.Area
+  alias Entice.Logic.Area
   alias Entice.Logic.Group
-  alias Entice.Web.Token
   alias Phoenix.Socket
-  import Phoenix.Naming
 
 
   def join("social:" <> map_rooms, _message, %Socket{assigns: %{map: map_mod}} = socket) do

@@ -14,11 +14,6 @@ defmodule Entice.Web.GroupChannelTest do
   end
 
 
-  test "join" do
-    assert_push "join:ok", %{}
-  end
-
-
   # this should actually be tested together with the entity_channel reacting to a map change request
   test "mapchange", %{player: player, socket: socket} do
     new_map = TeamArenas.underscore_name

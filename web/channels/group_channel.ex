@@ -1,6 +1,5 @@
 defmodule Entice.Web.GroupChannel do
   use Entice.Web.Web, :channel
-  use Entice.Logic.Area
   use Entice.Logic.Attributes
   alias Entice.Logic.Area
   alias Entice.Logic.Group
@@ -9,7 +8,6 @@ defmodule Entice.Web.GroupChannel do
   alias Entice.Web.Token
   alias Entice.Web.Endpoint
   alias Phoenix.Socket
-  import Phoenix.Naming
 
 
   @reported_attributes [
@@ -28,7 +26,6 @@ defmodule Entice.Web.GroupChannel do
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
     :ok = Group.register(socket |> entity_id)
-    socket |> push("join:ok", %{})
     {:noreply, socket}
   end
 

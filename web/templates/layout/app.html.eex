@@ -19,10 +19,10 @@
       <span><a href="<%= page_path(@conn, :index) %>">Home... </a></span>
 
       <%= if logged_in?(@conn) do %>
-        <span>| <a href="<%= page_path(@conn, :client, "heroes_ascent") %>">Client... </a></span>
         <span>| <a href="<%= page_path(@conn, :friend) %>">Friends...</a></span>
+        <span>| <a href="<%= page_path(@conn, :client, "heroes_ascent") %>">Client... </a></span>
+        <span>| <a href="<%= page_path(@conn, :invitation) %>">Invite Someone... </a></span>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Logout... </a></span>
-        <span>| <a href="<%= page_path(@conn, :invitation) %>">Request Invite... </a></span>
       <% else %>
         <span>| <a href="<%= page_path(@conn, :auth) %>">Login... </a></span>
         <span>| <a href="<%= page_path(@conn, :account) %>">Register... </a></span>

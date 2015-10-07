@@ -16,7 +16,7 @@ config :phoenix, :stacktrace_depth, 20
 config :entice_web, Entice.Web.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "",
+  password: "root",
   database: "entice_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

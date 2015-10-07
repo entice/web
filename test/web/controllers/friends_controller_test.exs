@@ -11,12 +11,13 @@ defmodule Entice.Web.FriendsControllerTest do
         #All other tests working with root account so we don't want to touch it
         result = %{email: "test@entice.ps", password: "test"}
         {:ok, acc} = Queries.get_account(result.email, result.password)
-        Entice.Web.Repo.delete!(hd(acc.friends))
-        Map.put(result, :params, %{friend_name: "Shit Happens"})
+        friend = hd(acc.friends)  #test2@entice.ps
+        Entice.Web.Repo.delete!(friend)
+        Map.put(result, :params, %{friend_name: "test2@entice.ps 1"})
       2 -> Map.put(result, :params, %{friend_name: "Char does not exist"})
-      3 -> Map.put(result, :params, %{friend_name: "Test Char"})
-      4 -> Map.put(result, :params, %{friend_name: "Cool Story"})
-      5 -> Map.put(result, :params, %{friend_name: "Cool Story"})
+      3 -> Map.put(result, :params, %{friend_name: "root@entice.ps 1"})
+      4 -> Map.put(result, :params, %{friend_name: "test2@entice.ps 2"})
+      5 -> Map.put(result, :params, %{friend_name: "test@entice.ps 1"})
       6 -> Map.put(result, :params, %{friend_name: "Not a friend char"})
       _ -> Map.put(result, :params, %{})
     end
