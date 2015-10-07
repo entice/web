@@ -44,7 +44,7 @@
         type: 'POST',
         contentType: 'application/json',
         dataType: 'json',
-        data: JSON.stringify({"friend_name": name}),
+        data: JSON.stringify({"char_name": name}),
         cache: false
       })
       .done(function(data) {
@@ -65,7 +65,7 @@
         type: 'DELETE',
         contentType: 'application/json',
         dataType: 'json',
-        data: JSON.stringify({"friend_name": name}),
+        data: JSON.stringify({"char_name": name}),
         cache: false
       })
       .done(function(data) {

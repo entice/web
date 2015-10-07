@@ -43,7 +43,7 @@ defmodule Entice.Web.FriendsController do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
     account_id = acc.id
-    friend_name = conn.params["friend_name"]
+    friend_name = conn.params["char_name"]
 
     result = case Queries.get_account_by_name(friend_name) do
       {:error, _} -> error(%{message: "There is no character with that name"})
@@ -64,7 +64,7 @@ defmodule Entice.Web.FriendsController do
   def delete(conn, _params) do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
-    friend_name = conn.params["friend_name"]
+    friend_name = conn.params["char_name"]
 
     #friend_name will always be base_name of friend model since query controller by client, so no need to get friend by id
     result = case Queries.get_friend_by_base_name(acc.id, friend_name) do
