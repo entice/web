@@ -7,7 +7,7 @@ defmodule Entice.Web.AccountController do
 
   plug :ensure_login when action in [:request_invite]
 
-  defp register(conn, %{"email" => email, "password" => password, "inviteKey" => invite_key}) do
+  def register(conn, %{"email" => email, "password" => password, "inviteKey" => invite_key}) do
     result = case Queries.get_invite(email) do
       {:ok, %Invitation{key: ^invite_key} = invite} ->
         %Account{email: email, password: password} |> Entice.Web.Repo.insert
@@ -21,6 +21,8 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def register(conn, params), do: conn |> json error(%{message: "Expected param 'email, password, inviteKey', got: #{inspect params}"})
+
   def request_invite(conn, %{"email" => email}) do
     result = case {Queries.get_account(email), Queries.get_invite(email)} do
       {{:ok, _account}, _} -> error(%{message: "This Email address is already in use"})
@@ -32,6 +34,8 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def request_invite(conn, params), do: conn |> json error(%{message: "Expected param 'email', got: #{inspect params}"})
+
   @doc "Gets the account id of a character by name (passed through conn) ."
   def by_char_name(conn, %{"char_name" => char_name}) do
     result = case Queries.get_account_id(char_name) do
@@ -41,4 +45,6 @@ defmodule Entice.Web.AccountController do
 
     conn |> json result
   end
+
+  def create(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
 end
