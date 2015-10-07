@@ -5,29 +5,29 @@ defmodule Entice.Web.AccountControllerTest do
   setup context do
     result = %{email: "root@entice.ps", password: "root" }
     result = case context.id do
-      1 -> Map.put(result, :params, %{client_version: "TestVersion", char_name: "name does not exist"})
-      2 -> Map.put(result, :params, %{client_version: "TestVersion", char_name: "root@entice.ps 1"})
-      3 -> Map.put(result, :params, %{client_version: "TestVersion", email: "root@entice.ps"})
+      1 -> Map.put(result, :params, %{char_name: "name does not exist"})
+      2 -> Map.put(result, :params, %{char_name: "root@entice.ps 1"})
+      3 -> Map.put(result, :params, %{email: "root@entice.ps"})
       4 ->
         email = "email@email.com"
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
-        Map.put(result, :params, %{client_version: "TestVersion", email: email, key: key})
-      5 -> Map.put(result, :params, %{client_version: "TestVersion", email: "new_email@email.com"})
-      6 -> Map.put(result, :params, %{client_version: "TestVersion", email: "was not invited", password: "p", inviteKey: "k"})
+        Map.put(result, :params, %{email: email, key: key})
+      5 -> Map.put(result, :params, %{email: "new_email@email.com"})
+      6 -> Map.put(result, :params, %{email: "was not invited", password: "p", inviteKey: "k"})
       7 ->
         email = "was invited"
         password = "p"
         inviteKey = "wrong key"
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
-        Map.put(result, :params, %{client_version: "TestVersion", email: email, password: password, inviteKey: inviteKey})
+        Map.put(result, :params, %{email: email, password: password, inviteKey: inviteKey})
       8 ->
         email = "was invited too"
         password = "p"
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
-        Map.put(result, :params, %{client_version: "TestVersion", email: email, password: password, inviteKey: key})
+        Map.put(result, :params, %{email: email, password: password, inviteKey: key})
       _ -> Map.put(result, :params, %{})
     end
     {:ok, result}
