@@ -6,6 +6,8 @@ config :entice_web, Entice.Web.Endpoint,
   http: [port: 4001],
   server: false
 
+config :entice_web, client_version: "TestVersion"
+
 # Print only warnings and errors during test
 config :logger, level: :warn
 
