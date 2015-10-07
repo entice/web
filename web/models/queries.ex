@@ -91,15 +91,18 @@ defmodule Entice.Web.Queries do
       |> Repo.insert
   end
 
-  def get_friend(account_id, key) do
-    query = case key do
-      base_name when is_bitstring(key) ->
+  def get_friend_by_base_name(account_id, base_name), do: get_friend(account_id, :base_name, base_name)
+  def get_friend_by_friend_account_id(account_id, friend_account_id), do: get_friend(account_id, :friend_account_id, friend_account_id)
+
+  def get_friend(account_id, key_atom, key) do
+    query = case key_atom do
+      :base_name ->
         from f in Entice.Web.Friend,
-          where: f.account_id == ^account_id and f.base_name == ^base_name,
+          where: f.account_id == ^account_id and f.base_name == ^key,
           select: f
-      friend_account_id ->
+      :friend_account_id ->
         from f in Entice.Web.Friend,
-          where: f.account_id == ^account_id and f.friend_account_id == ^friend_account_id,
+          where: f.account_id == ^account_id and f.friend_account_id == ^key,
           select: f
     end
     case Repo.all(query) do

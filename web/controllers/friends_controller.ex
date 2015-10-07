@@ -50,7 +50,7 @@ defmodule Entice.Web.FriendsController do
       {:ok, %Account{id: ^account_id}} -> error(%{message: "Can't add yourself."})
       {:ok, friend_account} ->
         #Important to get by friend_id and not name here or player will be able to add same account under dif names.
-        case Queries.get_friend(account_id, friend_account.id) do
+        case Queries.get_friend_by_friend_account_id(account_id, friend_account.id) do
           {:error, :no_matching_friend} ->
             Queries.add_friend(acc, friend_account, friend_name)
             ok(%{message: "Friend added."})
@@ -67,7 +67,7 @@ defmodule Entice.Web.FriendsController do
     friend_name = conn.params["friend_name"]
 
     #friend_name will always be base_name of friend model since query controller by client, so no need to get friend by id
-    result = case Queries.get_friend(acc.id, friend_name) do
+    result = case Queries.get_friend_by_base_name(acc.id, friend_name) do
       {:error, :no_matching_friend} -> error(%{message: "This friend does not exist."})
       {:ok, friend} ->
         Entice.Web.Repo.delete(friend)

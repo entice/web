@@ -16,7 +16,9 @@ defmodule Entice.Web.FriendsControllerTest do
         Map.put(result, :params, %{friend_name: "test2@entice.ps 1"})
       2 -> Map.put(result, :params, %{friend_name: "Char does not exist"})
       3 -> Map.put(result, :params, %{friend_name: "root@entice.ps 1"})
-      4 -> Map.put(result, :params, %{friend_name: "test2@entice.ps 2"})
+      4 ->
+        result = %{email: "root@entice.ps", password: "root"}
+        Map.put(result, :params, %{friend_name: "test3@entice.ps 1"})
       5 -> Map.put(result, :params, %{friend_name: "test@entice.ps 1"})
       6 -> Map.put(result, :params, %{friend_name: "Not a friend char"})
       _ -> Map.put(result, :params, %{})
