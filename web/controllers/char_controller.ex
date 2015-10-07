@@ -36,11 +36,11 @@ defmodule Entice.Web.CharController do
   end
 
 
-  def create(conn, params) do
+  def create(conn, %{"char_name" => name} = params) do
     id = conn |> get_session(:client_id)
     {:ok, acc} = Client.get_account(id)
 
-    changeset = Character.changeset_char_create(%Character{account_id: acc.id}, params)
+    changeset = Character.changeset_char_create(%Character{account_id: acc.id}, Map.put(params, "name", name))
     char = Entice.Web.Repo.insert(changeset)
 
     result =

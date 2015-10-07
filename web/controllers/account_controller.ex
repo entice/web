@@ -7,12 +7,7 @@ defmodule Entice.Web.AccountController do
 
   plug :ensure_login when action in [:request_invite]
 
-
-  def register(conn, _params) do
-    email = conn.params["email"]
-    password = conn.params["password"]
-    invite_key = conn.params["inviteKey"]
-
+  def register(conn, %{"email" => email, "password" => password, "invite_key" => invite_key}) do
     result = case Queries.get_invite(email) do
       {:ok, %Invitation{key: ^invite_key} = invite} ->
         %Account{email: email, password: password} |> Entice.Web.Repo.insert
@@ -26,9 +21,9 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def register(conn, params), do: conn |> json error(%{message: "Expected param 'email, password, inviteKey', got: #{inspect params}"})
 
-  def request_invite(conn, _params) do
-    email = conn.params["email"]
+  def request_invite(conn, %{"email" => email}) do
     result = case {Queries.get_account(email), Queries.get_invite(email)} do
       {{:ok, _account}, _} -> error(%{message: "This Email address is already in use"})
       {_, {:ok, invite}}   -> ok(%{message: "Invite exists already", email: invite.email, key: invite.key})
@@ -39,13 +34,17 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
+  def request_invite(conn, params), do: conn |> json error(%{message: "Expected param 'email', got: #{inspect params}"})
+
   @doc "Gets the account id of a character by name (passed through conn) ."
-  def by_char_name(conn, _params) do
-    result = case Queries.get_account_id(conn.params["char_name"]) do
+  def by_char_name(conn, %{"char_name" => char_name}) do
+    result = case Queries.get_account_id(char_name) do
       {:error, :no_matching_character} -> error(%{message: "Couldn't find character."})
       {:ok, account_id} -> ok(%{account_id: account_id})
     end
 
     conn |> json result
   end
+
+  def create(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
 end
