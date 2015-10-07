@@ -21,7 +21,8 @@ defmodule Entice.Web.AccountController do
     conn |> json result
   end
 
-  def register(conn, params), do: conn |> json error(%{message: "Expected param 'email, password, inviteKey', got: #{inspect params}"})
+  def register(conn, params), do: conn |> json error(%{message: "Expected param 'email, password, invite_key', got: #{inspect params}"})
+
 
   def request_invite(conn, %{"email" => email}) do
     result = case {Queries.get_account(email), Queries.get_invite(email)} do
@@ -35,6 +36,7 @@ defmodule Entice.Web.AccountController do
   end
 
   def request_invite(conn, params), do: conn |> json error(%{message: "Expected param 'email', got: #{inspect params}"})
+
 
   @doc "Gets the account id of a character by name (passed through conn) ."
   def by_char_name(conn, %{"char_name" => char_name}) do
