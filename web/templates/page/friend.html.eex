@@ -22,8 +22,8 @@
       })
       .done(function(data) {
         if(data.status == "ok"){
-          for (i = 0; i < data.friends[0].length; i++) {
-            friend = data.friends[0][i];
+          for (i = 0; i < data.friends.length; i++) {
+            friend = data.friends[i];
             if (friend.base_name != friend.current_name){
               $friends.append(friend.base_name + " (" + friend.current_name + ") [" + friend.status + "]<br>");
             }

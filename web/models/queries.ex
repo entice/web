@@ -13,9 +13,9 @@ defmodule Entice.Web.Queries do
     Repo.all(query)
   end
 
-  def get_account_id(name) do
+  def get_account_id(char_name) do
     query = from char in Character,
-          where: char.name == ^name,
+          where: char.name == ^char_name,
          select: char.account_id
 
     case Repo.all(query) do
@@ -24,11 +24,11 @@ defmodule Entice.Web.Queries do
     end
   end
 
-  def get_account_by_name(name) do
-    case get_account_id(name) do
+  def get_account_by_name(char_name) do
+    case get_account_id(char_name) do
       {:ok, account_id} ->
         account = Entice.Web.Repo.get(Entice.Web.Account, account_id)
-        assert account != nil, "There should never be a character without an account." #Right?
+        assert account != nil, "There should never be a character without an account."
         {:ok, account}
       _ -> {:error, :no_matching_character}
     end
@@ -91,25 +91,11 @@ defmodule Entice.Web.Queries do
       |> Repo.insert
   end
 
-  def get_friend_by_base_name(account_id, base_name), do: get_friend(account_id, :base_name, base_name)
-  def get_friend_by_friend_account_id(account_id, friend_account_id), do: get_friend(account_id, :friend_account_id, friend_account_id)
+  def get_friend_by_base_name(account_id, base_name),
+  do: Entice.Web.Repo.get_by(Friend, account_id: account_id, base_name: base_name)
 
-  def get_friend(account_id, key_atom, key) do
-    query = case key_atom do
-      :base_name ->
-        from f in Entice.Web.Friend,
-          where: f.account_id == ^account_id and f.base_name == ^key,
-          select: f
-      :friend_account_id ->
-        from f in Entice.Web.Friend,
-          where: f.account_id == ^account_id and f.friend_account_id == ^key,
-          select: f
-    end
-    case Repo.all(query) do
-      [friend] -> {:ok, friend}
-      _     -> {:error, :no_matching_friend}
-    end
-  end
+  def get_friend_by_friend_account_id(account_id, friend_account_id),
+  do: Entice.Web.Repo.get_by(Friend, account_id: account_id, friend_account_id: friend_account_id)
 
   def get_friends(account_id) do
     query = from f in Friend,
