@@ -93,7 +93,7 @@ defmodule Entice.Web.Client do
   end
 
   #TODO: Add current map to status when map is server side
-  @doc "Returns a friend's online status and character name from his account id."
+  @doc "Returns a friend's online status and character name from their account id."
   def get_status(friend_name) do
     case Queries.get_account_id(friend_name) do
       {:ok, account_id} ->
@@ -112,6 +112,7 @@ defmodule Entice.Web.Client do
     end
   end
 
+
   # Entity api
 
 
@@ -128,50 +129,56 @@ defmodule Entice.Web.Client do
 end
 
 
+#TODO: maybe this needs to be replaced by a proper ETS implementation or so
+# especially since we don't monitor registered clients
 defmodule Entice.Web.Client.Server do
   use GenServer
+
 
   def start_link,
   do: Agent.start_link(fn -> %{} end, name: __MODULE__)
 
-  def set_client_by_account_id(account_id, client), do: set_client(:account_id, account_id, client)
-  def set_client_by_email(email, client), do: set_client(:email, email, client)
 
-  defp set_client(map_key, key, client_id) do
+  def set_client_by_account_id(account_id, client), do: set_client(:account_id, account_id, client)
+  def set_client_by_email(email, client),           do: set_client(:email, email, client)
+
+  defp set_client(map_key, key, client_id) when is_atom(map_key) do
     Agent.update(__MODULE__,
       fn state ->
-        if state == nil do
-          nil
-        else
-          new_entry = Map.put(%{},key, client_id)
-          Map.update(state, map_key, new_entry, fn map -> Map.merge(map, new_entry) end)
-        end
+        new_entry = Map.put(%{}, key, client_id)
+        Map.update(state, map_key, new_entry, fn map -> Map.merge(map, new_entry) end)
       end)
   end
+
 
   def get_client_by_account_id(account_id), do: get_client(:account_id, account_id)
-  def get_client_by_email(email), do: get_client(:email, email)
+  def get_client_by_email(email),           do: get_client(:email, email)
 
-   def get_client(map_key, key) do
-    Agent.get(__MODULE__,
+  def get_client(map_key, key) when is_atom(map_key) do
+    Agent.get_and_update(__MODULE__,
       fn state ->
-        if state == nil do
-          nil
-        else
-          map = Map.get(state, map_key)
-          if map != nil, do: client_id = Map.get(map, key)
-        end
+        state
+        |> Map.get(map_key)
+        |> case do
+             %{} = map -> {Map.get(map, key), state}
+             nil       -> {nil, Map.put(state, map_key, %{})}
+           end
       end)
   end
 
-  def remove_client_by_account_id(account_id), do: remove_client(:account_id, account_id)
-  def remove_client_by_email(email), do: remove_client(:email, email)
 
-  def remove_client(map_key, key) do
+  def remove_client_by_account_id(account_id), do: remove_client(:account_id, account_id)
+  def remove_client_by_email(email),           do: remove_client(:email, email)
+
+  def remove_client(map_key, key) when is_atom(map_key) do
     Agent.update(__MODULE__,
       fn state ->
-        map = Map.get(state, map_key)
-        if map != nil, do: Map.delete(map, key)
+        state
+        |> Map.get(map_key)
+        |> case do
+             %{} = map -> Map.put(state, map_key, Map.delete(map, key))
+             nil       -> state
+           end
       end)
   end
 end
