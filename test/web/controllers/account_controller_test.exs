@@ -14,20 +14,20 @@ defmodule Entice.Web.AccountControllerTest do
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
         Map.put(result, :params, %{email: email, key: key})
       5 -> Map.put(result, :params, %{email: "new_email@email.com"})
-      6 -> Map.put(result, :params, %{email: "was not invited", password: "p", inviteKey: "k"})
+      6 -> Map.put(result, :params, %{email: "was not invited", password: "p", invite_key: "k"})
       7 ->
         email = "was invited"
         password = "p"
-        inviteKey = "wrong key"
+        invite_key = "wrong key"
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
-        Map.put(result, :params, %{email: email, password: password, inviteKey: inviteKey})
+        Map.put(result, :params, %{email: email, password: password, invite_key: invite_key})
       8 ->
         email = "was invited too"
         password = "p"
         key = UUID.uuid4()
         %Invitation{email: email, key: key} |> Entice.Web.Repo.insert
-        Map.put(result, :params, %{email: email, password: password, inviteKey: key})
+        Map.put(result, :params, %{email: email, password: password, invite_key: key})
       _ -> Map.put(result, :params, %{})
     end
     {:ok, result}

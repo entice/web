@@ -25,9 +25,8 @@ defmodule Entice.Web.FriendsController do
 
     results = for friend <- friends do
       {:ok, status, name} = get_status(friend.base_name)
-      map = %{base_name: friend.base_name, current_name: name, status: status}
+      _map = %{base_name: friend.base_name, current_name: name, status: status}
     end
-    IO.inspect results
 
     conn |> json ok(%{
       message: "All friends",
@@ -35,7 +34,7 @@ defmodule Entice.Web.FriendsController do
   end
 
   defp get_status(friend_name) do
-    {:ok, status, name} = Client.get_status(friend_name)
+    {:ok, _status, _name} = Client.get_status(friend_name)
   end
 
   @doc "Adds friend :id to friends list of connected account."
@@ -59,6 +58,9 @@ defmodule Entice.Web.FriendsController do
     conn |> json result
   end
 
+  def create(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
+
+
   @doc "Deletes friend :id from friends list of connected account."
   def delete(conn, %{"char_name" => friend_name}) do
     session_id = get_session(conn, :client_id)
@@ -73,4 +75,6 @@ defmodule Entice.Web.FriendsController do
     end
     conn |> json result
   end
+
+  def delete(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
 end

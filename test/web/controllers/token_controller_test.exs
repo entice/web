@@ -3,7 +3,7 @@ defmodule Entice.Web.TokenControllerTest do
 
   setup do
     result = %{email: "root@entice.ps", password: "root" }
-    result = Map.put(result, :params, %{map: "heroes_ascent", char_name: "root@entice.ps 1"})
+    result = Map.put(result, :params, %{client_version: "TestVersion", map: "heroes_ascent", char_name: "root@entice.ps 1"})
     {:ok, result}
   end
 
