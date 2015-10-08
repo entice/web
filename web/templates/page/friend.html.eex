@@ -5,8 +5,8 @@
     <p>Friends:</p>
     <p id="friends"></p>
     <p>
-      <label for="id" class="inputLabel">ID:</label>
-      <input type="text" class="inputField" id="id" name="id" value="" size="20" maxlength="50" />
+      <label for="name" class="inputLabel">Name:</label>
+      <input type="text" class="inputField" id="name" name="name" value="" size="20" maxlength="50" />
     </p>
     <input type="submit" class="inputButton" id="submitAdd" name="submit" value="Add Friend" />
     <input type="submit" class="inputButton" id="submitDel" name="submit" value="Delete Friend" />
@@ -22,7 +22,15 @@
       })
       .done(function(data) {
         if(data.status == "ok"){
-          $friends.append(data.friends);
+          for (i = 0; i < data.friends.length; i++) {
+            friend = data.friends[i];
+            if (friend.base_name != friend.current_name){
+              $friends.append(friend.base_name + " (" + friend.current_name + ") [" + friend.status + "]<br>");
+            }
+            else {
+              $friends.append(friend.base_name + " [" + friend.status + "]<br>");
+            }
+          }
         }
         else {
         }
@@ -30,13 +38,13 @@
       .fail(function(data) {});
 
     $('#submitAdd').click(function() {
-      id = $("#id").val();
+      name = $("#name").val();
 
       $.ajax("<%= friends_path(@conn, :create) %>", {
         type: 'POST',
         contentType: 'application/json',
         dataType: 'json',
-        data: JSON.stringify({"friend_account_id": id}),
+        data: JSON.stringify({"char_name": name}),
         cache: false
       })
       .done(function(data) {
@@ -51,13 +59,13 @@
     });
 
     $('#submitDel').click(function() {
-      id = $("#id").val();
+      name = $("#name").val();
 
       $.ajax("<%= friends_path(@conn, :delete) %>", {
         type: 'DELETE',
         contentType: 'application/json',
         dataType: 'json',
-        data: JSON.stringify({"friend_account_id": id}),
+        data: JSON.stringify({"char_name": name}),
         cache: false
       })
       .done(function(data) {

@@ -55,6 +55,7 @@ defmodule Entice.Web.ConnCase do
         conn = conn(req, route, context.params)
         |> with_session()
         if must_login == true, do: conn = log_in(conn, context)
+
         conn = Entice.Web.Router.call(conn, @opts)
         Poison.decode(conn.resp_body)
       end

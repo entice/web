@@ -48,8 +48,9 @@ defmodule Seeds do
 
 
   def import_friends(%{} = accounts) do
-    for {acc_id1, _acc1} <- accounts, {acc_id2, _acc2} <- accounts, acc_id1 != acc_id2,
-    do: Friend.changeset(%Friend{}, %{account_id: acc_id1, friend_account_id: acc_id2}) |> Repo.insert!
+    #The characters are named after their account's email + an index,we set base_name to the first char
+    for {acc_id1, _acc1} <- accounts, {acc_id2, acc2} <- accounts, acc_id1 != acc_id2,
+    do: Friend.changeset(%Friend{}, %{account_id: acc_id1, friend_account_id: acc_id2, base_name: "#{acc2.email} 1"}) |> Repo.insert!
   end
 end
 
