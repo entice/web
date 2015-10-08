@@ -13,12 +13,10 @@ defmodule Entice.Web.FriendsControllerTest do
         {:ok, acc} = Queries.get_account(result.email, result.password)
         friend = hd(acc.friends)  #test2@entice.ps
         Entice.Web.Repo.delete!(friend)
-        Map.put(result, :params, %{char_name: "test2@entice.ps 1"})
+        Map.put(result, :params, %{char_name: friend.base_name})
       2 -> Map.put(result, :params, %{char_name: "Char does not exist"})
       3 -> Map.put(result, :params, %{char_name: "root@entice.ps 1"})
-      4 ->
-        result = %{email: "root@entice.ps", password: "root"}
-        Map.put(result, :params, %{char_name: "test3@entice.ps 1"})
+      4 -> Map.put(result, :params, %{char_name: "test3@entice.ps 1"})
       5 -> Map.put(result, :params, %{char_name: "test@entice.ps 1"})
       6 -> Map.put(result, :params, %{char_name: "Not a friend char"})
       _ -> Map.put(result, :params, %{})
