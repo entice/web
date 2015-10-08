@@ -58,7 +58,7 @@ defmodule Entice.Web.FriendsController do
     conn |> json result
   end
 
-  def create(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
+  def create(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
 
 
   @doc "Deletes friend :id from friends list of connected account."
@@ -76,5 +76,5 @@ defmodule Entice.Web.FriendsController do
     conn |> json result
   end
 
-  def delete(conn, params), do: conn |> json error(%{message: "Expected param 'friend_account_id', got: #{inspect params}"})
+  def delete(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
 end
