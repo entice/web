@@ -6,7 +6,12 @@ defmodule Entice.Web.PageController do
 
 
   def index(conn, _),      do: conn |> render "index.html"
-  def auth(conn, _),       do: conn |> render "auth.html"
+
+  def auth(conn, params) do       
+    client_version = Application.get_env(:entice_web, :client_version)
+    conn |> render "auth.html", client_version: client_version
+  end
+
   def account(conn, _),    do: conn |> render "account.html"
   def invitation(conn, _), do: conn |> render "invitation.html"
   def friend(conn, _),     do: conn |> render "friend.html"
