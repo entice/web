@@ -12,13 +12,9 @@ defmodule Entice.Web.TokenController do
 
   plug :ensure_login
 
-  def entity_token(conn, %{"client_version" => client_version, "map" => map, "char_name" => char_name}) do
-    if client_version == Application.get_env(:entice_web, :client_version),
-    do: entity_token_internal(conn, map, char_name),
-    else: conn |> json(error(%{message: "Invalid Client Version"}))
-  end
+  def entity_token(conn, "map" => map, "char_name" => char_name}), do: entity_token_internal(conn, map, char_name)
 
-  def entity_token(conn, params), do: conn |> json error(%{message: "Expected param 'client_version, map, char_name', got: #{inspect params}"})
+  def entity_token(conn, params), do: conn |> json error(%{message: "Expected param 'map, char_name', got: #{inspect params}"})
 
 
   defp entity_token_internal(conn, map, char_name) do
