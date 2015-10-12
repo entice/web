@@ -1,7 +1,7 @@
 defmodule Entice.Web.AuthController do
   use Entice.Web.Web, :controller
 
-  def login(conn, %{"email" => email, "password" => password}, %{"client_version" => cleint_version}) do
+  def login(conn, %{"email" => email, "password" => password}, %{"client_version" => client_version}) do
     if client_version == Application.get_env(:entice_web, :client_version),
     do: login(conn, email, password, Client.logged_out?(conn)),
     else: conn |> json(error(%{message: "Invalid Client Version"}))

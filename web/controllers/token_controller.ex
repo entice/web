@@ -12,7 +12,7 @@ defmodule Entice.Web.TokenController do
 
   plug :ensure_login
 
-  def entity_token(conn, "map" => map, "char_name" => char_name}), do: entity_token_internal(conn, map, char_name)
+  def entity_token(conn, %{"map" => map, "char_name" => char_name}), do: entity_token_internal(conn, map, char_name)
 
   def entity_token(conn, params), do: conn |> json error(%{message: "Expected param 'map, char_name', got: #{inspect params}"})
 
