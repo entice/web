@@ -1,8 +1,13 @@
 defmodule Entice.Web.AuthController do
   use Entice.Web.Web, :controller
 
-  def login(conn, %{"email" => email, "password" => password}), do: login(conn, email, password, Client.logged_out?(conn))
-  def login(conn, params), do: conn |> json error(%{message: "Expected param 'email, password', got: #{inspect params}"})
+  def login(conn, %{"email" => email, "password" => password, "client_version" => client_version}) do
+    if client_version == Application.get_env(:entice_web, :client_version),
+    do: login(conn, email, password, Client.logged_out?(conn)),
+    else: conn |> json(error(%{message: "Invalid Client Version"}))
+  end
+
+  def login(conn, params), do: conn |> json error(%{message: "Expected param 'email, password, client_version', got: #{inspect params}"})
 
   defp login(conn, _email, _password, false), do: conn |> json error(%{message: "Already logged in."})
   defp login(conn, email, password, true),    do: Client.log_in(email, password) |> maybe_log_in(conn, email)

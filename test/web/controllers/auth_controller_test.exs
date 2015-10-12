@@ -4,11 +4,12 @@ defmodule Entice.Web.AuthControllerTest do
   setup context do
     result = %{email: "root@entice.ps", password: "root" }
     result = case context.id do
-      0 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root"})
-      1 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root"})
-      2 -> Map.put(result, :params, %{email: "root@entice.ps", password: "wrong pass"})
-      3 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root"})
-      _ -> Map.put(result, :params, %{email: "root@entice.ps", password: "root"})
+      0 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root", client_version: Application.get_env(:entice_web, :client_version)})
+      1 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root", client_version: Application.get_env(:entice_web, :client_version)})
+      2 -> Map.put(result, :params, %{email: "root@entice.ps", password: "wrong pass", client_version: Application.get_env(:entice_web, :client_version)})
+      3 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root", client_version: Application.get_env(:entice_web, :client_version)})
+      4 -> Map.put(result, :params, %{email: "root@entice.ps", password: "root", client_version: "Invalid"})
+      _ -> Map.put(result, :params, %{email: "root@entice.ps", password: "root", client_version: Application.get_env(:entice_web, :client_version)})
     end
     {:ok, result}
   end
@@ -46,6 +47,14 @@ defmodule Entice.Web.AuthControllerTest do
   end
 
   @tag id: 4
+  test "Invalid Client Version", context do
+    {:ok, result} = fetch_route(:post, "/api/login", context)
+
+    assert result["status"] == "error"
+    assert result["message"] == "Invalid Client Version"
+  end
+
+  @tag id: 5
   test "logout already logged out", context do
     {:ok, result} = fetch_route(:post, "/api/logout", context, false)
 
