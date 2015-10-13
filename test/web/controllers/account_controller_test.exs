@@ -6,7 +6,7 @@ defmodule Entice.Web.AccountControllerTest do
     result = %{email: "root@entice.ps", password: "root" }
     result = case context.id do
       1 -> Map.put(result, :params, %{char_name: "name does not exist"})
-      2 -> Map.put(result, :params, %{char_name: "root@entice.ps 1"})
+      2 -> Map.put(result, :params, %{char_name: "root 1"})
       3 -> Map.put(result, :params, %{email: "root@entice.ps"})
       4 ->
         email = "email@email.com"
