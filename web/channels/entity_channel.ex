@@ -6,6 +6,7 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Entity.Coordination
   alias Entice.Logic.Area
   alias Entice.Logic.Player
+  alias Entice.Logic.Npc
   alias Entice.Web.Endpoint
   alias Entice.Web.Token
   alias Phoenix.Socket
@@ -16,7 +17,8 @@ defmodule Entice.Web.EntityChannel do
     Appearance,
     Health,
     Energy,
-    Level]
+    Level,
+    Npc]
 
   @initally_reported_attributes [
     Position]
@@ -34,7 +36,7 @@ defmodule Entice.Web.EntityChannel do
 
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
-    attrs = Player.attributes(socket |> entity_id)
+    attrs = socket |> entity_id |> Entity.take_attributes(@all_reported_attributes)
     socket |> push("initial", %{attributes: process_attributes(attrs, @all_reported_attributes)})
     {:noreply, socket}
   end
@@ -154,4 +156,7 @@ defmodule Entice.Web.EntityChannel do
 
   defp attribute_to_tuple(%Level{level: lvl} = attr),
   do: {attr |> StructOps.to_underscore_name, lvl}
+
+  defp attribute_to_tuple(%Npc{npc_model_id: npc_model_id} = attr),
+  do: {attr |> StructOps.to_underscore_name, npc_model_id}
 end

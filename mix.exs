@@ -22,7 +22,7 @@ defmodule Entice.Web.Mixfile do
   defp elixirc_paths(_),     do: ["lib", "web"]
 
   defp deps do
-    [{:entice_logic, github: "entice/logic", ref: "9766043e73edf1fd6d7e4263f59c3b9a17edd6af"},
+    [{:entice_logic, github: "entice/logic", ref: "ad58d7f4e0fc80526511a9f6e91737e073a83358"},
      {:entice_entity, github: "entice/entity", ref: "abd47e4bf5cc97d69c0c332d9559c63718348c0e"},
      {:entice_skill, github: "entice/skill", ref: "7fca03ba881edc53c65db8fb2703f69b3cba3acd"},
      {:entice_utils, github: "entice/utils", ref: "45fa9369284f92857c4436251a6b995c5d014680"},
