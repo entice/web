@@ -32,7 +32,7 @@ defmodule Entice.Web.MovementChannel do
       "goal" => %{"x" => goal_x, "y" => goal_y, "plane" => goal_plane} = goal,
       "move_type" => mtype,
       "velocity" => velo}, socket)
-  when mtype in 0..10 and velo in -1..2 do
+  when mtype in 0..10 and (-1.0 < velo) and (velo < 2.0) do
     Move.update(socket |> entity_id,
       %Position{pos: %Coord{x: pos_x, y: pos_y}, plane: pos_plane},
       %Movement{goal: %Coord{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})

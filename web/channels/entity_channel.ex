@@ -5,7 +5,6 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Logic.Area
-  alias Entice.Logic.Player
   alias Entice.Logic.Npc
   alias Entice.Web.Endpoint
   alias Entice.Web.Token

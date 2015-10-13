@@ -4,7 +4,7 @@ defmodule Entice.Web.Mixfile do
   def project do
     [app: :entice_web,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.1",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -27,10 +27,10 @@ defmodule Entice.Web.Mixfile do
      {:entice_skill, github: "entice/skill", ref: "7fca03ba881edc53c65db8fb2703f69b3cba3acd"},
      {:entice_utils, github: "entice/utils", ref: "45fa9369284f92857c4436251a6b995c5d014680"},
      {:cowboy, "~> 1.0"},
-     {:phoenix, "~> 1.0.1"},
-     {:phoenix_ecto, "~> 1.1"},
+     {:phoenix, "~> 1.0.3"},
+     {:phoenix_ecto, "~> 1.2"},
      {:postgrex, ">= 0.0.0"},
-     {:phoenix_html, "~> 2.1"},
+     {:phoenix_html, "~> 2.2"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:uuid, "~> 1.0"}] # https://github.com/zyro/elixir-uuid
   end
