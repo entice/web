@@ -40,9 +40,9 @@ defmodule Seeds do
 
   def import_characters(%{} = accounts) do
     for {acc_id, acc} <- accounts do
-      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{acc.email} 1"}) |> Repo.insert!
-      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{acc.email} 2"}) |> Repo.insert!
-      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{acc.email} 3"}) |> Repo.insert!
+      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{hd(String.split(acc.email,"@"))} 1"}) |> Repo.insert!
+      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{hd(String.split(acc.email,"@"))} 2"}) |> Repo.insert!
+      Character.changeset_char_create(%Character{}, %{account_id: acc_id, name: "#{hd(String.split(acc.email,"@"))} 3"}) |> Repo.insert!
     end
   end
 
@@ -50,7 +50,7 @@ defmodule Seeds do
   def import_friends(%{} = accounts) do
     #The characters are named after their account's email + an index,we set base_name to the first char
     for {acc_id1, _acc1} <- accounts, {acc_id2, acc2} <- accounts, acc_id1 != acc_id2,
-    do: Friend.changeset(%Friend{}, %{account_id: acc_id1, friend_account_id: acc_id2, base_name: "#{acc2.email} 1"}) |> Repo.insert!
+    do: Friend.changeset(%Friend{}, %{account_id: acc_id1, friend_account_id: acc_id2, base_name: "#{hd(String.split(acc2.email,"@"))} 1"}) |> Repo.insert!
   end
 end
 
