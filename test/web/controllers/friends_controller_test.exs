@@ -15,9 +15,9 @@ defmodule Entice.Web.FriendsControllerTest do
         Entice.Web.Repo.delete!(friend)
         Map.put(result, :params, %{char_name: friend.base_name})
       2 -> Map.put(result, :params, %{char_name: "Char does not exist"})
-      3 -> Map.put(result, :params, %{char_name: "root 1"})
-      4 -> Map.put(result, :params, %{char_name: "test3 1"})
-      5 -> Map.put(result, :params, %{char_name: "test 1"})
+      3 -> Map.put(result, :params, %{char_name: "Root Root A"})
+      4 -> Map.put(result, :params, %{char_name: "Testc Testc A"})
+      5 -> Map.put(result, :params, %{char_name: "Test Test A"})
       6 -> Map.put(result, :params, %{char_name: "Not a friend char"})
       _ -> Map.put(result, :params, %{})
     end
