@@ -1,6 +1,6 @@
 defmodule Entice.Web.Character do
   use Entice.Web.Web, :model
-  alias Entice.Skills
+  alias Entice.Logic.Skills
   alias Entice.Web.Character
 
   schema "characters" do

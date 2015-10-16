@@ -1,6 +1,6 @@
 defmodule Entice.Web.ClientTest do
   use ExUnit.Case
-  alias Entice.Skills
+  alias Entice.Logic.Skills
   alias Entice.Web.Character
   alias Entice.Web.Client
 

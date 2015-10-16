@@ -1,7 +1,7 @@
 defmodule Entice.Web.SkillChannel do
   use Entice.Web.Web, :channel
   alias Entice.Entity.Coordination
-  alias Entice.Skills
+  alias Entice.Logic.Skills
   alias Entice.Logic.Area
   alias Entice.Logic.SkillBar
   alias Phoenix.Socket
