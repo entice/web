@@ -24,27 +24,28 @@ defmodule Entice.Web.SkillChannel do
     {:noreply, socket}
   end
 
-  def handle_info(:skill_casted, info, socket) do
+  def handle_info({:skill_casted, info}, socket) do
     socket |> broadcast("cast:end", info)
-    {:reply, :ok, socket}
+    {:noreply, socket}
   end
 
-  def handle_info(:skill_cast_interrupted, info, socket) do
+  def handle_info({:skill_cast_interrupted, info}, socket) do
     socket |> broadcast("cast:interrupted", info)
-    {:reply, :ok, socket}
+    {:noreply, socket}
   end
 
-  def handle_info(:skill_recharged, info, socket) do
+  def handle_info({:skill_recharged, info}, socket) do
     socket |> broadcast("recharge:end", info)
-    {:reply, :ok, socket}
+    {:noreply, socket}
   end
 
-  def handle_info(:after_cast_delay_ended, info, socket) do
+  def handle_info({:after_cast_delay_ended, info}, socket) do
     socket |> broadcast("delay:ended", info)
-    {:reply, :ok, socket}
+    {:noreply, socket}
   end
 
   def handle_info(_msg, socket), do: {:noreply, socket}
+
 
 
   # Incoming
@@ -87,7 +88,7 @@ defmodule Entice.Web.SkillChannel do
     #       entity: socket |> entity_id,
     #       slot: slot,
     #       skill: skill.id,
-    #       cast_time: skill.cast_time})
+    #       cast_time: sakill.cst_time})
     #     {:reply, :ok, socket}
     #   {:ok, :instant, skill} ->
     #     socket |> broadcast("cast:instantly", %{
