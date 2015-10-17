@@ -31,8 +31,6 @@ defmodule Entice.Web.SkillChannel do
   def handle_in("skillbar:set", %{"slot" => slot, "id" => id}, socket) when slot in 0..10 and id > -1 do
     skill_bits = :erlang.list_to_integer((socket |> character).available_skills |> String.to_char_list, 16)
     unlocked = Entice.Utils.BitOps.get_bit(skill_bits, id)
-    IO.puts "UNLOCKED 3" #Unlocked is 1 should be 0
-    IO.puts unlocked
     case unlocked do
       1 ->
         case {Skills.get_skill(id), (socket |> map).is_outpost?} do
