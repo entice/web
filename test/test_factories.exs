@@ -53,7 +53,7 @@ defmodule Entice.Test.Factories do
     {id, pid}
   end
 
-  def create_player(topic, map) when is_bitstring(topic) and is_atom(map) do
+  def create_player(map) when is_atom(map) do
     char       = create_character
     acc        = create_account(char)
     cid        = create_client(acc)

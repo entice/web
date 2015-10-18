@@ -7,11 +7,11 @@ defmodule Entice.Web.EntityChannelTest do
 
 
   setup do
-    player = Factories.create_player("entity", HeroesAscent)
+    player = Factories.create_player(HeroesAscent)
     {eid, _pid} = Factories.create_entity()
 
     {:ok, _, socket} = subscribe_and_join(player[:socket], "entity:heroes_ascent", %{})
-    {:ok, [socket: socket, other_entity_id: eid]}
+    {:ok, [socket: socket, entity_id: player[:entity_id], other_entity_id: eid]}
   end
 
 
@@ -68,6 +68,13 @@ defmodule Entice.Web.EntityChannelTest do
   test "entity leave", %{other_entity_id: eid} do
     Entity.stop(eid)
     assert_push "remove", %{entity: ^eid}
+  end
+
+
+  test "getting kicked", %{socket: socket, entity_id: eid} do
+    Process.monitor socket.channel_pid
+    Entity.stop(eid)
+    assert_receive {:DOWN, _, _, _, _}
   end
 
 

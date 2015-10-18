@@ -7,7 +7,7 @@ defmodule Entice.Web.MovementChannelTest do
 
 
   setup do
-    player = Factories.create_player("movement", HeroesAscent)
+    player = Factories.create_player(HeroesAscent)
     {:ok, _, socket} = subscribe_and_join(player[:socket], "movement:heroes_ascent", %{})
     {:ok, [socket: socket, entity_id: player[:entity_id]]}
   end

@@ -7,7 +7,7 @@ defmodule Entice.Web.SkillChannelTest do
   alias Entice.Test.Factories
 
   setup do
-    player = Factories.create_player("skill", HeroesAscent)
+    player = Factories.create_player(HeroesAscent)
     player[:entity_id] |> Vitals.register
 
     locked_skill_id = 4
