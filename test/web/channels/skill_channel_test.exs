@@ -31,13 +31,14 @@ defmodule Entice.Web.SkillChannelTest do
   end
 
   test "simple casting", %{socket: socket} do
+    skill_id = Skills.HealingSignet.id
     ref = push socket, "skillbar:set", %{"slot" => 0, "id" => Skills.HealingSignet.id}
     assert_reply ref, :ok
     ref = push socket, "cast", %{"slot" => 0}
     assert_reply ref, :ok
-    assert_broadcast "cast:start", %{entity: id, target: id, slot: 0, skill: _, cast_time: cast_time}
-    assert_broadcast "cast:end", %{entity: id, target: id, slot: 0, skill: _, recharge_time: recharge_time}, (cast_time + 100)
+    assert_broadcast "cast:start", %{entity: id, target: id, slot: 0, skill: ^skill_id, cast_time: cast_time}
+    assert_broadcast "cast:end", %{entity: id, target: id, slot: 0, skill: ^skill_id, recharge_time: recharge_time}, (cast_time + 100)
     assert_broadcast "after_cast:end", %{entity: _}, (Entice.Logic.Casting.after_cast_delay + 100)
-    assert_broadcast "recharge:end", %{entity: _, slot: 0, skill: _}, (recharge_time - Entice.Logic.Casting.after_cast_delay + 100)
+    assert_broadcast "recharge:end", %{entity: _, slot: 0, skill: ^skill_id}, (recharge_time - Entice.Logic.Casting.after_cast_delay + 100)
   end
 end

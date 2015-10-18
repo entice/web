@@ -29,13 +29,13 @@ defmodule Entice.Web.SkillChannel do
         entity_id: entity_id,
         target_entity_id: target_id,
         slot: slot,
-        skill: skill_id,
+        skill: skill,
         recharge_time: recharge_time}}, socket) do
     socket |> broadcast("cast:end", %{
       entity: entity_id,
       target: target_id,
       slot: slot,
-      skill: skill_id,
+      skill: skill.id,
       recharge_time: recharge_time})
     {:noreply, socket}
   end
@@ -45,14 +45,14 @@ defmodule Entice.Web.SkillChannel do
         entity_id: entity_id,
         target_entity_id: target_id,
         slot: slot,
-        skill: skill_id,
+        skill: skill,
         recharge_time: recharge_time,
         reason: reason}}, socket) do
     socket |> broadcast("cast:interrupted", %{
       entity: entity_id,
       target: target_id,
       slot: slot,
-      skill: skill_id,
+      skill: skill.id,
       recharge_time: recharge_time,
       reason: reason})
     {:noreply, socket}
@@ -62,11 +62,11 @@ defmodule Entice.Web.SkillChannel do
       {:skill_recharged, %{
         entity_id: entity_id,
         slot: slot,
-        skill: skill_id}}, socket) do
+        skill: skill}}, socket) do
     socket |> broadcast("recharge:end", %{
       entity: entity_id,
       slot: slot,
-      skill: skill_id})
+      skill: skill.id})
     {:noreply, socket}
   end
 
