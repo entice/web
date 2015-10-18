@@ -6,7 +6,7 @@ defmodule Entice.Web.TokenTest do
 
 
   setup do
-    player = Factories.create_player("test:token", HeroesAscent)
+    player = Factories.create_player(HeroesAscent)
     {:ok, [client_id: player[:client_id], entity_id: player[:entity_id], character: player[:character]]}
   end
 

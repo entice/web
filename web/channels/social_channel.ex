@@ -2,6 +2,7 @@ defmodule Entice.Web.SocialChannel do
   use Entice.Web.Web, :channel
   alias Entice.Logic.Area
   alias Entice.Logic.Group
+  alias Entice.Entity.Coordination
   alias Phoenix.Socket
 
 
@@ -36,13 +37,13 @@ defmodule Entice.Web.SocialChannel do
   """
   def handle_info({:entity_change, %{entity_id: leader_id}}, %Socket{assigns: %{leader: leader_id}} = socket) do
     case Group.is_my_leader?(socket |> entity_id, leader_id) do
-      false -> {:stop, :group_leader_changed}
+      false -> {:stop, :normal, socket}
       true  -> {:noreply, socket}
     end
   end
 
   def handle_info({:entity_leave, %{entity_id: leader_id}}, %Socket{assigns: %{leader: leader_id}} = socket),
-  do: {:stop, :group_leader_changed}
+  do: {:stop, :normal, socket}
 
   def handle_info(_msg, socket), do: {:noreply, socket}
 
