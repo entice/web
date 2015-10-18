@@ -41,6 +41,9 @@ defmodule Entice.Web.SocialChannel do
     end
   end
 
+  def handle_info({:entity_leave, %{entity_id: leader_id}}, %Socket{assigns: %{leader: leader_id}} = socket),
+  do: {:stop, :group_leader_changed}
+
   def handle_info(_msg, socket), do: {:noreply, socket}
 
 
