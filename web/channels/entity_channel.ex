@@ -46,7 +46,7 @@ defmodule Entice.Web.EntityChannel do
 
   @doc "If this entity leaves, disconnect all sockets, and shut this down as well"
   def handle_info({:entity_leave, %{entity_id: eid}}, %Socket{assigns: %{entity_id: eid}} = socket) do
-    Endpoint.broadcast(Entice.Web.Socket.id(socket), "disconnect")
+    Endpoint.broadcast(Entice.Web.Socket.id(socket), "disconnect", %{})
     {:stop, :normal, socket}
   end
 
