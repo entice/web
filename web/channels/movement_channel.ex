@@ -1,7 +1,6 @@
 defmodule Entice.Web.MovementChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Attributes
-  alias Entice.Entity
   alias Entice.Logic.Area
   alias Entice.Logic.Movement, as: Move
   alias Entice.Entity.Coordination
@@ -19,7 +18,6 @@ defmodule Entice.Web.MovementChannel do
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
     :ok = Move.register(socket |> entity_id)
-    socket |> push("join:ok", %{})
     {:noreply, socket}
   end
 
@@ -29,26 +27,17 @@ defmodule Entice.Web.MovementChannel do
   # Incoming
 
 
-  def handle_in("update:pos", %{"pos" => %{"x" => x, "y" => y} = pos}, socket) do
-    Entity.put_attribute(socket |> entity_id, %Position{pos: %Coord{x: x, y: y}})
-    broadcast!(socket, "update:pos", %{entity: socket |> entity_id, pos: pos})
+  def handle_in("update", %{
+      "position" => %{"x" => pos_x, "y" => pos_y, "plane" => pos_plane} = pos,
+      "goal" => %{"x" => goal_x, "y" => goal_y, "plane" => goal_plane} = goal,
+      "move_type" => mtype,
+      "velocity" => velo}, socket)
+  when mtype in 0..10 and (-1.0 < velo) and (velo < 2.0) do
+    Move.update(socket |> entity_id,
+      %Position{pos: %Coord{x: pos_x, y: pos_y}, plane: pos_plane},
+      %Movement{goal: %Coord{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})
 
-    {:noreply, socket}
-  end
-
-
-  def handle_in("update:goal", %{"goal" => %{"x" => x, "y" => y} = goal, "plane" => plane}, socket) do
-    Move.change_goal(socket |> entity_id, %Coord{x: x, y: y}, plane)
-    broadcast!(socket, "update:goal", %{entity: socket |> entity_id, goal: goal, plane: plane})
-
-    {:noreply, socket}
-  end
-
-
-  def handle_in("update:movetype", %{"movetype" => mtype, "velocity" => velo}, socket)
-  when mtype in 0..10 and velo in -1..2 do
-    Move.change_move_type(socket |> entity_id, mtype, velo)
-    broadcast!(socket, "update:movetype", %{entity: socket |> entity_id, movetype: mtype, velocity: velo})
+    broadcast!(socket, "update", %{entity: socket |> entity_id, position: pos, goal: goal, move_type: mtype, velocity: velo})
 
     {:noreply, socket}
   end

@@ -26,7 +26,8 @@ defmodule Entice.Test.Factories do
   def create_account(characters),
   do: %Account{
     email: "somemail#{Counter.get_num(:account_email)}@example.com",
-    characters: characters}
+    characters: characters,
+    id: Counter.get_num(:account_id)}
 
 
   def create_client do
@@ -52,7 +53,7 @@ defmodule Entice.Test.Factories do
     {id, pid}
   end
 
-  def create_player(topic, map) when is_bitstring(topic) and is_atom(map) do
+  def create_player(map) when is_atom(map) do
     char       = create_character
     acc        = create_account(char)
     cid        = create_client(acc)

@@ -6,15 +6,22 @@ defmodule Entice.Web.PageController do
 
 
   def index(conn, _),      do: conn |> render "index.html"
-  def auth(conn, _),       do: conn |> render "auth.html"
   def account(conn, _),    do: conn |> render "account.html"
   def invitation(conn, _), do: conn |> render "invitation.html"
   def friend(conn, _),     do: conn |> render "friend.html"
-
   def not_found(conn, _),  do: conn |> render "not_found.html"
   def error(conn, _),      do: conn |> render "error.html"
 
-  def client(conn, %{"map" => map}) do
-    conn |> render "client.html", map: map
+
+  def auth(conn, _) do
+    client_version = Application.get_env(:entice_web, :client_version)
+    conn |> render "auth.html", client_version: client_version
   end
+
+
+  def client(conn, %{"map" => map}),
+  do: conn |> render "client.html", map: map
+
+  def client(conn, _params),
+  do: conn |> send_resp 400, "The client needs a 'map' parameter to work"
 end

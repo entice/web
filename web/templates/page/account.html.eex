@@ -31,13 +31,12 @@
       passw = $("#password").val();
       key = $("#key").val();
 
-    $.ajax("<%= account_path(@conn, :register) %>", {
-      type: 'POST',
-      contentType: 'application/json',
-      dataType: 'json',
-      data: JSON.stringify({"email": email,"password": passw,
-        "inviteKey": key}),
-      cache: false
+      $.ajax("<%= account_path(@conn, :register) %>", {
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({"email": email, "password": passw, "invite_key": key}),
+        cache: false
       })
       .done(function(data){
         $('.authMessage').append("<br/>").append(data.message);

@@ -6,8 +6,8 @@ Serves a web frontend for entice. Use this to access the worlds.
 
 Needs:
 
-- Erlang version: 17.1
-- Elixir version: 1.0.2
+- Erlang version: 17.5
+- Elixir version: 1.0.4
 
 To config:
 
@@ -21,5 +21,6 @@ To config:
 To start:
 
 1. Install dependencies with `mix deps.get`
-2. Seed the database with `mix ecto.migrate Entice.Web.Repo`
-3. Start server with `mix phoenix.server`
+2. Create the database with `mix ecto.migrate`
+3. Seed the database with `mix run priv/repo/seeds.exs`
+4. Start server with `mix phoenix.server`

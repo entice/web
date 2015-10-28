@@ -5,18 +5,24 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Logic.Area
-  alias Entice.Logic.Player
+  alias Entice.Logic.Npc
   alias Entice.Web.Endpoint
   alias Entice.Web.Token
   alias Phoenix.Socket
 
-
-  @reported_attributes [
+  @all_reported_attributes [
     Position,
     Name,
     Appearance,
     Health,
-    Energy]
+    Energy,
+    Level,
+    Npc]
+
+  @initally_reported_attributes [
+    Position]
+
+  @continually_reported_attributes @all_reported_attributes -- @initally_reported_attributes
 
 
   def join("entity:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
@@ -29,8 +35,8 @@ defmodule Entice.Web.EntityChannel do
 
   def handle_info(:after_join, socket) do
     Coordination.register_observer(self)
-    attrs = Player.attributes(socket |> entity_id)
-    socket |> push("join:ok", %{attributes: process_attributes(attrs)})
+    attrs = socket |> entity_id |> Entity.take_attributes(@all_reported_attributes)
+    socket |> push("initial", %{attributes: process_attributes(attrs, @all_reported_attributes)})
     {:noreply, socket}
   end
 
@@ -40,13 +46,13 @@ defmodule Entice.Web.EntityChannel do
 
   @doc "If this entity leaves, disconnect all sockets, and shut this down as well"
   def handle_info({:entity_leave, %{entity_id: eid}}, %Socket{assigns: %{entity_id: eid}} = socket) do
-    Endpoint.broadcast(Entice.Web.Socket.id(socket), "disconnect")
+    Endpoint.broadcast(Entice.Web.Socket.id(socket), "disconnect", %{})
     {:stop, :normal, socket}
   end
 
 
   def handle_info({:entity_join, %{entity_id: entity_id, attributes: attrs}}, socket) do
-    res = process_attributes(attrs)
+    res = process_attributes(attrs, @all_reported_attributes)
     if not Enum.empty?(res) do
       socket |> push("add", %{
         entity: entity_id,
@@ -56,10 +62,8 @@ defmodule Entice.Web.EntityChannel do
   end
 
 
-  def handle_info({:entity_leave, %{entity_id: entity_id, attributes: attrs}}, socket) do
-    res = process_attributes(attrs)
-    if not Enum.empty?(res),
-    do: socket |> push("remove", %{entity: entity_id})
+  def handle_info({:entity_leave, %{entity_id: entity_id, attributes: _attrs}}, socket) do
+    socket |> push("remove", %{entity: entity_id})
     {:noreply, socket}
   end
 
@@ -70,9 +74,9 @@ defmodule Entice.Web.EntityChannel do
       changed: changed,
       removed: removed}}, socket) do
     res = [
-      process_attributes(added),
-      process_attributes(changed),
-      process_attributes(removed)]
+      process_attributes(added, @all_reported_attributes),
+      process_attributes(changed, @continually_reported_attributes),
+      process_attributes(removed, @all_reported_attributes)]
     if res |> Enum.any?(&(not Enum.empty?(&1))) do
       socket |> push("change", %{
         entity: id,
@@ -116,26 +120,26 @@ defmodule Entice.Web.EntityChannel do
 
 
   # Transform attributes to network transferable maps
-  defp process_attributes(attributes) when is_map(attributes) do
+  defp process_attributes(attributes, filter) when is_map(attributes) do
     attributes
     |> Map.keys
     |> Enum.filter_map(
-        fn (attr) -> attr in @reported_attributes end,
+        fn (attr) -> attr in filter end,
         fn (attr) -> attributes[attr] |> attribute_to_tuple end)
     |> Enum.into(%{})
   end
 
-  defp process_attributes(attributes) when is_list(attributes) do
+  defp process_attributes(attributes, filter) when is_list(attributes) do
     attributes
     |> Enum.filter_map(
-        fn (attr) -> attr in @reported_attributes end,
+        fn (attr) -> attr in filter end,
         &StructOps.to_underscore_name/1)
   end
 
 
   # Maps an attribute to a network-transferable tuple
-  defp attribute_to_tuple(%Position{pos: pos} = attr),
-  do: {attr |> StructOps.to_underscore_name, Map.from_struct(pos)}
+  defp attribute_to_tuple(%Position{pos: pos, plane: plane} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(pos) |> Map.put(:plane, plane)}
 
   defp attribute_to_tuple(%Name{name: name} = attr),
   do: {attr |> StructOps.to_underscore_name, name}
@@ -143,9 +147,15 @@ defmodule Entice.Web.EntityChannel do
   defp attribute_to_tuple(%Appearance{} = attr),
   do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
 
-  defp attribute_to_tuple(%Health{health: health} = attr),
-  do: {attr |> StructOps.to_underscore_name, health}
+  defp attribute_to_tuple(%Health{} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
 
-  defp attribute_to_tuple(%Energy{mana: mana} = attr),
-  do: {attr |> StructOps.to_underscore_name, mana}
+  defp attribute_to_tuple(%Energy{} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
+
+  defp attribute_to_tuple(%Level{level: lvl} = attr),
+  do: {attr |> StructOps.to_underscore_name, lvl}
+
+  defp attribute_to_tuple(%Npc{npc_model_id: npc_model_id} = attr),
+  do: {attr |> StructOps.to_underscore_name, npc_model_id}
 end

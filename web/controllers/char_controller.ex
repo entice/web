@@ -36,17 +36,24 @@ defmodule Entice.Web.CharController do
   end
 
 
-  def create(conn, _params) do
+  def create(conn, %{"char_name" => name} = params) do
     id = conn |> get_session(:client_id)
     {:ok, acc} = Client.get_account(id)
 
-    name = conn.params["name"]
-    char = %Character{name: name, account: acc} |> Entice.Web.Repo.insert
+    changeset = Character.changeset_char_create(%Character{account_id: acc.id}, Map.put(params, "name", name))
+    char = Entice.Web.Repo.insert(changeset)
 
-    Client.add_char(id, char)
+    result =
+      case char do
+        {:error, %{errors: [name: "has already been taken"]}} -> error(%{message: "Could not create char. The name is already in use."})
+        {:error, %{errors: errors}}                           -> error(%{message: "Errors occured: #{inspect errors}"})
+        {:error, _reason}                                     -> error(%{message: "Unknown error occured."})
+        {:ok, char} ->
+          # make sure the account has the new char...
+          {:ok, _char} = Client.get_char(id, char.name)
+          ok(%{message: "Char created.", character: char |> Map.from_struct |> Map.take(@field_whitelist)})
+      end
 
-    conn |> json ok(%{
-      message: "Char created.",
-      character: char |> Map.from_struct |> Map.take(@field_whitelist)})
+    conn |> json result
   end
 end
