@@ -5,6 +5,7 @@ defmodule Entice.Test.Factories do
   use Entice.Logic.Attributes
   use Phoenix.ChannelTest
   alias Entice.Entity
+  alias Entice.Entity.Coordination
   alias Entice.Logic.Player
   alias Entice.Web.Account
   alias Entice.Web.Character
@@ -60,6 +61,7 @@ defmodule Entice.Test.Factories do
     {eid, pid} = create_entity
     {:ok, tid} = Token.create_entity_token(cid, %{entity_id: eid, map: map, char: char})
 
+    Coordination.register(eid, map)
     Player.register(eid, map, char.name, copy_into(%Appearance{}, char))
 
     {:ok, socket} = connect(Entice.Web.Socket, %{"client_id" => cid, "entity_token" => tid, "map" => map.underscore_name})

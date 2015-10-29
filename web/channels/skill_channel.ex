@@ -17,7 +17,7 @@ defmodule Entice.Web.SkillChannel do
 
 
   def handle_info(:after_join, %Socket{assigns: %{entity_id: entity_id, character: char}} = socket) do
-    Coordination.register_observer(self)
+    Coordination.register_observer(self, socket |> map)
     SkillBar.register(entity_id, char.skillbar)
     Casting.register(entity_id)
     socket |> push("initial", %{unlocked_skills: char.available_skills, skillbar: entity_id |> SkillBar.get_skills})
