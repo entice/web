@@ -21,7 +21,7 @@ defmodule Entice.Web.SocialChannel do
     case Group.is_my_leader?(socket |> entity_id, leader_id) do
       false -> {:error, %{reason: "Access to this group chat denied"}}
       true  ->
-        Coordination.register_observer(self)
+        Coordination.register_observer(self, socket |> map)
         {:ok, socket |> set_leader(leader_id)}
     end
   end

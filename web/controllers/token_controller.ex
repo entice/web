@@ -1,6 +1,7 @@
 defmodule Entice.Web.TokenController do
   use Entice.Web.Web, :controller
   alias Entice.Entity
+  alias Entice.Entity.Coordination
   alias Entice.Logic.Area
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
@@ -45,6 +46,7 @@ defmodule Entice.Web.TokenController do
 
     # init the entity and update the client
     Client.set_entity(id, eid)
+    Coordination.register(eid, map_mod)
     Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
     Vitals.register(eid)
 
