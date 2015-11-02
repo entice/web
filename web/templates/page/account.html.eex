@@ -1,5 +1,5 @@
 <div>
-  <form id="createAccountForm" name="createAccountForm">    
+  <form id="createAccountForm" name="createAccountForm">
     <fieldset>
       <legend>Account</legend>
       <p>
@@ -40,6 +40,15 @@
       })
       .done(function(data){
         $('.authMessage').append("<br/>").append(data.message);
+        if (data.status == "ok"){
+          $.ajax("<%= auth_path(@conn, :login) %>", {
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({"email": email, "password": passw, "client_version": "<%= @client_version %>"})})
+          .done(function(data) {
+            $(location).attr('href','<%= page_path(@conn, :index) %>');
+          })
+        }
       })
       .fail(function(data) {
         $('.authMessage').append(data.message);
