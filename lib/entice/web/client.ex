@@ -112,9 +112,7 @@ defmodule Entice.Web.Client do
     end
   end
 
-
   # Entity api
-
 
   def set_entity(id, entity_id),
   do: Entity.put_attribute(id, %Client{entity_id: entity_id, online_status: :online})
