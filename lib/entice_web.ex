@@ -12,8 +12,8 @@ defmodule Entice.Web do
       supervisor(Entice.Web.Endpoint, []),
       # Start the Ecto repository
       worker(Entice.Web.Repo, []),
-      worker(Entice.Web.Client.Server, [])
-      #worker(Entice.Logic.MapRegistry, [])
+      worker(Entice.Web.Client.Server, []),
+      worker(Entice.Logic.MapRegistry, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

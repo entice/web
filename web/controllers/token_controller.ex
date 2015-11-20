@@ -6,6 +6,7 @@ defmodule Entice.Web.TokenController do
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
   alias Entice.Logic.Vitals
+  alias Entice.Logic.MapInstance
   alias Entice.Logic.MapRegistry
   alias Entice.Web.Character
   alias Entice.Web.Token
@@ -48,11 +49,11 @@ defmodule Entice.Web.TokenController do
     # init the entity and update the client
     Client.set_entity(id, eid)
     Coordination.register(eid, map_mod)
-    # case MapRegistry.start_instance(map_mod) do
-    #   {:ok, instance_id} -> :nothing
-    #   {:error, :instance_already_running} -> {:ok, instance_id} = MapRegistry.get_instance(map_mod)
-    # end
-    # MapInstance.add_player(instance_id, eid)
+    case MapRegistry.start_instance(map_mod) do
+      {:ok, instance_id} -> :nothing
+      {:error, :instance_already_running} -> {:ok, instance_id} = MapRegistry.get_instance(map_mod)
+    end
+    MapInstance.add_player(instance_id, eid)
     Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
     Vitals.register(eid)
 
