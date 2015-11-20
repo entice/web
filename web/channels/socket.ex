@@ -20,7 +20,7 @@ end
 
 defmodule Entice.Web.Socket do
   use Phoenix.Socket
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Web.Token
   import Entice.Web.Socket.Helpers
   import Phoenix.Naming
@@ -43,7 +43,7 @@ defmodule Entice.Web.Socket do
     try_connect(
       client_id, token, socket,
       Token.get_token(client_id),
-      Area.get_map(camelize(map)))
+      Maps.get_map(camelize(map)))
   end
 
   defp try_connect(

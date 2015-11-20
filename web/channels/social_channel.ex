@@ -1,6 +1,6 @@
 defmodule Entice.Web.SocialChannel do
   use Entice.Web.Web, :channel
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Logic.Group
   alias Entice.Entity.Coordination
   alias Phoenix.Socket
@@ -8,7 +8,7 @@ defmodule Entice.Web.SocialChannel do
 
   def join("social:" <> map_rooms, _message, %Socket{assigns: %{map: map_mod}} = socket) do
     [map | rooms] = Regex.split(~r/:/, map_rooms)
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
+    {:ok, ^map_mod} = Maps.get_map(camelize(map))
     join_internal(rooms, socket)
   end
 

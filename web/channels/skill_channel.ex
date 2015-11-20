@@ -2,14 +2,14 @@ defmodule Entice.Web.SkillChannel do
   use Entice.Web.Web, :channel
   alias Entice.Entity.Coordination
   alias Entice.Logic.Skills
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Logic.SkillBar
   alias Entice.Logic.Casting
   alias Phoenix.Socket
 
 
   def join("skill:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
+    {:ok, ^map_mod} = Maps.get_map(camelize(map))
     Process.flag(:trap_exit, true)
     send(self, :after_join)
     {:ok, socket}

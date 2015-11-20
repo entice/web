@@ -1,6 +1,6 @@
 defmodule Entice.Web.GroupChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Area
+  use Entice.Logic.Maps
   use Entice.Logic.Attributes
   alias Entice.Web.Endpoint
   alias Entice.Entity

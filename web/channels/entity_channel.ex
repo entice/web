@@ -4,7 +4,7 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Utils.StructOps
   alias Entice.Entity
   alias Entice.Entity.Coordination
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Logic.Npc
   alias Entice.Web.Endpoint
   alias Entice.Web.Token
@@ -26,7 +26,7 @@ defmodule Entice.Web.EntityChannel do
 
 
   def join("entity:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
+    {:ok, ^map_mod} = Maps.get_map(camelize(map))
     Process.flag(:trap_exit, true)
     send(self, :after_join)
     {:ok, socket}
@@ -95,7 +95,7 @@ defmodule Entice.Web.EntityChannel do
 
 
   def handle_in("map:change", %{"map" => map}, socket) do
-    {:ok, map_mod} = Area.get_map(camelize(map))
+    {:ok, map_mod} = Maps.get_map(camelize(map))
     {:ok, _token}  = Token.create_mapchange_token(socket |> client_id, %{
       entity_id: socket |> entity_id,
       map: map_mod,
