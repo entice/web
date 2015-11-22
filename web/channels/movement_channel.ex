@@ -1,14 +1,14 @@
 defmodule Entice.Web.MovementChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Attributes
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Logic.Movement, as: Move
   alias Entice.Entity.Coordination
   alias Phoenix.Socket
 
 
   def join("movement:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
-    {:ok, ^map_mod} = Area.get_map(camelize(map))
+    {:ok, ^map_mod} = Maps.get_map(camelize(map))
     Process.flag(:trap_exit, true)
     send(self, :after_join)
     {:ok, socket}

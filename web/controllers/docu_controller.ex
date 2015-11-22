@@ -1,13 +1,13 @@
 defmodule Entice.Web.DocuController do
   use Entice.Web.Web, :controller
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Skills
 
   plug :ensure_login
 
 
   def maps(conn, _params) do
-    maps = Area.get_maps
+    maps = Maps.get_maps
     |> Enum.filter(&(&1 != Lobby and &1 != Transfer))
     |> Enum.map(&(&1.underscore_name))
 

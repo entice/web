@@ -1,6 +1,6 @@
 defmodule Entice.Web.SkillChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Area
+  use Entice.Logic.Maps
   alias Entice.Web.Socket.Helpers
   alias Entice.Logic.Skills
   alias Entice.Logic.Vitals

@@ -1,6 +1,6 @@
 defmodule Entice.Web.MovementChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Area
+  use Entice.Logic.Maps
   use Entice.Logic.Attributes
   alias Entice.Entity
   alias Entice.Test.Factories

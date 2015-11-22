@@ -12,7 +12,8 @@ defmodule Entice.Web do
       supervisor(Entice.Web.Endpoint, []),
       # Start the Ecto repository
       worker(Entice.Web.Repo, []),
-      worker(Entice.Web.Client.Server, [])
+      worker(Entice.Web.Client.Server, []),
+      worker(Entice.Logic.MapRegistry, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -20,7 +21,6 @@ defmodule Entice.Web do
     opts = [strategy: :one_for_one, name: Entice.Web.Supervisor]
     result = Supervisor.start_link(children, opts)
 
-    Npc.spawn_all()
     result
   end
 

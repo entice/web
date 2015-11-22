@@ -1,6 +1,6 @@
 defmodule Entice.Web.TokenTest do
   use ExUnit.Case
-  use Entice.Logic.Area
+  use Entice.Logic.Maps
   alias Entice.Web.Token
   alias Entice.Test.Factories
 
