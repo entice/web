@@ -2,10 +2,13 @@ defmodule Entice.Web.TokenController do
   use Entice.Web.Web, :controller
   alias Entice.Entity
   alias Entice.Entity.Coordination
-  alias Entice.Logic.Area
+  alias Entice.Logic.Maps
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
+  alias Entice.Logic.Player.Position
   alias Entice.Logic.Vitals
+  alias Entice.Logic.MapInstance
+  alias Entice.Logic.MapRegistry
   alias Entice.Web.Character
   alias Entice.Web.Token
   import Entice.Utils.StructOps
@@ -17,6 +20,19 @@ defmodule Entice.Web.TokenController do
 
   def entity_token(conn, params), do: conn |> json error(%{message: "Expected param 'map, char_name', got: #{inspect params}"})
 
+  defp spawn_dhuum(instance_id, map_mod) do
+    MapInstance.add_npc(instance_id, "Dhuum", :dhuum, %Position{pos: map_mod.spawn})
+  end
+
+  defp start_or_get_instance(map_mod) do
+    case MapRegistry.start_instance(map_mod) do
+      {:ok, instance_id} ->
+        #TODO: Replace following line with populating function, new file for dealing with instances, map model etc...
+        spawn_dhuum(instance_id, map_mod)
+        {:ok, instance_id}
+      {:error, :instance_already_running} -> {:ok, _instance_id} = MapRegistry.get_instance(map_mod)
+    end
+  end
 
   defp entity_token_internal(conn, map, char_name) do
     id = get_session(conn, :client_id)
@@ -27,7 +43,7 @@ defmodule Entice.Web.TokenController do
       _ ->
     end
 
-    {:ok, map_mod}   = Area.get_map(camelize(map))
+    {:ok, map_mod}   = Maps.get_map(camelize(map))
     {:ok, char}      = Client.get_char(id, char_name)
     {:ok, eid, _pid} = Entity.start()
     name = char.name
@@ -47,6 +63,8 @@ defmodule Entice.Web.TokenController do
     # init the entity and update the client
     Client.set_entity(id, eid)
     Coordination.register(eid, map_mod)
+    {:ok, instance_id} = start_or_get_instance(map_mod)
+    MapInstance.add_player(instance_id, eid)
     Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
     Vitals.register(eid)
 

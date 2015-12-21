@@ -1,6 +1,6 @@
 defmodule Entice.Web.SocialChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Area
+  use Entice.Logic.Maps
   alias Entice.Logic.Group
   alias Entice.Test.Factories
 
