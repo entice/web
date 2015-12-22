@@ -95,15 +95,20 @@ defmodule Entice.Web.EntityChannel do
 
 
   def handle_in("map:change", %{"map" => map}, socket) do
-    {:ok, map_mod} = Maps.get_map(camelize(map))
-    {:ok, _token}  = Token.create_mapchange_token(socket |> client_id, %{
-      entity_id: socket |> entity_id,
-      map: map_mod,
-      char: socket |> character})
+    reply = case Maps.get_map(camelize(map)) do
+      {:ok, map_mod} ->
+        {:ok, _token}  = Token.create_mapchange_token(socket |> client_id, %{
+          entity_id: socket |> entity_id,
+          map: map_mod,
+          char: socket |> character})
 
-    Endpoint.plain_broadcast(Entice.Web.Socket.id(socket), {:entity_mapchange, %{map: map_mod}})
+        Endpoint.plain_broadcast(Entice.Web.Socket.id(socket), {:entity_mapchange, %{map: map_mod}})
+        {:ok, %{map: map}}
 
-    {:reply, {:ok, %{map: map}}, socket}
+      _ -> {:error, %{reason: :unknown_map}}
+    end
+
+    {:reply, reply, socket}
   end
 
 

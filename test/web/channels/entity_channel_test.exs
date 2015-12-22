@@ -84,4 +84,11 @@ defmodule Entice.Web.EntityChannelTest do
     ref = push socket, "map:change", %{"map" => new_map}
     assert_reply ref, :ok, %{map: ^new_map}
   end
+
+
+  test "error in mapchange", %{socket: socket} do
+    new_map = "non_existing_map"
+    ref = push socket, "map:change", %{"map" => new_map}
+    assert_reply ref, :error, %{reason: :unknown_map}
+  end
 end
