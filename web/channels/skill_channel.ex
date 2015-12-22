@@ -5,6 +5,7 @@ defmodule Entice.Web.SkillChannel do
   alias Entice.Logic.Maps
   alias Entice.Logic.SkillBar
   alias Entice.Logic.Casting
+  alias Entice.Web.Character
   alias Phoenix.Socket
 
 
@@ -91,7 +92,7 @@ defmodule Entice.Web.SkillChannel do
       {_, _, false} -> {:reply, {:error, %{reason: :cannot_change_skill_in_explorable}}, socket}
       _ ->
         new_slots = socket |> entity_id |> SkillBar.change_skill(slot, id)
-        Entice.Web.Repo.update(%{(socket |> character) | skillbar: new_slots})
+        Entice.Web.Repo.update(Character.changeset_skillbar((socket |> character), new_slots))
         {:reply, {:ok, %{skillbar: new_slots}}, socket}
     end
   end
