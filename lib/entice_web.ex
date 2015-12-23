@@ -1,6 +1,5 @@
 defmodule Entice.Web do
   use Application
-  alias Entice.Logic.Npc
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications

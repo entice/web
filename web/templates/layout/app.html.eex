@@ -40,7 +40,7 @@
       <% end %>
 
       <br>
-      <%= @inner %>
+      <%= render @view_module, @view_template, assigns %>
     </div>
 
     <div class="footer">

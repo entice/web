@@ -6,7 +6,6 @@ defmodule Entice.Web.TokenController do
   alias Entice.Logic.Player
   alias Entice.Logic.Player.Appearance
   alias Entice.Logic.Player.Position
-  alias Entice.Logic.Vitals
   alias Entice.Logic.MapInstance
   alias Entice.Logic.MapRegistry
   alias Entice.Web.Character
