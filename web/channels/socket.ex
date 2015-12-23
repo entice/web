@@ -32,6 +32,7 @@ defmodule Entice.Web.Socket do
   channel "movement:*", Entice.Web.MovementChannel
   channel "skill:*",    Entice.Web.SkillChannel
   channel "social:*",   Entice.Web.SocialChannel
+  channel "vitals:*",   Entice.Web.VitalsChannel
 
 
   ## Transports

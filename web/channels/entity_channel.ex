@@ -16,6 +16,7 @@ defmodule Entice.Web.EntityChannel do
     Appearance,
     Health,
     Energy,
+    Morale,
     Level,
     Npc]
 
@@ -157,6 +158,9 @@ defmodule Entice.Web.EntityChannel do
 
   defp attribute_to_tuple(%Energy{} = attr),
   do: {attr |> StructOps.to_underscore_name, Map.from_struct(attr)}
+
+  defp attribute_to_tuple(%Morale{morale: morale} = attr),
+  do: {attr |> StructOps.to_underscore_name, morale}
 
   defp attribute_to_tuple(%Level{level: lvl} = attr),
   do: {attr |> StructOps.to_underscore_name, lvl}

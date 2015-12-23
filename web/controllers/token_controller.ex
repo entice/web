@@ -66,7 +66,6 @@ defmodule Entice.Web.TokenController do
     {:ok, instance_id} = start_or_get_instance(map_mod)
     MapInstance.add_player(instance_id, eid)
     Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
-    Vitals.register(eid)
 
     conn |> json ok(%{
       message: "Transferring...",
