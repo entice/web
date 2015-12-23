@@ -52,6 +52,10 @@ defmodule Entice.Web.EntityChannel do
   end
 
 
+  @doc "Filter out 'join' messages of this entity, which we'd get after registering as an observer"
+  def handle_info({:entity_join, %{entity_id: eid}}, %Socket{assigns: %{entity_id: eid}} = socket), do: {:noreply, socket}
+
+
   def handle_info({:entity_join, %{entity_id: entity_id, attributes: attrs}}, socket) do
     res = process_attributes(attrs, @all_reported_attributes)
     if not Enum.empty?(res) do
