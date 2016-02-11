@@ -29,7 +29,9 @@ defmodule Entice.Web.TokenController do
         #TODO: Replace following line with populating function, new file for dealing with instances, map model etc...
         spawn_dhuum(instance_id, map_mod)
         {:ok, instance_id}
-      {:error, :instance_already_running} -> {:ok, _instance_id} = MapRegistry.get_instance(map_mod)
+      {:error, :instance_already_running} ->
+        instance_id = MapRegistry.get_instance(map_mod)
+        {:ok, instance_id}
     end
   end
 
