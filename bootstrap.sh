@@ -14,8 +14,7 @@ sudo rm -f pg_hba.conf
 
 cat | sudo -u postgres tee pg_hba.conf <<- EOM
 local all all trust
-host all all 127.0.0.1/32 trust
-host all all ::1/128 trust
+host all all all trust
 EOM
 
 sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "postgresql.conf"
