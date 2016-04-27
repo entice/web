@@ -7,10 +7,7 @@ defmodule Entice.Test.Factories do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Logic.Player
-  alias Entice.Web.Account
-  alias Entice.Web.Character
-  alias Entice.Web.Client
-  alias Entice.Web.Token
+  alias Entice.Web.{Account, Character, Client, Token}
   alias Entice.Test.Factories.Counter
   import Entice.Utils.StructOps
 

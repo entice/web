@@ -4,10 +4,8 @@ defmodule Entice.Web.EntityChannel do
   alias Entice.Utils.StructOps
   alias Entice.Entity
   alias Entice.Entity.Coordination
-  alias Entice.Logic.Maps
-  alias Entice.Logic.Npc
-  alias Entice.Web.Endpoint
-  alias Entice.Web.Token
+  alias Entice.Logic.{Maps, Npc}
+  alias Entice.Web.{Endpoint, Token}
   alias Phoenix.Socket
 
   @all_reported_attributes [

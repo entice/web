@@ -1,8 +1,7 @@
 defmodule Entice.Web.VitalsChannel do
   use Entice.Web.Web, :channel
   alias Entice.Entity.Coordination
-  alias Entice.Logic.Maps
-  alias Entice.Logic.Vitals
+  alias Entice.Logic.{Maps, Vitals}
   alias Phoenix.Socket
 
 

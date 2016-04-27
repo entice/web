@@ -1,7 +1,6 @@
 defmodule Entice.Web.CharacterTest do
   use Entice.Web.ModelCase
-  alias Entice.Web.Account
-  alias Entice.Web.Character
+  alias Entice.Web.{Account, Character}
 
 
   test "initial available skills" do

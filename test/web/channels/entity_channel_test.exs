@@ -1,7 +1,6 @@
 defmodule Entice.Web.EntityChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Maps
-  use Entice.Logic.Attributes
+  use Entice.Logic.{Maps, Attributes}
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Test.Factories

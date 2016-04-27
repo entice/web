@@ -1,7 +1,5 @@
 defmodule Entice.Web.Client do
-  alias Entice.Web.Account
-  alias Entice.Web.Client
-  alias Entice.Web.Queries
+  alias Entice.Web.{Account, Client, Queries}
   alias Entice.Entity
   alias Entice.Logic.Player
   import Plug.Conn
@@ -47,7 +45,7 @@ defmodule Entice.Web.Client do
 
     case get_entity(id) do
       eid when is_bitstring(eid) -> Entity.stop(eid)
-      _ ->
+      _ -> nil
     end
 
     Client.Server.remove_client_by_email(email)

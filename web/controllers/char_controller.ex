@@ -30,9 +30,9 @@ defmodule Entice.Web.CharController do
       |> Map.take(@field_whitelist)
     end)
 
-    conn |> json ok(%{
+    conn |> json(ok(%{
       message: "All chars...",
-      characters: chars})
+      characters: chars}))
   end
 
 
@@ -54,6 +54,6 @@ defmodule Entice.Web.CharController do
           ok(%{message: "Char created.", character: char |> Map.from_struct |> Map.take(@field_whitelist)})
       end
 
-    conn |> json result
+    conn |> json(result)
   end
 end
