@@ -63,8 +63,10 @@ defmodule Entice.Web.ConnCase do
   end
 
   setup tags do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Entice.Web.Repo)
+
     unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(Entice.Web.Repo, [])
+      Ecto.Adapters.SQL.Sandbox.mode(Entice.Web.Repo, {:shared, self()})
     end
 
     :ok

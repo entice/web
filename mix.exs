@@ -28,7 +28,7 @@ defmodule Entice.Web.Mixfile do
      {:entice_utils, github: "entice/utils", ref: "e80039a439753d743635b0a67b78fa04329f8930"},
      {:cowboy, "~> 1.0"},
      {:phoenix, "~> 1.1"},
-     {:phoenix_ecto, "~> 2.0"},
+     {:phoenix_ecto, "~> 3.0.0-rc"},
      {:postgrex, ">= 0.0.0"},
      {:phoenix_html, "~> 2.3"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
@@ -38,6 +38,7 @@ defmodule Entice.Web.Mixfile do
 
   defp aliases do
     ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-     "ecto.reset": ["ecto.drop", "ecto.setup"]]
+     "ecto.reset": ["ecto.drop", "ecto.setup"],
+     "test":  ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

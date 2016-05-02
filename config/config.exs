@@ -7,7 +7,8 @@ use Mix.Config
 
 config :entice_web,
   app_namespace: Entice.Web,
-  client_version: (System.get_env("CLIENT_VERSION") || "MS11")
+  client_version: (System.get_env("CLIENT_VERSION") || "MS11"),
+  ecto_repos: [Entice.Web.Repo]
 
 # Configures the endpoint
 config :entice_web, Entice.Web.Endpoint,
