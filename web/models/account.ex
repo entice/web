@@ -1,5 +1,5 @@
 defmodule Entice.Web.Account do
-  use Entice.Web.Web, :model
+  use Entice.Web.Web, :schema
 
   schema "accounts" do
     field :email,    :string
@@ -10,9 +10,10 @@ defmodule Entice.Web.Account do
   end
 
 
-  def changeset(account, params \\ :empty) do
+  def changeset(account, params \\ :invalid) do
     account
-    |> cast(params, ~w(email password), ~w())
+    |> cast(params, [:email, :password])
+    |> validate_required([:email, :password])
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
   end
