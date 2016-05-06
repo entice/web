@@ -57,18 +57,21 @@ defmodule Entice.Web.TokenController do
     {:ok, token} = Token.create_entity_token(id, %{entity_id: eid, map: map_mod, char: char})
 
     # init the entity and update the client
-    Client.set_entity(id, eid)
-    Coordination.register(eid, map_mod)
-    {:ok, instance_id} = start_or_get_instance(map_mod)
-    MapInstance.add_player(instance_id, eid)
-    Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char))
-
-    conn |> json(ok(%{
-      message: "Transferring...",
-      client_id: id,
-      entity_id: eid,
-      entity_token: token,
-      map: map_mod.underscore_name,
-      is_outpost: map_mod.is_outpost?}))
+    with :ok <- Client.set_entity(id, eid),
+         :ok <- Coordination.register(eid, map_mod),
+         {:ok, instance_id} <- start_or_get_instance(map_mod),
+         :ok <- MapInstance.add_player(instance_id, eid),
+         %{Player.Appearance => _, 
+           Player.Level => _,
+           Player.Name =>_,
+           Player.Position => _ } <- Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char)) do
+        conn |> json(ok(%{
+          message: "Transferring...",
+          client_id: id,
+          entity_id: eid,
+          entity_token: token,
+          map: map_mod.underscore_name,
+          is_outpost: map_mod.is_outpost?}))
+      end
   end
 end

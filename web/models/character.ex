@@ -1,7 +1,6 @@
 defmodule Entice.Web.Character do
   use Entice.Web.Web, :schema
   alias Entice.Logic.Skills
-  alias Entice.Web.Character
 
   schema "characters" do
     field :name,             :string
