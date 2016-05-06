@@ -3,7 +3,7 @@ defmodule Entice.Web.TokenController do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Logic.{Maps, Player, MapInstance, MapRegistry}
-  alias Entice.Logic.Player.{Appearance, Position}
+  alias Entice.Logic.Player.Appearance
   alias Entice.Web.{Character, Token}
   import Entice.Utils.StructOps
   import Phoenix.Naming
@@ -13,22 +13,6 @@ defmodule Entice.Web.TokenController do
   def entity_token(conn, %{"map" => map, "char_name" => char_name}), do: entity_token_internal(conn, map, char_name)
 
   def entity_token(conn, params), do: conn |> json(error(%{message: "Expected param 'map, char_name', got: #{inspect params}"}))
-
-  defp spawn_dhuum(instance_id, map_mod) do
-    MapInstance.add_npc(instance_id, "Dhuum", :dhuum, %Position{pos: map_mod.spawn})
-  end
-
-  defp start_or_get_instance(map_mod) do
-    case MapRegistry.start_instance(map_mod) do
-      {:ok, instance_id} ->
-        #TODO: Replace following line with populating function, new file for dealing with instances, map model etc...
-        spawn_dhuum(instance_id, map_mod)
-        {:ok, instance_id}
-      {:error, :instance_already_running} ->
-        instance_id = MapRegistry.get_instance(map_mod)
-        {:ok, instance_id}
-    end
-  end
 
   defp entity_token_internal(conn, map, char_name) do
     id = get_session(conn, :client_id)
@@ -59,7 +43,7 @@ defmodule Entice.Web.TokenController do
     # init the entity and update the client
     with :ok <- Client.set_entity(id, eid),
          :ok <- Coordination.register(eid, map_mod),
-         {:ok, instance_id} <- start_or_get_instance(map_mod),
+         instance_id = MapRegistry.get_or_create_instance(map_mod),
          :ok <- MapInstance.add_player(instance_id, eid),
          %{Player.Appearance => _, 
            Player.Level => _,
