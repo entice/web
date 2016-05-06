@@ -52,7 +52,7 @@ defmodule Entice.Web.ConnCase do
       def fetch_route(req, route, context), do: fetch_route(req, route, context, true)
 
       def fetch_route(req, route, context, must_login) do
-        conn = conn(req, route, context.params)
+        conn = build_conn(req, route, context.params)
         |> with_session()
         if must_login == true, do: conn = log_in(conn, context)
 
