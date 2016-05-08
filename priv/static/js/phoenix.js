@@ -1,3 +1,18 @@
+(function(exports){
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 // Phoenix Channels JavaScript client
 //
 // ## Socket Connection
@@ -166,29 +181,29 @@
 //       this.setState({users: Presence.list(room.presences, listBy)})
 //     })
 //
-const VSN = "1.0.0"
-const SOCKET_STATES = {connecting: 0, open: 1, closing: 2, closed: 3}
-const DEFAULT_TIMEOUT = 10000
-const CHANNEL_STATES = {
+var VSN = "1.0.0";
+var SOCKET_STATES = { connecting: 0, open: 1, closing: 2, closed: 3 };
+var DEFAULT_TIMEOUT = 10000;
+var CHANNEL_STATES = {
   closed: "closed",
   errored: "errored",
   joined: "joined",
   joining: "joining",
-  leaving: "leaving",
-}
-const CHANNEL_EVENTS = {
+  leaving: "leaving"
+};
+var CHANNEL_EVENTS = {
   close: "phx_close",
   error: "phx_error",
   join: "phx_join",
   reply: "phx_reply",
   leave: "phx_leave"
-}
-const TRANSPORTS = {
+};
+var TRANSPORTS = {
   longpoll: "longpoll",
   websocket: "websocket"
-}
+};
 
-class Push {
+var Push = function () {
 
   // Initializes the Push
   //
@@ -197,237 +212,345 @@ class Push {
   // payload - The payload, for example `{user_id: 123}`
   // timeout - The push timeout in milliseconds
   //
-  constructor(channel, event, payload, timeout){
-    this.channel      = channel
-    this.event        = event
-    this.payload      = payload || {}
-    this.receivedResp = null
-    this.timeout      = timeout
-    this.timeoutTimer = null
-    this.recHooks     = []
-    this.sent         = false
+
+  function Push(channel, event, payload, timeout) {
+    _classCallCheck(this, Push);
+
+    this.channel = channel;
+    this.event = event;
+    this.payload = payload || {};
+    this.receivedResp = null;
+    this.timeout = timeout;
+    this.timeoutTimer = null;
+    this.recHooks = [];
+    this.sent = false;
   }
 
-  resend(timeout){
-    this.timeout = timeout
-    this.cancelRefEvent()
-    this.ref          = null
-    this.refEvent     = null
-    this.receivedResp = null
-    this.sent         = false
-    this.send()
-  }
+  _createClass(Push, [{
+    key: "resend",
+    value: function resend(timeout) {
+      this.timeout = timeout;
+      this.cancelRefEvent();
+      this.ref = null;
+      this.refEvent = null;
+      this.receivedResp = null;
+      this.sent = false;
+      this.send();
+    }
+  }, {
+    key: "send",
+    value: function send() {
+      if (this.hasReceived("timeout")) {
+        return;
+      }
+      this.startTimeout();
+      this.sent = true;
+      this.channel.socket.push({
+        topic: this.channel.topic,
+        event: this.event,
+        payload: this.payload,
+        ref: this.ref
+      });
+    }
+  }, {
+    key: "receive",
+    value: function receive(status, callback) {
+      if (this.hasReceived(status)) {
+        callback(this.receivedResp.response);
+      }
 
-  send(){ if(this.hasReceived("timeout")){ return }
-    this.startTimeout()
-    this.sent = true
-    this.channel.socket.push({
-      topic: this.channel.topic,
-      event: this.event,
-      payload: this.payload,
-      ref: this.ref
-    })
-  }
-
-  receive(status, callback){
-    if(this.hasReceived(status)){
-      callback(this.receivedResp.response)
+      this.recHooks.push({ status: status, callback: callback });
+      return this;
     }
 
-    this.recHooks.push({status, callback})
-    return this
-  }
+    // private
 
+  }, {
+    key: "matchReceive",
+    value: function matchReceive(_ref) {
+      var status = _ref.status;
+      var response = _ref.response;
+      var ref = _ref.ref;
 
-  // private
-
-  matchReceive({status, response, ref}){
-    this.recHooks.filter( h => h.status === status )
-                 .forEach( h => h.callback(response) )
-  }
-
-  cancelRefEvent(){ if(!this.refEvent){ return }
-    this.channel.off(this.refEvent)
-  }
-
-  cancelTimeout(){
-    clearTimeout(this.timeoutTimer)
-    this.timeoutTimer = null
-  }
-
-  startTimeout(){ if(this.timeoutTimer){ return }
-    this.ref      = this.channel.socket.makeRef()
-    this.refEvent = this.channel.replyEventName(this.ref)
-
-    this.channel.on(this.refEvent, payload => {
-      this.cancelRefEvent()
-      this.cancelTimeout()
-      this.receivedResp = payload
-      this.matchReceive(payload)
-    })
-
-    this.timeoutTimer = setTimeout(() => {
-      this.trigger("timeout", {})
-    }, this.timeout)
-  }
-
-  hasReceived(status){
-    return this.receivedResp && this.receivedResp.status === status
-  }
-
-  trigger(status, response){
-    this.channel.trigger(this.refEvent, {status, response})
-  }
-}
-
-export class Channel {
-  constructor(topic, params, socket) {
-    this.state       = CHANNEL_STATES.closed
-    this.topic       = topic
-    this.params      = params || {}
-    this.socket      = socket
-    this.bindings    = []
-    this.timeout     = this.socket.timeout
-    this.joinedOnce  = false
-    this.joinPush    = new Push(this, CHANNEL_EVENTS.join, this.params, this.timeout)
-    this.pushBuffer  = []
-    this.rejoinTimer  = new Timer(
-      () => this.rejoinUntilConnected(),
-      this.socket.reconnectAfterMs
-    )
-    this.joinPush.receive("ok", () => {
-      this.state = CHANNEL_STATES.joined
-      this.rejoinTimer.reset()
-      this.pushBuffer.forEach( pushEvent => pushEvent.send() )
-      this.pushBuffer = []
-    })
-    this.onClose( () => {
-      this.socket.log("channel", `close ${this.topic} ${this.joinRef()}`)
-      this.state = CHANNEL_STATES.closed
-      this.socket.remove(this)
-    })
-    this.onError( reason => {
-      this.socket.log("channel", `error ${this.topic}`, reason)
-      this.state = CHANNEL_STATES.errored
-      this.rejoinTimer.scheduleTimeout()
-    })
-    this.joinPush.receive("timeout", () => {
-      if(this.state !== CHANNEL_STATES.joining){ return }
-
-      this.socket.log("channel", `timeout ${this.topic}`, this.joinPush.timeout)
-      this.state = CHANNEL_STATES.errored
-      this.rejoinTimer.scheduleTimeout()
-    })
-    this.on(CHANNEL_EVENTS.reply, (payload, ref) => {
-      this.trigger(this.replyEventName(ref), payload)
-    })
-  }
-
-  rejoinUntilConnected(){
-    this.rejoinTimer.scheduleTimeout()
-    if(this.socket.isConnected()){
-      this.rejoin()
+      this.recHooks.filter(function (h) {
+        return h.status === status;
+      }).forEach(function (h) {
+        return h.callback(response);
+      });
     }
-  }
-
-  join(timeout = this.timeout){
-    if(this.joinedOnce){
-      throw(`tried to join multiple times. 'join' can only be called a single time per channel instance`)
-    } else {
-      this.joinedOnce = true
-      this.rejoin(timeout)
-      return this.joinPush
+  }, {
+    key: "cancelRefEvent",
+    value: function cancelRefEvent() {
+      if (!this.refEvent) {
+        return;
+      }
+      this.channel.off(this.refEvent);
     }
-  }
-
-  onClose(callback){ this.on(CHANNEL_EVENTS.close, callback) }
-
-  onError(callback){
-    this.on(CHANNEL_EVENTS.error, reason => callback(reason) )
-  }
-
-  on(event, callback){ this.bindings.push({event, callback}) }
-
-  off(event){ this.bindings = this.bindings.filter( bind => bind.event !== event ) }
-
-  canPush(){ return this.socket.isConnected() && this.state === CHANNEL_STATES.joined }
-
-  push(event, payload, timeout = this.timeout){
-    if(!this.joinedOnce){
-      throw(`tried to push '${event}' to '${this.topic}' before joining. Use channel.join() before pushing events`)
+  }, {
+    key: "cancelTimeout",
+    value: function cancelTimeout() {
+      clearTimeout(this.timeoutTimer);
+      this.timeoutTimer = null;
     }
-    let pushEvent = new Push(this, event, payload, timeout)
-    if(this.canPush()){
-      pushEvent.send()
-    } else {
-      pushEvent.startTimeout()
-      this.pushBuffer.push(pushEvent)
+  }, {
+    key: "startTimeout",
+    value: function startTimeout() {
+      var _this = this;
+
+      if (this.timeoutTimer) {
+        return;
+      }
+      this.ref = this.channel.socket.makeRef();
+      this.refEvent = this.channel.replyEventName(this.ref);
+
+      this.channel.on(this.refEvent, function (payload) {
+        _this.cancelRefEvent();
+        _this.cancelTimeout();
+        _this.receivedResp = payload;
+        _this.matchReceive(payload);
+      });
+
+      this.timeoutTimer = setTimeout(function () {
+        _this.trigger("timeout", {});
+      }, this.timeout);
+    }
+  }, {
+    key: "hasReceived",
+    value: function hasReceived(status) {
+      return this.receivedResp && this.receivedResp.status === status;
+    }
+  }, {
+    key: "trigger",
+    value: function trigger(status, response) {
+      this.channel.trigger(this.refEvent, { status: status, response: response });
+    }
+  }]);
+
+  return Push;
+}();
+
+var Channel = exports.Channel = function () {
+  function Channel(topic, params, socket) {
+    var _this2 = this;
+
+    _classCallCheck(this, Channel);
+
+    this.state = CHANNEL_STATES.closed;
+    this.topic = topic;
+    this.params = params || {};
+    this.socket = socket;
+    this.bindings = [];
+    this.timeout = this.socket.timeout;
+    this.joinedOnce = false;
+    this.joinPush = new Push(this, CHANNEL_EVENTS.join, this.params, this.timeout);
+    this.pushBuffer = [];
+    this.rejoinTimer = new Timer(function () {
+      return _this2.rejoinUntilConnected();
+    }, this.socket.reconnectAfterMs);
+    this.joinPush.receive("ok", function () {
+      _this2.state = CHANNEL_STATES.joined;
+      _this2.rejoinTimer.reset();
+      _this2.pushBuffer.forEach(function (pushEvent) {
+        return pushEvent.send();
+      });
+      _this2.pushBuffer = [];
+    });
+    this.onClose(function () {
+      _this2.socket.log("channel", "close " + _this2.topic + " " + _this2.joinRef());
+      _this2.state = CHANNEL_STATES.closed;
+      _this2.socket.remove(_this2);
+    });
+    this.onError(function (reason) {
+      _this2.socket.log("channel", "error " + _this2.topic, reason);
+      _this2.state = CHANNEL_STATES.errored;
+      _this2.rejoinTimer.scheduleTimeout();
+    });
+    this.joinPush.receive("timeout", function () {
+      if (_this2.state !== CHANNEL_STATES.joining) {
+        return;
+      }
+
+      _this2.socket.log("channel", "timeout " + _this2.topic, _this2.joinPush.timeout);
+      _this2.state = CHANNEL_STATES.errored;
+      _this2.rejoinTimer.scheduleTimeout();
+    });
+    this.on(CHANNEL_EVENTS.reply, function (payload, ref) {
+      _this2.trigger(_this2.replyEventName(ref), payload);
+    });
+  }
+
+  _createClass(Channel, [{
+    key: "rejoinUntilConnected",
+    value: function rejoinUntilConnected() {
+      this.rejoinTimer.scheduleTimeout();
+      if (this.socket.isConnected()) {
+        this.rejoin();
+      }
+    }
+  }, {
+    key: "join",
+    value: function join() {
+      var timeout = arguments.length <= 0 || arguments[0] === undefined ? this.timeout : arguments[0];
+
+      if (this.joinedOnce) {
+        throw "tried to join multiple times. 'join' can only be called a single time per channel instance";
+      } else {
+        this.joinedOnce = true;
+        this.rejoin(timeout);
+        return this.joinPush;
+      }
+    }
+  }, {
+    key: "onClose",
+    value: function onClose(callback) {
+      this.on(CHANNEL_EVENTS.close, callback);
+    }
+  }, {
+    key: "onError",
+    value: function onError(callback) {
+      this.on(CHANNEL_EVENTS.error, function (reason) {
+        return callback(reason);
+      });
+    }
+  }, {
+    key: "on",
+    value: function on(event, callback) {
+      this.bindings.push({ event: event, callback: callback });
+    }
+  }, {
+    key: "off",
+    value: function off(event) {
+      this.bindings = this.bindings.filter(function (bind) {
+        return bind.event !== event;
+      });
+    }
+  }, {
+    key: "canPush",
+    value: function canPush() {
+      return this.socket.isConnected() && this.state === CHANNEL_STATES.joined;
+    }
+  }, {
+    key: "push",
+    value: function push(event, payload) {
+      var timeout = arguments.length <= 2 || arguments[2] === undefined ? this.timeout : arguments[2];
+
+      if (!this.joinedOnce) {
+        throw "tried to push '" + event + "' to '" + this.topic + "' before joining. Use channel.join() before pushing events";
+      }
+      var pushEvent = new Push(this, event, payload, timeout);
+      if (this.canPush()) {
+        pushEvent.send();
+      } else {
+        pushEvent.startTimeout();
+        this.pushBuffer.push(pushEvent);
+      }
+
+      return pushEvent;
     }
 
-    return pushEvent
-  }
+    // Leaves the channel
+    //
+    // Unsubscribes from server events, and
+    // instructs channel to terminate on server
+    //
+    // Triggers onClose() hooks
+    //
+    // To receive leave acknowledgements, use the a `receive`
+    // hook to bind to the server ack, ie:
+    //
+    //     channel.leave().receive("ok", () => alert("left!") )
+    //
 
-  // Leaves the channel
-  //
-  // Unsubscribes from server events, and
-  // instructs channel to terminate on server
-  //
-  // Triggers onClose() hooks
-  //
-  // To receive leave acknowledgements, use the a `receive`
-  // hook to bind to the server ack, ie:
-  //
-  //     channel.leave().receive("ok", () => alert("left!") )
-  //
-  leave(timeout = this.timeout){
-    this.state = CHANNEL_STATES.leaving
-    let onClose = () => {
-      this.socket.log("channel", `leave ${this.topic}`)
-      this.trigger(CHANNEL_EVENTS.close, "leave", this.joinRef())
+  }, {
+    key: "leave",
+    value: function leave() {
+      var _this3 = this;
+
+      var timeout = arguments.length <= 0 || arguments[0] === undefined ? this.timeout : arguments[0];
+
+      this.state = CHANNEL_STATES.leaving;
+      var onClose = function onClose() {
+        _this3.socket.log("channel", "leave " + _this3.topic);
+        _this3.trigger(CHANNEL_EVENTS.close, "leave", _this3.joinRef());
+      };
+      var leavePush = new Push(this, CHANNEL_EVENTS.leave, {}, timeout);
+      leavePush.receive("ok", function () {
+        return onClose();
+      }).receive("timeout", function () {
+        return onClose();
+      });
+      leavePush.send();
+      if (!this.canPush()) {
+        leavePush.trigger("ok", {});
+      }
+
+      return leavePush;
     }
-    let leavePush = new Push(this, CHANNEL_EVENTS.leave, {}, timeout)
-    leavePush.receive("ok", () => onClose() )
-             .receive("timeout", () => onClose() )
-    leavePush.send()
-    if(!this.canPush()){ leavePush.trigger("ok", {}) }
 
-    return leavePush
-  }
+    // Overridable message hook
+    //
+    // Receives all events for specialized message handling
 
-  // Overridable message hook
-  //
-  // Receives all events for specialized message handling
-  onMessage(event, payload, ref){}
+  }, {
+    key: "onMessage",
+    value: function onMessage(event, payload, ref) {}
 
-  // private
+    // private
 
-  isMember(topic){ return this.topic === topic }
-
-  joinRef(){ return this.joinPush.ref }
-
-  sendJoin(timeout){
-    this.state = CHANNEL_STATES.joining
-    this.joinPush.resend(timeout)
-  }
-
-  rejoin(timeout = this.timeout){ if(this.state === CHANNEL_STATES.leaving){ return }
-    this.sendJoin(timeout)
-  }
-
-  trigger(event, payload, ref){
-    let {close, error, leave, join} = CHANNEL_EVENTS
-    if(ref && [close, error, leave, join].indexOf(event) >= 0 && ref !== this.joinRef()){
-      return
+  }, {
+    key: "isMember",
+    value: function isMember(topic) {
+      return this.topic === topic;
     }
-    this.onMessage(event, payload, ref)
-    this.bindings.filter( bind => bind.event === event)
-                 .map( bind => bind.callback(payload, ref))
-  }
+  }, {
+    key: "joinRef",
+    value: function joinRef() {
+      return this.joinPush.ref;
+    }
+  }, {
+    key: "sendJoin",
+    value: function sendJoin(timeout) {
+      this.state = CHANNEL_STATES.joining;
+      this.joinPush.resend(timeout);
+    }
+  }, {
+    key: "rejoin",
+    value: function rejoin() {
+      var timeout = arguments.length <= 0 || arguments[0] === undefined ? this.timeout : arguments[0];
+      if (this.state === CHANNEL_STATES.leaving) {
+        return;
+      }
+      this.sendJoin(timeout);
+    }
+  }, {
+    key: "trigger",
+    value: function trigger(event, payload, ref) {
+      var close = CHANNEL_EVENTS.close;
+      var error = CHANNEL_EVENTS.error;
+      var leave = CHANNEL_EVENTS.leave;
+      var join = CHANNEL_EVENTS.join;
 
-  replyEventName(ref){ return `chan_reply_${ref}` }
-}
+      if (ref && [close, error, leave, join].indexOf(event) >= 0 && ref !== this.joinRef()) {
+        return;
+      }
+      this.onMessage(event, payload, ref);
+      this.bindings.filter(function (bind) {
+        return bind.event === event;
+      }).map(function (bind) {
+        return bind.callback(payload, ref);
+      });
+    }
+  }, {
+    key: "replyEventName",
+    value: function replyEventName(ref) {
+      return "chan_reply_" + ref;
+    }
+  }]);
 
-export class Socket {
+  return Channel;
+}();
+
+var Socket = exports.Socket = function () {
 
   // Initializes the Socket
   //
@@ -457,408 +580,602 @@ export class Socket {
   //
   // For IE8 support use an ES5-shim (https://github.com/es-shims/es5-shim)
   //
-  constructor(endPoint, opts = {}){
-    this.stateChangeCallbacks = {open: [], close: [], error: [], message: []}
-    this.channels             = []
-    this.sendBuffer           = []
-    this.ref                  = 0
-    this.timeout              = opts.timeout || DEFAULT_TIMEOUT
-    this.transport            = opts.transport || window.WebSocket || LongPoll
-    this.heartbeatIntervalMs  = opts.heartbeatIntervalMs || 30000
-    this.reconnectAfterMs     = opts.reconnectAfterMs || function(tries){
-      return [1000, 2000, 5000, 10000][tries - 1] || 10000
+
+  function Socket(endPoint) {
+    var _this4 = this;
+
+    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    _classCallCheck(this, Socket);
+
+    this.stateChangeCallbacks = { open: [], close: [], error: [], message: [] };
+    this.channels = [];
+    this.sendBuffer = [];
+    this.ref = 0;
+    this.timeout = opts.timeout || DEFAULT_TIMEOUT;
+    this.transport = opts.transport || window.WebSocket || LongPoll;
+    this.heartbeatIntervalMs = opts.heartbeatIntervalMs || 30000;
+    this.reconnectAfterMs = opts.reconnectAfterMs || function (tries) {
+      return [1000, 2000, 5000, 10000][tries - 1] || 10000;
+    };
+    this.logger = opts.logger || function () {}; // noop
+    this.longpollerTimeout = opts.longpollerTimeout || 20000;
+    this.params = opts.params || {};
+    this.endPoint = endPoint + "/" + TRANSPORTS.websocket;
+    this.reconnectTimer = new Timer(function () {
+      _this4.disconnect(function () {
+        return _this4.connect();
+      });
+    }, this.reconnectAfterMs);
+  }
+
+  _createClass(Socket, [{
+    key: "protocol",
+    value: function protocol() {
+      return location.protocol.match(/^https/) ? "wss" : "ws";
     }
-    this.logger               = opts.logger || function(){} // noop
-    this.longpollerTimeout    = opts.longpollerTimeout || 20000
-    this.params               = opts.params || {}
-    this.endPoint             = `${endPoint}/${TRANSPORTS.websocket}`
-    this.reconnectTimer       = new Timer(() => {
-      this.disconnect(() => this.connect())
-    }, this.reconnectAfterMs)
-  }
-
-  protocol(){ return location.protocol.match(/^https/) ? "wss" : "ws" }
-
-  endPointURL(){
-    let uri = Ajax.appendParams(
-      Ajax.appendParams(this.endPoint, this.params), {vsn: VSN})
-    if(uri.charAt(0) !== "/"){ return uri }
-    if(uri.charAt(1) === "/"){ return `${this.protocol()}:${uri}` }
-
-    return `${this.protocol()}://${location.host}${uri}`
-  }
-
-  disconnect(callback, code, reason){
-    if(this.conn){
-      this.conn.onclose = function(){} // noop
-      if(code){ this.conn.close(code, reason || "") } else { this.conn.close() }
-      this.conn = null
-    }
-    callback && callback()
-  }
-
-  // params - The params to send when connecting, for example `{user_id: userToken}`
-  connect(params){
-    if(params){
-      console && console.log("passing params to connect is deprecated. Instead pass :params to the Socket constructor")
-      this.params = params
-    }
-    if(this.conn){ return }
-
-    this.conn = new this.transport(this.endPointURL())
-    this.conn.timeout   = this.longpollerTimeout
-    this.conn.onopen    = () => this.onConnOpen()
-    this.conn.onerror   = error => this.onConnError(error)
-    this.conn.onmessage = event => this.onConnMessage(event)
-    this.conn.onclose   = event => this.onConnClose(event)
-  }
-
-  // Logs the message. Override `this.logger` for specialized logging. noops by default
-  log(kind, msg, data){ this.logger(kind, msg, data) }
-
-  // Registers callbacks for connection state change events
-  //
-  // Examples
-  //
-  //    socket.onError(function(error){ alert("An error occurred") })
-  //
-  onOpen     (callback){ this.stateChangeCallbacks.open.push(callback) }
-  onClose    (callback){ this.stateChangeCallbacks.close.push(callback) }
-  onError    (callback){ this.stateChangeCallbacks.error.push(callback) }
-  onMessage  (callback){ this.stateChangeCallbacks.message.push(callback) }
-
-  onConnOpen(){
-    this.log("transport", `connected to ${this.endPointURL()}`, this.transport.prototype)
-    this.flushSendBuffer()
-    this.reconnectTimer.reset()
-    if(!this.conn.skipHeartbeat){
-      clearInterval(this.heartbeatTimer)
-      this.heartbeatTimer = setInterval(() => this.sendHeartbeat(), this.heartbeatIntervalMs)
-    }
-    this.stateChangeCallbacks.open.forEach( callback => callback() )
-  }
-
-  onConnClose(event){
-    this.log("transport", "close", event)
-    this.triggerChanError()
-    clearInterval(this.heartbeatTimer)
-    this.reconnectTimer.scheduleTimeout()
-    this.stateChangeCallbacks.close.forEach( callback => callback(event) )
-  }
-
-  onConnError(error){
-    this.log("transport", error)
-    this.triggerChanError()
-    this.stateChangeCallbacks.error.forEach( callback => callback(error) )
-  }
-
-  triggerChanError(){
-    this.channels.forEach( channel => channel.trigger(CHANNEL_EVENTS.error) )
-  }
-
-  connectionState(){
-    switch(this.conn && this.conn.readyState){
-      case SOCKET_STATES.connecting: return "connecting"
-      case SOCKET_STATES.open:       return "open"
-      case SOCKET_STATES.closing:    return "closing"
-      default:                       return "closed"
-    }
-  }
-
-  isConnected(){ return this.connectionState() === "open" }
-
-  remove(channel){
-    this.channels = this.channels.filter(c => c.joinRef() !== channel.joinRef())
-  }
-
-  channel(topic, chanParams = {}){
-    let chan = new Channel(topic, chanParams, this)
-    this.channels.push(chan)
-    return chan
-  }
-
-  push(data){
-    let {topic, event, payload, ref} = data
-    let callback = () => this.conn.send(JSON.stringify(data))
-    this.log("push", `${topic} ${event} (${ref})`, payload)
-    if(this.isConnected()){
-      callback()
-    }
-    else {
-      this.sendBuffer.push(callback)
-    }
-  }
-
-  // Return the next message ref, accounting for overflows
-  makeRef(){
-    let newRef = this.ref + 1
-    if(newRef === this.ref){ this.ref = 0 } else { this.ref = newRef }
-
-    return this.ref.toString()
-  }
-
-  sendHeartbeat(){ if(!this.isConnected()){ return }
-    this.push({topic: "phoenix", event: "heartbeat", payload: {}, ref: this.makeRef()})
-  }
-
-  flushSendBuffer(){
-    if(this.isConnected() && this.sendBuffer.length > 0){
-      this.sendBuffer.forEach( callback => callback() )
-      this.sendBuffer = []
-    }
-  }
-
-  onConnMessage(rawMessage){
-    let msg = JSON.parse(rawMessage.data)
-    let {topic, event, payload, ref} = msg
-    this.log("receive", `${payload.status || ""} ${topic} ${event} ${ref && "(" + ref + ")" || ""}`, payload)
-    this.channels.filter( channel => channel.isMember(topic) )
-                 .forEach( channel => channel.trigger(event, payload, ref) )
-    this.stateChangeCallbacks.message.forEach( callback => callback(msg) )
-  }
-}
-
-
-export class LongPoll {
-
-  constructor(endPoint){
-    this.endPoint        = null
-    this.token           = null
-    this.skipHeartbeat   = true
-    this.onopen          = function(){} // noop
-    this.onerror         = function(){} // noop
-    this.onmessage       = function(){} // noop
-    this.onclose         = function(){} // noop
-    this.pollEndpoint    = this.normalizeEndpoint(endPoint)
-    this.readyState      = SOCKET_STATES.connecting
-
-    this.poll()
-  }
-
-  normalizeEndpoint(endPoint){
-    return(endPoint
-      .replace("ws://", "http://")
-      .replace("wss://", "https://")
-      .replace(new RegExp("(.*)\/" + TRANSPORTS.websocket), "$1/" + TRANSPORTS.longpoll))
-  }
-
-  endpointURL(){
-    return Ajax.appendParams(this.pollEndpoint, {token: this.token})
-  }
-
-  closeAndRetry(){
-    this.close()
-    this.readyState = SOCKET_STATES.connecting
-  }
-
-  ontimeout(){
-    this.onerror("timeout")
-    this.closeAndRetry()
-  }
-
-  poll(){
-    if(!(this.readyState === SOCKET_STATES.open || this.readyState === SOCKET_STATES.connecting)){ return }
-
-    Ajax.request("GET", this.endpointURL(), "application/json", null, this.timeout, this.ontimeout.bind(this), (resp) => {
-      if(resp){
-        var {status, token, messages} = resp
-        this.token = token
-      } else{
-        var status = 0
+  }, {
+    key: "endPointURL",
+    value: function endPointURL() {
+      var uri = Ajax.appendParams(Ajax.appendParams(this.endPoint, this.params), { vsn: VSN });
+      if (uri.charAt(0) !== "/") {
+        return uri;
+      }
+      if (uri.charAt(1) === "/") {
+        return this.protocol() + ":" + uri;
       }
 
-      switch(status){
-        case 200:
-          messages.forEach( msg => this.onmessage({data: JSON.stringify(msg)}) )
-          this.poll()
-          break
-        case 204:
-          this.poll()
-          break
-        case 410:
-          this.readyState = SOCKET_STATES.open
-          this.onopen()
-          this.poll()
-          break
-        case 0:
-        case 500:
-          this.onerror()
-          this.closeAndRetry()
-          break
-        default: throw(`unhandled poll status ${status}`)
-      }
-    })
-  }
-
-  send(body){
-    Ajax.request("POST", this.endpointURL(), "application/json", body, this.timeout, this.onerror.bind(this, "timeout"), (resp) => {
-      if(!resp || resp.status !== 200){
-        this.onerror(status)
-        this.closeAndRetry()
-      }
-    })
-  }
-
-  close(code, reason){
-    this.readyState = SOCKET_STATES.closed
-    this.onclose()
-  }
-}
-
-
-export class Ajax {
-
-  static request(method, endPoint, accept, body, timeout, ontimeout, callback){
-    if(window.XDomainRequest){
-      let req = new XDomainRequest() // IE8, IE9
-      this.xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback)
-    } else {
-      let req = window.XMLHttpRequest ?
-                  new XMLHttpRequest() : // IE7+, Firefox, Chrome, Opera, Safari
-                  new ActiveXObject("Microsoft.XMLHTTP") // IE6, IE5
-      this.xhrRequest(req, method, endPoint, accept, body, timeout, ontimeout, callback)
+      return this.protocol() + "://" + location.host + uri;
     }
-  }
-
-  static xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback){
-    req.timeout = timeout
-    req.open(method, endPoint)
-    req.onload = () => {
-      let response = this.parseJSON(req.responseText)
-      callback && callback(response)
-    }
-    if(ontimeout){ req.ontimeout = ontimeout }
-
-    // Work around bug in IE9 that requires an attached onprogress handler
-    req.onprogress = () => {}
-
-    req.send(body)
-  }
-
-  static xhrRequest(req, method, endPoint, accept, body, timeout, ontimeout, callback){
-    req.timeout = timeout
-    req.open(method, endPoint, true)
-    req.setRequestHeader("Content-Type", accept)
-    req.onerror = () => { callback && callback(null) }
-    req.onreadystatechange = () => {
-      if(req.readyState === this.states.complete && callback){
-        let response = this.parseJSON(req.responseText)
-        callback(response)
-      }
-    }
-    if(ontimeout){ req.ontimeout = ontimeout }
-
-    req.send(body)
-  }
-
-  static parseJSON(resp){
-    return (resp && resp !== "") ?
-             JSON.parse(resp) :
-             null
-  }
-
-  static serialize(obj, parentKey){
-    let queryStr = [];
-    for(var key in obj){ if(!obj.hasOwnProperty(key)){ continue }
-      let paramKey = parentKey ? `${parentKey}[${key}]` : key
-      let paramVal = obj[key]
-      if(typeof paramVal === "object"){
-        queryStr.push(this.serialize(paramVal, paramKey))
-      } else {
-        queryStr.push(encodeURIComponent(paramKey) + "=" + encodeURIComponent(paramVal))
-      }
-    }
-    return queryStr.join("&")
-  }
-
-  static appendParams(url, params){
-    if(Object.keys(params).length === 0){ return url }
-
-    let prefix = url.match(/\?/) ? "&" : "?"
-    return `${url}${prefix}${this.serialize(params)}`
-  }
-}
-
-Ajax.states = {complete: 4}
-
-
-
-export var Presence = {
-
-  syncState(state, newState, onJoin, onLeave){
-    let joins = {}
-    let leaves = {}
-
-    this.map(state, (key, presence) => {
-      if(!newState[key]){
-        leaves[key] = this.clone(presence)
-      }
-    })
-    this.map(newState, (key, newPresence) => {
-      let currentPresence = state[key]
-      if(currentPresence){
-        let newRefs = newPresence.metas.map(m => m.phx_ref)
-        let curRefs = currentPresence.metas.map(m => m.phx_ref)
-        let joinedMetas = newPresence.metas.filter(m => curRefs.indexOf(m.phx_ref) < 0)
-        let leftMetas = currentPresence.metas.filter(m => newRefs.indexOf(m.phx_ref) < 0)
-        if(joinedMetas.length > 0){
-          joins[key] = newPresence
-          joins[key].metas = joinedMetas
+  }, {
+    key: "disconnect",
+    value: function disconnect(callback, code, reason) {
+      if (this.conn) {
+        this.conn.onclose = function () {}; // noop
+        if (code) {
+          this.conn.close(code, reason || "");
+        } else {
+          this.conn.close();
         }
-        if(leftMetas.length > 0){
-          leaves[key] = this.clone(currentPresence)
-          leaves[key].metas = leftMetas
-        }
+        this.conn = null;
+      }
+      callback && callback();
+    }
+
+    // params - The params to send when connecting, for example `{user_id: userToken}`
+
+  }, {
+    key: "connect",
+    value: function connect(params) {
+      var _this5 = this;
+
+      if (params) {
+        console && console.log("passing params to connect is deprecated. Instead pass :params to the Socket constructor");
+        this.params = params;
+      }
+      if (this.conn) {
+        return;
+      }
+
+      this.conn = new this.transport(this.endPointURL());
+      this.conn.timeout = this.longpollerTimeout;
+      this.conn.onopen = function () {
+        return _this5.onConnOpen();
+      };
+      this.conn.onerror = function (error) {
+        return _this5.onConnError(error);
+      };
+      this.conn.onmessage = function (event) {
+        return _this5.onConnMessage(event);
+      };
+      this.conn.onclose = function (event) {
+        return _this5.onConnClose(event);
+      };
+    }
+
+    // Logs the message. Override `this.logger` for specialized logging. noops by default
+
+  }, {
+    key: "log",
+    value: function log(kind, msg, data) {
+      this.logger(kind, msg, data);
+    }
+
+    // Registers callbacks for connection state change events
+    //
+    // Examples
+    //
+    //    socket.onError(function(error){ alert("An error occurred") })
+    //
+
+  }, {
+    key: "onOpen",
+    value: function onOpen(callback) {
+      this.stateChangeCallbacks.open.push(callback);
+    }
+  }, {
+    key: "onClose",
+    value: function onClose(callback) {
+      this.stateChangeCallbacks.close.push(callback);
+    }
+  }, {
+    key: "onError",
+    value: function onError(callback) {
+      this.stateChangeCallbacks.error.push(callback);
+    }
+  }, {
+    key: "onMessage",
+    value: function onMessage(callback) {
+      this.stateChangeCallbacks.message.push(callback);
+    }
+  }, {
+    key: "onConnOpen",
+    value: function onConnOpen() {
+      var _this6 = this;
+
+      this.log("transport", "connected to " + this.endPointURL(), this.transport.prototype);
+      this.flushSendBuffer();
+      this.reconnectTimer.reset();
+      if (!this.conn.skipHeartbeat) {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = setInterval(function () {
+          return _this6.sendHeartbeat();
+        }, this.heartbeatIntervalMs);
+      }
+      this.stateChangeCallbacks.open.forEach(function (callback) {
+        return callback();
+      });
+    }
+  }, {
+    key: "onConnClose",
+    value: function onConnClose(event) {
+      this.log("transport", "close", event);
+      this.triggerChanError();
+      clearInterval(this.heartbeatTimer);
+      this.reconnectTimer.scheduleTimeout();
+      this.stateChangeCallbacks.close.forEach(function (callback) {
+        return callback(event);
+      });
+    }
+  }, {
+    key: "onConnError",
+    value: function onConnError(error) {
+      this.log("transport", error);
+      this.triggerChanError();
+      this.stateChangeCallbacks.error.forEach(function (callback) {
+        return callback(error);
+      });
+    }
+  }, {
+    key: "triggerChanError",
+    value: function triggerChanError() {
+      this.channels.forEach(function (channel) {
+        return channel.trigger(CHANNEL_EVENTS.error);
+      });
+    }
+  }, {
+    key: "connectionState",
+    value: function connectionState() {
+      switch (this.conn && this.conn.readyState) {
+        case SOCKET_STATES.connecting:
+          return "connecting";
+        case SOCKET_STATES.open:
+          return "open";
+        case SOCKET_STATES.closing:
+          return "closing";
+        default:
+          return "closed";
+      }
+    }
+  }, {
+    key: "isConnected",
+    value: function isConnected() {
+      return this.connectionState() === "open";
+    }
+  }, {
+    key: "remove",
+    value: function remove(channel) {
+      this.channels = this.channels.filter(function (c) {
+        return c.joinRef() !== channel.joinRef();
+      });
+    }
+  }, {
+    key: "channel",
+    value: function channel(topic) {
+      var chanParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var chan = new Channel(topic, chanParams, this);
+      this.channels.push(chan);
+      return chan;
+    }
+  }, {
+    key: "push",
+    value: function push(data) {
+      var _this7 = this;
+
+      var topic = data.topic;
+      var event = data.event;
+      var payload = data.payload;
+      var ref = data.ref;
+
+      var callback = function callback() {
+        return _this7.conn.send(JSON.stringify(data));
+      };
+      this.log("push", topic + " " + event + " (" + ref + ")", payload);
+      if (this.isConnected()) {
+        callback();
       } else {
-        joins[key] = newPresence
+        this.sendBuffer.push(callback);
       }
-    })
-    this.syncDiff(state, {joins: joins, leaves: leaves}, onJoin, onLeave)
+    }
+
+    // Return the next message ref, accounting for overflows
+
+  }, {
+    key: "makeRef",
+    value: function makeRef() {
+      var newRef = this.ref + 1;
+      if (newRef === this.ref) {
+        this.ref = 0;
+      } else {
+        this.ref = newRef;
+      }
+
+      return this.ref.toString();
+    }
+  }, {
+    key: "sendHeartbeat",
+    value: function sendHeartbeat() {
+      if (!this.isConnected()) {
+        return;
+      }
+      this.push({ topic: "phoenix", event: "heartbeat", payload: {}, ref: this.makeRef() });
+    }
+  }, {
+    key: "flushSendBuffer",
+    value: function flushSendBuffer() {
+      if (this.isConnected() && this.sendBuffer.length > 0) {
+        this.sendBuffer.forEach(function (callback) {
+          return callback();
+        });
+        this.sendBuffer = [];
+      }
+    }
+  }, {
+    key: "onConnMessage",
+    value: function onConnMessage(rawMessage) {
+      var msg = JSON.parse(rawMessage.data);
+      var topic = msg.topic;
+      var event = msg.event;
+      var payload = msg.payload;
+      var ref = msg.ref;
+
+      this.log("receive", (payload.status || "") + " " + topic + " " + event + " " + (ref && "(" + ref + ")" || ""), payload);
+      this.channels.filter(function (channel) {
+        return channel.isMember(topic);
+      }).forEach(function (channel) {
+        return channel.trigger(event, payload, ref);
+      });
+      this.stateChangeCallbacks.message.forEach(function (callback) {
+        return callback(msg);
+      });
+    }
+  }]);
+
+  return Socket;
+}();
+
+var LongPoll = exports.LongPoll = function () {
+  function LongPoll(endPoint) {
+    _classCallCheck(this, LongPoll);
+
+    this.endPoint = null;
+    this.token = null;
+    this.skipHeartbeat = true;
+    this.onopen = function () {}; // noop
+    this.onerror = function () {}; // noop
+    this.onmessage = function () {}; // noop
+    this.onclose = function () {}; // noop
+    this.pollEndpoint = this.normalizeEndpoint(endPoint);
+    this.readyState = SOCKET_STATES.connecting;
+
+    this.poll();
+  }
+
+  _createClass(LongPoll, [{
+    key: "normalizeEndpoint",
+    value: function normalizeEndpoint(endPoint) {
+      return endPoint.replace("ws://", "http://").replace("wss://", "https://").replace(new RegExp("(.*)\/" + TRANSPORTS.websocket), "$1/" + TRANSPORTS.longpoll);
+    }
+  }, {
+    key: "endpointURL",
+    value: function endpointURL() {
+      return Ajax.appendParams(this.pollEndpoint, { token: this.token });
+    }
+  }, {
+    key: "closeAndRetry",
+    value: function closeAndRetry() {
+      this.close();
+      this.readyState = SOCKET_STATES.connecting;
+    }
+  }, {
+    key: "ontimeout",
+    value: function ontimeout() {
+      this.onerror("timeout");
+      this.closeAndRetry();
+    }
+  }, {
+    key: "poll",
+    value: function poll() {
+      var _this8 = this;
+
+      if (!(this.readyState === SOCKET_STATES.open || this.readyState === SOCKET_STATES.connecting)) {
+        return;
+      }
+
+      Ajax.request("GET", this.endpointURL(), "application/json", null, this.timeout, this.ontimeout.bind(this), function (resp) {
+        if (resp) {
+          var status = resp.status;
+          var token = resp.token;
+          var messages = resp.messages;
+
+          _this8.token = token;
+        } else {
+          var status = 0;
+        }
+
+        switch (status) {
+          case 200:
+            messages.forEach(function (msg) {
+              return _this8.onmessage({ data: JSON.stringify(msg) });
+            });
+            _this8.poll();
+            break;
+          case 204:
+            _this8.poll();
+            break;
+          case 410:
+            _this8.readyState = SOCKET_STATES.open;
+            _this8.onopen();
+            _this8.poll();
+            break;
+          case 0:
+          case 500:
+            _this8.onerror();
+            _this8.closeAndRetry();
+            break;
+          default:
+            throw "unhandled poll status " + status;
+        }
+      });
+    }
+  }, {
+    key: "send",
+    value: function send(body) {
+      var _this9 = this;
+
+      Ajax.request("POST", this.endpointURL(), "application/json", body, this.timeout, this.onerror.bind(this, "timeout"), function (resp) {
+        if (!resp || resp.status !== 200) {
+          _this9.onerror(status);
+          _this9.closeAndRetry();
+        }
+      });
+    }
+  }, {
+    key: "close",
+    value: function close(code, reason) {
+      this.readyState = SOCKET_STATES.closed;
+      this.onclose();
+    }
+  }]);
+
+  return LongPoll;
+}();
+
+var Ajax = exports.Ajax = function () {
+  function Ajax() {
+    _classCallCheck(this, Ajax);
+  }
+
+  _createClass(Ajax, null, [{
+    key: "request",
+    value: function request(method, endPoint, accept, body, timeout, ontimeout, callback) {
+      if (window.XDomainRequest) {
+        var req = new XDomainRequest(); // IE8, IE9
+        this.xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback);
+      } else {
+        var req = window.XMLHttpRequest ? new XMLHttpRequest() : // IE7+, Firefox, Chrome, Opera, Safari
+        new ActiveXObject("Microsoft.XMLHTTP"); // IE6, IE5
+        this.xhrRequest(req, method, endPoint, accept, body, timeout, ontimeout, callback);
+      }
+    }
+  }, {
+    key: "xdomainRequest",
+    value: function xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback) {
+      var _this10 = this;
+
+      req.timeout = timeout;
+      req.open(method, endPoint);
+      req.onload = function () {
+        var response = _this10.parseJSON(req.responseText);
+        callback && callback(response);
+      };
+      if (ontimeout) {
+        req.ontimeout = ontimeout;
+      }
+
+      // Work around bug in IE9 that requires an attached onprogress handler
+      req.onprogress = function () {};
+
+      req.send(body);
+    }
+  }, {
+    key: "xhrRequest",
+    value: function xhrRequest(req, method, endPoint, accept, body, timeout, ontimeout, callback) {
+      var _this11 = this;
+
+      req.timeout = timeout;
+      req.open(method, endPoint, true);
+      req.setRequestHeader("Content-Type", accept);
+      req.onerror = function () {
+        callback && callback(null);
+      };
+      req.onreadystatechange = function () {
+        if (req.readyState === _this11.states.complete && callback) {
+          var response = _this11.parseJSON(req.responseText);
+          callback(response);
+        }
+      };
+      if (ontimeout) {
+        req.ontimeout = ontimeout;
+      }
+
+      req.send(body);
+    }
+  }, {
+    key: "parseJSON",
+    value: function parseJSON(resp) {
+      return resp && resp !== "" ? JSON.parse(resp) : null;
+    }
+  }, {
+    key: "serialize",
+    value: function serialize(obj, parentKey) {
+      var queryStr = [];
+      for (var key in obj) {
+        if (!obj.hasOwnProperty(key)) {
+          continue;
+        }
+        var paramKey = parentKey ? parentKey + "[" + key + "]" : key;
+        var paramVal = obj[key];
+        if ((typeof paramVal === "undefined" ? "undefined" : _typeof(paramVal)) === "object") {
+          queryStr.push(this.serialize(paramVal, paramKey));
+        } else {
+          queryStr.push(encodeURIComponent(paramKey) + "=" + encodeURIComponent(paramVal));
+        }
+      }
+      return queryStr.join("&");
+    }
+  }, {
+    key: "appendParams",
+    value: function appendParams(url, params) {
+      if (Object.keys(params).length === 0) {
+        return url;
+      }
+
+      var prefix = url.match(/\?/) ? "&" : "?";
+      return "" + url + prefix + this.serialize(params);
+    }
+  }]);
+
+  return Ajax;
+}();
+
+Ajax.states = { complete: 4 };
+
+var Presence = exports.Presence = {
+  syncState: function syncState(state, newState, onJoin, onLeave) {
+    var _this12 = this;
+
+    var joins = {};
+    var leaves = {};
+
+    this.map(state, function (key, presence) {
+      if (!newState[key]) {
+        leaves[key] = _this12.clone(presence);
+      }
+    });
+    this.map(newState, function (key, newPresence) {
+      var currentPresence = state[key];
+      if (currentPresence) {
+        (function () {
+          var newRefs = newPresence.metas.map(function (m) {
+            return m.phx_ref;
+          });
+          var curRefs = currentPresence.metas.map(function (m) {
+            return m.phx_ref;
+          });
+          var joinedMetas = newPresence.metas.filter(function (m) {
+            return curRefs.indexOf(m.phx_ref) < 0;
+          });
+          var leftMetas = currentPresence.metas.filter(function (m) {
+            return newRefs.indexOf(m.phx_ref) < 0;
+          });
+          if (joinedMetas.length > 0) {
+            joins[key] = newPresence;
+            joins[key].metas = joinedMetas;
+          }
+          if (leftMetas.length > 0) {
+            leaves[key] = _this12.clone(currentPresence);
+            leaves[key].metas = leftMetas;
+          }
+        })();
+      } else {
+        joins[key] = newPresence;
+      }
+    });
+    this.syncDiff(state, { joins: joins, leaves: leaves }, onJoin, onLeave);
   },
+  syncDiff: function syncDiff(state, _ref2, onJoin, onLeave) {
+    var joins = _ref2.joins;
+    var leaves = _ref2.leaves;
 
-  syncDiff(state, {joins, leaves}, onJoin, onLeave){
-    if(!onJoin){ onJoin = function(){} }
-    if(!onLeave){ onLeave = function(){} }
+    if (!onJoin) {
+      onJoin = function onJoin() {};
+    }
+    if (!onLeave) {
+      onLeave = function onLeave() {};
+    }
 
-    this.map(joins, (key, newPresence) => {
-      let currentPresence = state[key]
-      state[key] = newPresence
-      if(currentPresence){
-        state[key].metas.unshift(...currentPresence.metas)
+    this.map(joins, function (key, newPresence) {
+      var currentPresence = state[key];
+      state[key] = newPresence;
+      if (currentPresence) {
+        var _state$key$metas;
+
+        (_state$key$metas = state[key].metas).unshift.apply(_state$key$metas, _toConsumableArray(currentPresence.metas));
       }
-      onJoin(key, currentPresence, newPresence)
-    })
-    this.map(leaves, (key, leftPresence) => {
-      let currentPresence = state[key]
-      if(!currentPresence){ return }
-      let refsToRemove = leftPresence.metas.map(m => m.phx_ref)
-      currentPresence.metas = currentPresence.metas.filter(p => {
-        return refsToRemove.indexOf(p.phx_ref) < 0
-      })
-      onLeave(key, currentPresence, leftPresence)
-      if(currentPresence.metas.length === 0){
-        delete state[key]
+      onJoin(key, currentPresence, newPresence);
+    });
+    this.map(leaves, function (key, leftPresence) {
+      var currentPresence = state[key];
+      if (!currentPresence) {
+        return;
       }
-    })
+      var refsToRemove = leftPresence.metas.map(function (m) {
+        return m.phx_ref;
+      });
+      currentPresence.metas = currentPresence.metas.filter(function (p) {
+        return refsToRemove.indexOf(p.phx_ref) < 0;
+      });
+      onLeave(key, currentPresence, leftPresence);
+      if (currentPresence.metas.length === 0) {
+        delete state[key];
+      }
+    });
   },
+  list: function list(presences, chooser) {
+    if (!chooser) {
+      chooser = function chooser(key, pres) {
+        return pres;
+      };
+    }
 
-  list(presences, chooser){
-    if(!chooser){ chooser = function(key, pres){ return pres } }
-
-    return this.map(presences, (key, presence) => {
-      return chooser(key, presence)
-    })
+    return this.map(presences, function (key, presence) {
+      return chooser(key, presence);
+    });
   },
 
   // private
 
-  map(obj, func){
-    return Object.getOwnPropertyNames(obj).map(key => func(key, obj[key]))
+  map: function map(obj, func) {
+    return Object.getOwnPropertyNames(obj).map(function (key) {
+      return func(key, obj[key]);
+    });
   },
-
-  clone(obj){ return JSON.parse(JSON.stringify(obj)) }
-}
-
+  clone: function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+};
 
 // Creates a timer that accepts a `timerCalc` function to perform
 // calculated timeout retries, such as exponential backoff.
@@ -873,26 +1190,42 @@ export var Presence = {
 //    reconnectTimer.reset()
 //    reconnectTimer.scheduleTimeout() // fires after 1000
 //
-class Timer {
-  constructor(callback, timerCalc){
-    this.callback  = callback
-    this.timerCalc = timerCalc
-    this.timer     = null
-    this.tries     = 0
+
+var Timer = function () {
+  function Timer(callback, timerCalc) {
+    _classCallCheck(this, Timer);
+
+    this.callback = callback;
+    this.timerCalc = timerCalc;
+    this.timer = null;
+    this.tries = 0;
   }
 
-  reset(){
-    this.tries = 0
-    clearTimeout(this.timer)
-  }
+  _createClass(Timer, [{
+    key: "reset",
+    value: function reset() {
+      this.tries = 0;
+      clearTimeout(this.timer);
+    }
 
-  // Cancels any previous scheduleTimeout and schedules callback
-  scheduleTimeout(){
-    clearTimeout(this.timer)
+    // Cancels any previous scheduleTimeout and schedules callback
 
-    this.timer = setTimeout(() => {
-      this.tries = this.tries + 1
-      this.callback()
-    }, this.timerCalc(this.tries + 1))
-  }
-}
+  }, {
+    key: "scheduleTimeout",
+    value: function scheduleTimeout() {
+      var _this13 = this;
+
+      clearTimeout(this.timer);
+
+      this.timer = setTimeout(function () {
+        _this13.tries = _this13.tries + 1;
+        _this13.callback();
+      }, this.timerCalc(this.tries + 1));
+    }
+  }]);
+
+  return Timer;
+}();
+
+})(typeof(exports) === "undefined" ? window.Phoenix = window.Phoenix || {} : exports);
+
