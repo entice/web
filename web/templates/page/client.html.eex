@@ -8,6 +8,7 @@
     $('#output').append(pre);
   };
 
+  <!-- TODO: get character name from account -->
   $.get("<%= raw token_path(@conn, :entity_token, map: @map, char_name: "Test Char") %>")
    .then(function(data) {
     if (data.status === "ok") {

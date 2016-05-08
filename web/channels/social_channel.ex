@@ -1,7 +1,6 @@
 defmodule Entice.Web.SocialChannel do
   use Entice.Web.Web, :channel
-  alias Entice.Logic.Maps
-  alias Entice.Logic.Group
+  alias Entice.Logic.{Group, Maps}
   alias Entice.Entity.Coordination
   alias Phoenix.Socket
 

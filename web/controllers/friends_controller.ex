@@ -1,7 +1,6 @@
 defmodule Entice.Web.FriendsController do
   use Entice.Web.Web, :controller
-  alias Entice.Web.Queries
-  alias Entice.Web.Account
+  alias Entice.Web.{Friend, Queries}
 
   plug :ensure_login
 
@@ -28,9 +27,9 @@ defmodule Entice.Web.FriendsController do
       _map = %{base_name: friend.base_name, current_name: name, status: status}
     end
 
-    conn |> json ok(%{
+    conn |> json(ok(%{
       message: "All friends",
-      friends: results})
+      friends: results}))
   end
 
   defp get_status(friend_name) do
@@ -42,23 +41,24 @@ defmodule Entice.Web.FriendsController do
     session_id = get_session(conn, :client_id)
     {:ok, acc} = Client.get_account(session_id)
     account_id = acc.id
+    
+    success = with {:ok, friend_account} <- Queries.get_account_by_name(friend_name),
+                  false <- friend_account.id == account_id,
+                  nil <- Queries.get_friend_by_friend_account_id(account_id, friend_account.id),
+                  {:ok, _friend} <- Queries.add_friend(acc, friend_account, friend_name),
+      do: :ok
 
-    result = case Queries.get_account_by_name(friend_name) do
-      {:error, _} -> error(%{message: "There is no character with that name"})
-      {:ok, %Account{id: ^account_id}} -> error(%{message: "Can't add yourself."})
-      {:ok, friend_account} ->
-        #Important to get by friend_id and not name here or player will be able to add same account under dif names.
-        case Queries.get_friend_by_friend_account_id(account_id, friend_account.id) do
-          nil ->
-            Queries.add_friend(acc, friend_account, friend_name)
-            ok(%{message: "Friend added."})
-          _friend -> error(%{message: "Already in friends list."})
-        end
+    result = case success do
+      {:error, :no_matching_character} -> error(%{message: "There is no character with that name"})
+      true -> error(%{message: "Can't add yourself."})
+      %Friend{} -> error(%{message: "Already in friends list."})
+      _ -> ok(%{message: "Friend added."})
     end
-    conn |> json result
+
+    conn |> json(result)
   end
 
-  def create(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
+  def create(conn, params), do: conn |> json(error(%{message: "Expected param 'char_name', got: #{inspect params}"}))
 
 
   @doc "Deletes friend :id from friends list of connected account."
@@ -73,8 +73,8 @@ defmodule Entice.Web.FriendsController do
         Entice.Web.Repo.delete(friend)
         ok(%{message: "Friend deleted."})
     end
-    conn |> json result
+    conn |> json(result)
   end
 
-  def delete(conn, params), do: conn |> json error(%{message: "Expected param 'char_name', got: #{inspect params}"})
+  def delete(conn, params), do: conn |> json(error(%{message: "Expected param 'char_name', got: #{inspect params}"}))
 end

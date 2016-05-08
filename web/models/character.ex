@@ -1,7 +1,6 @@
 defmodule Entice.Web.Character do
-  use Entice.Web.Web, :model
+  use Entice.Web.Web, :schema
   alias Entice.Logic.Skills
-  alias Entice.Web.Character
 
   schema "characters" do
     field :name,             :string
@@ -20,22 +19,17 @@ defmodule Entice.Web.Character do
   end
 
 
-  after_load :set_skills
-
-
-  def set_skills(character),
-  do: %Character{character | available_skills: :erlang.integer_to_list(Skills.max_unlocked_skills, 16) |> to_string}
-
-
   def changeset_skillbar(character, skillbar \\ [0, 0, 0, 0, 0, 0, 0, 0]) do
     character
-    |> cast(%{skillbar: skillbar}, ~w(skillbar), ~w())
+    |> cast(%{skillbar: skillbar}, [:skillbar])
+    |> validate_required([:skillbar])
   end
 
 
-  def changeset_char_create(character, params \\ :empty) do
+  def changeset_char_create(character, params \\ :invalid) do
     character
-    |> cast(params, [:name, :account_id], [:available_skills, :skillbar, :profession, :campaign, :sex, :height, :skin_color, :hair_color, :hairstyle, :face])
+    |> cast(params, [:name, :account_id, :available_skills, :skillbar, :profession, :campaign, :sex, :height, :skin_color, :hair_color, :hairstyle, :face])
+    |> validate_required([:name, :account_id])
     |> validate_inclusion(:profession, 0..20)
     |> validate_inclusion(:campaign, 0..5)
     |> validate_inclusion(:sex, 0..5)

@@ -1,9 +1,5 @@
 defmodule Entice.Web.Queries do
-  alias Entice.Web.Account
-  alias Entice.Web.Character
-  alias Entice.Web.Invitation
-  alias Entice.Web.Friend
-  alias Entice.Web.Repo
+  alias Entice.Web.{Account, Character, Invitation, Friend, Repo}
   import Ecto.Query
   import ExUnit.Assertions
 

@@ -1,5 +1,5 @@
 defmodule Entice.Web.Friend do
-  use Entice.Web.Web, :model
+  use Entice.Web.Web, :schema
 
   schema "friends" do
     field       :base_name,      :string
@@ -9,9 +9,10 @@ defmodule Entice.Web.Friend do
   end
 
 
-  def changeset(friend, params \\ :empty) do
+  def changeset(friend, params \\ :invalid) do
     friend
-    |> cast(params, [:account_id, :friend_account_id, :base_name], [])
+    |> cast(params, [:account_id, :friend_account_id, :base_name])
+    |> validate_required([:account_id, :friend_account_id, :base_name])
     |> assoc_constraint(:account)
     |> assoc_constraint(:friend_account)
   end

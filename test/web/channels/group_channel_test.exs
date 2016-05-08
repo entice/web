@@ -1,7 +1,6 @@
 defmodule Entice.Web.GroupChannelTest do
   use Entice.Web.ChannelCase
-  use Entice.Logic.Maps
-  use Entice.Logic.Attributes
+  use Entice.Logic.{Maps, Attributes}
   alias Entice.Web.Endpoint
   alias Entice.Entity
   alias Entice.Test.Factories
@@ -19,7 +18,7 @@ defmodule Entice.Web.GroupChannelTest do
     new_map = TeamArenas.underscore_name
     # we fake a uuid and subscribe ourselfs to its topic
     eid = UUID.uuid4()
-    Endpoint.subscribe(self, Entice.Web.Socket.id_by_entity(eid))
+    Endpoint.subscribe(Entice.Web.Socket.id_by_entity(eid))
     # set the faked entity as a member
     entity_id |> Entity.put_attribute(%Leader{members: [eid]})
     # trigger the mapchange

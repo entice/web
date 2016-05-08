@@ -1,12 +1,10 @@
 defmodule Entice.Web.GroupChannel do
   use Entice.Web.Web, :channel
   use Entice.Logic.Attributes
-  alias Entice.Logic.Maps
-  alias Entice.Logic.Group
+  alias Entice.Logic.{Group, Maps}
   alias Entice.Entity
   alias Entice.Entity.Coordination
-  alias Entice.Web.Token
-  alias Entice.Web.Endpoint
+  alias Entice.Web.{Endpoint, Token}
   alias Phoenix.Socket
 
 

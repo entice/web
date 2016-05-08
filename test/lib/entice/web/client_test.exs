@@ -4,6 +4,10 @@ defmodule Entice.Web.ClientTest do
   alias Entice.Web.Character
   alias Entice.Web.Client
 
+  setup do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Entice.Web.Repo)
+  end
+
   test "default accounts" do
     assert {:ok, _id} = Client.log_in("root@entice.ps", "root")
   end
