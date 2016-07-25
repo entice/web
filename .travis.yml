@@ -9,8 +9,8 @@ addons:
 
 before_install:
 - psql -c 'create database entice_test;' -U postgres
-- wget http://s3.hex.pm/builds/elixir/v1.2.4.zip
-- unzip -d elixir v1.2.4.zip
+- wget http://s3.hex.pm/builds/elixir/v1.3.2.zip
+- unzip -d elixir v1.3.2.zip
 
 before_script:
 - export PATH=`pwd`/elixir/bin:$PATH
