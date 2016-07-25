@@ -95,13 +95,11 @@ defmodule Entice.Web.Client do
   def get_status(friend_name) do
     with {:ok, account_id}                   <- Queries.get_account_id(friend_name),
          client_id when is_binary(client_id) <- Client.Server.get_client_by_account_id(account_id),
-         {:ok, client}                       <- Entity.fetch_attribute(client_id, Clienty),
-         player when is_map(player)          <- Player.attributes(client.entity_id) do
-
-         {:ok, client.online_status, player[Player.Name].name}
+         {:ok, client}                       <- Entity.fetch_attribute(client_id, Client),
+         %{} = player                        <- Player.attributes(client.entity_id) do
+    {:ok, client.online_status, player[Player.Name].name}
     else
-      nil    -> {:ok, :offline, friend_name}
-      :error -> {:ok, :offline, friend_name}
+      _ -> {:ok, :offline, friend_name}
    end
 
   end
