@@ -97,7 +97,7 @@ defmodule Entice.Web.Client do
          client_id when is_binary(client_id) <- Client.Server.get_client_by_account_id(account_id),
          {:ok, client}                       <- Entity.fetch_attribute(client_id, Client),
          %{} = player                        <- Player.attributes(client.entity_id) do
-    {:ok, client.online_status, player[Player.Name].name}
+      {:ok, client.online_status, player[Player.Name].name}
     else
       _ -> {:ok, :offline, friend_name}
    end
