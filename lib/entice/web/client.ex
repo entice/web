@@ -91,26 +91,17 @@ defmodule Entice.Web.Client do
   end
 
   #TODO: Add current map to status when map is server side
-  #TODO: clean up and use idiomatic pipes or what to make this more concise
   @doc "Returns a friend's online status and character name from their account id."
   def get_status(friend_name) do
-    case Queries.get_account_id(friend_name) do
-      {:ok, account_id} ->
-        case Client.Server.get_client_by_account_id(account_id) do
-          nil -> {:ok, :offline, friend_name}
-          client_id ->
-            case Entity.fetch_attribute(client_id, Client) do
-              :error -> {:ok, :offline, friend_name}
-              {:ok, client} ->
-                case Player.attributes(client.entity_id) do
-                  :error -> {:ok, :offline, friend_name}
-                  player -> {:ok, client.online_status, player[Player.Name].name}
-                end
-            end
-        end
-      #If char with that name has been deleted (If name is then taken by another account it will be a problem)
+    with {:ok, account_id}                   <- Queries.get_account_id(friend_name),
+         client_id when is_binary(client_id) <- Client.Server.get_client_by_account_id(account_id),
+         {:ok, client}                       <- Entity.fetch_attribute(client_id, Client),
+         %{} = player                        <- Player.attributes(client.entity_id) do
+      {:ok, client.online_status, player[Player.Name].name}
+    else
       _ -> {:ok, :offline, friend_name}
-    end
+   end
+
   end
 
   # Entity api
