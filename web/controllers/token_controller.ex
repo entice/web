@@ -3,7 +3,7 @@ defmodule Entice.Web.TokenController do
   alias Entice.Entity
   alias Entice.Entity.Coordination
   alias Entice.Logic.{Maps, Player, MapInstance, MapRegistry}
-  alias Entice.Logic.Player.Appearance
+  alias Entice.Logic.Player.{Appearance, Position}
   alias Entice.Web.{Character, Token}
   import Entice.Utils.StructOps
   import Phoenix.Naming
@@ -44,8 +44,9 @@ defmodule Entice.Web.TokenController do
     with :ok <- Client.set_entity(id, eid),
          :ok <- Coordination.register(eid, map_mod),
          instance_id = MapRegistry.get_or_create_instance(map_mod),
+         :ok <- MapInstance.add_npc(instance_id, "Dhuum", :dhuum, %Position{coord: map_mod.spawn}), #TODO: fix so it doesn't spawn everytime a player connects
          :ok <- MapInstance.add_player(instance_id, eid),
-         %{Player.Appearance => _, 
+         %{Player.Appearance => _,
            Player.Level => _,
            Player.Name =>_,
            Player.Position => _ } <- Player.register(eid, map_mod, char.name, copy_into(%Appearance{}, char)) do

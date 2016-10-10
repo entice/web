@@ -5,7 +5,7 @@
   "decimal": {:hex, :decimal, "1.1.2", "79a769d4657b2d537b51ef3c02d29ab7141d2b486b516c109642d453ee08e00c", [:mix], []},
   "ecto": {:hex, :ecto, "2.0.2", "b02331c1f20bbe944dbd33c8ecd8f1ccffecc02e344c4471a891baf3a25f5406", [:mix], [{:db_connection, "~> 1.0-rc.2", [hex: :db_connection, optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, optional: false]}, {:mariaex, "~> 0.7.7", [hex: :mariaex, optional: true]}, {:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: true]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: false]}, {:postgrex, "~> 0.11.2", [hex: :postgrex, optional: true]}, {:sbroker, "~> 1.0-beta", [hex: :sbroker, optional: true]}]},
   "entice_entity": {:git, "https://github.com/entice/entity.git", "c26f6f77ae650e25e6cd2ffea8aae46b7d83966a", [ref: "c26f6f77ae650e25e6cd2ffea8aae46b7d83966a"]},
-  "entice_logic": {:git, "https://github.com/entice/logic.git", "e3a833c9197edbdb6c43ebffb02a2705ca13bad3", [ref: "e3a833c9197edbdb6c43ebffb02a2705ca13bad3"]},
+  "entice_logic": {:git, "https://github.com/entice/logic.git", "f7ab01942514720b45b11bd3fb7f0ddbb9bb513f", [ref: "f7ab01942514720b45b11bd3fb7f0ddbb9bb513f"]},
   "entice_utils": {:git, "https://github.com/entice/utils.git", "79ead4dca77324b4c24f584468edbaff2029eeab", [ref: "79ead4dca77324b4c24f584468edbaff2029eeab"]},
   "fs": {:hex, :fs, "0.9.2", "ed17036c26c3f70ac49781ed9220a50c36775c6ca2cf8182d123b6566e49ec59", [:rebar], []},
   "gettext": {:hex, :gettext, "0.11.0", "80c1dd42d270482418fa158ec5ba073d2980e3718bacad86f3d4ad71d5667679", [:mix], []},

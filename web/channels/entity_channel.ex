@@ -10,6 +10,7 @@ defmodule Entice.Web.EntityChannel do
 
   @all_reported_attributes [
     Position,
+    Movement, #It feels good here to me. Should it be in movement channel or is movement channel only for player movement propagation?
     Name,
     Appearance,
     Health,
@@ -146,8 +147,14 @@ defmodule Entice.Web.EntityChannel do
 
 
   # Maps an attribute to a network-transferable tuple
-  defp attribute_to_tuple(%Position{pos: pos, plane: plane} = attr),
-  do: {attr |> StructOps.to_underscore_name, Map.from_struct(pos) |> Map.put(:plane, plane)}
+  defp attribute_to_tuple(%Movement{goal: goal, move_type: move_type, velocity: velocity} = attr),
+  do: {attr |> StructOps.to_underscore_name, goal
+                                             |> Map.from_struct
+                                             |> Map.put(:move_type, move_type)
+                                             |> Map.put(:velocity, velocity)}
+
+  defp attribute_to_tuple(%Position{coord: coord, plane: plane} = attr),
+  do: {attr |> StructOps.to_underscore_name, Map.from_struct(coord) |> Map.put(:plane, plane)}
 
   defp attribute_to_tuple(%Name{name: name} = attr),
   do: {attr |> StructOps.to_underscore_name, name}
