@@ -5,6 +5,7 @@ defmodule Entice.Web.MovementChannel do
   alias Entice.Logic.Movement, as: Move
   alias Entice.Entity.Coordination
   alias Phoenix.Socket
+  alias Geom.Shape.Vector2D
 
 
   def join("movement:" <> map, _message, %Socket{assigns: %{map: map_mod}} = socket) do
@@ -34,8 +35,8 @@ defmodule Entice.Web.MovementChannel do
       "velocity" => velo}, socket)
   when mtype in 0..10 and (-1.0 < velo) and (velo < 2.0) do
     Move.update(socket |> entity_id,
-      %Position{coord: %Coord{x: pos_x, y: pos_y}, plane: pos_plane},
-      %Movement{goal: %Coord{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})
+      %Position{coord: %Vector2D{x: pos_x, y: pos_y}, plane: pos_plane},
+      %Movement{goal: %Vector2D{x: goal_x, y: goal_y}, plane: goal_plane, move_type: mtype, velocity: velo})
 
     broadcast!(socket, "update", %{entity: socket |> entity_id, position: pos, goal: goal, move_type: mtype, velocity: velo})
 
