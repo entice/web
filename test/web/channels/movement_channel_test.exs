@@ -27,6 +27,6 @@ defmodule Entice.Web.MovementChannelTest do
       move_type: _,
       velocity: _}
 
-    assert %Position{coord: %Coord{x: 42, y: 1337}} = Entity.get_attribute(eid, Position)
+    assert %Position{coord: %Vector2D{x: 42, y: 1337}} = Entity.get_attribute(eid, Position)
   end
 end
